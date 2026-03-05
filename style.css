@@ -1,14 +1,14 @@
 /* GLOBAL */
 body {
     font-family: "Segoe UI", sans-serif;
-    background: #fdf8f2;
+    background: #fff8e6;
     margin: 0;
     color: #4a2c2a;
 }
 
 /* HEADER */
 .header {
-    background: #7b1e1e;
+    background: #e67e22; /* saffron */
     color: white;
     padding: 20px;
     text-align: center;
@@ -56,7 +56,7 @@ body {
 /* LEFT COLUMN */
 .left-column {
     width: 22%;
-    background: #fff3e0;
+    background: #fff3d4;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 8px #d4a017;
@@ -72,7 +72,7 @@ body {
 /* Moving Welcome Text */
 .welcome-marquee {
     font-size: 24px;
-    color: #7b1e1e;
+    color: #e67e22;
     font-weight: bold;
     margin-bottom: 20px;
 }
@@ -99,7 +99,7 @@ body {
 .right-column {
     width: 22%;
     padding: 20px;
-    background: #fff3e0;
+    background: #fff3d4;
     border-radius: 10px;
     box-shadow: 0 0 8px #d4a017;
 }
@@ -107,7 +107,7 @@ body {
 /* Right Navigation Buttons */
 .side-btn {
     display: block;
-    background: #7b1e1e;
+    background: #e67e22;
     color: white;
     padding: 12px;
     margin: 10px 0;
@@ -115,17 +115,18 @@ body {
     border-radius: 8px;
     text-decoration: none;
     font-size: 18px;
+    font-weight: bold;
 }
 
 .side-btn:hover {
-    background: #a83232;
+    background: #d35400;
 }
 
 /* FOOTER */
 .footer {
     text-align: center;
     padding: 15px;
-    background: #7b1e1e;
+    background: #e67e22;
     color: white;
     margin-top: 40px;
 }
@@ -139,7 +140,7 @@ body {
 }
 
 .doc-card {
-    background: #fff3e0;
+    background: #fff3d4;
     padding: 20px;
     border-radius: 8px;
     width: 200px;
@@ -156,7 +157,7 @@ body {
 
 .events-table th,
 .events-table td {
-    border: 1px solid #a83232;
+    border: 1px solid #e67e22;
     padding: 10px;
     text-align: center;
 }
@@ -170,11 +171,6 @@ body {
 #tool-screen {
     padding: 20px;
 }
-
-textarea {
-    width: 100%;
-}
-
 
 /* Allocation 2-column layout */
 .allocation-layout {
@@ -204,6 +200,7 @@ textarea {
     color: white;
     text-decoration: none;
     border-radius: 6px;
+    font-weight: bold;
 }
 
 .nav-link:hover {
@@ -222,9 +219,9 @@ textarea {
 /* Tool box */
 .tool-box {
     background: #fff3d4;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #d4a017;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #d4a017;
 }
 
 /* Two-column rows */
@@ -240,18 +237,39 @@ textarea {
 /* Small input fields */
 .small-input {
     width: 90%;
-    padding: 6px;
+    padding: 8px;
+    font-size: 15px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
 }
 
-/* Buttons */
+/* TEXTAREAS — big + draggable */
+textarea {
+    width: 100%;
+    min-height: 220px;
+    resize: both;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #e67e22;
+    border-radius: 8px;
+    background: #fffaf0;
+}
+
+/* BUTTONS — bold, capitalized */
 .btn {
-    padding: 10px 18px;
+    padding: 14px 22px;
     background: #e67e22;
     color: white;
     border: none;
-    border-radius: 6px;
-    margin: 5px;
+    border-radius: 8px;
+    margin: 6px;
     cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: "Georgia", serif;
+    letter-spacing: 1px;
 }
 
 .btn:hover {
