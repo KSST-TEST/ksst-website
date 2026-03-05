@@ -3,6 +3,7 @@
 <head>
     <title>KSST Sloka Allocation</title>
     <link rel="stylesheet" href="style.css">
+
     <style>
         /* Page layout after login */
         .main-layout {
@@ -33,6 +34,7 @@
             color: white;
             text-decoration: none;
             border-radius: 6px;
+            cursor: pointer;
         }
 
         .nav-link:hover {
@@ -55,7 +57,7 @@
 
         textarea {
             width: 100%;
-            height: 180px;
+            height: 150px;
         }
 
         .btn {
@@ -71,6 +73,33 @@
         .btn:hover {
             background: #7b1e1e;
         }
+
+        /* Updated Header */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #7b1e1e;
+            color: white;
+            position: relative;
+        }
+
+        .ksst-logo {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            width: 85px;
+        }
+
+        .site-title {
+            font-family: "Georgia", serif;
+            font-size: 26px;
+            margin: 0;
+        }
+
+        .tagline {
+            font-size: 15px;
+            margin-top: 4px;
+        }
     </style>
 </head>
 
@@ -78,7 +107,7 @@
 
 <!-- PASSWORD SCREEN -->
 <div id="password-screen">
-    <h2>Coordinator Access</h2>
+    <h2>Welcome KSST Coordinator Access</h2>
     <p>Enter Password:</p>
     <input type="password" id="pass">
     <button class="btn" onclick="checkPassword()">Enter</button>
@@ -90,7 +119,7 @@
     <!-- HEADER -->
     <div class="header">
         <img src="images/ksst-logo.jpeg" class="ksst-logo">
-        <h1 class="site-title">KSST</h1>
+        <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
         <div class="tagline">Celebrating Timeless Dharma</div>
     </div>
 
@@ -113,7 +142,7 @@
 
         <!-- RIGHT CONTENT AREA -->
         <div class="content-area" id="content-area">
-            <h2>Welcome Coordinator</h2>
+            <h2>Welcome KSST Coordinator</h2>
             <p>Select a Stothram from the left to begin allocation.</p>
         </div>
 
@@ -121,7 +150,7 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        © KSST – Celebrating Timeless Dharma
+        © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
     </div>
 
 </div>
@@ -143,42 +172,64 @@ function loadVSN() {
         <h2>Shri Vishnu Sahasranamam – Allocation Tool</h2>
 
         <div class="tool-box">
-            <label>Enter Names (one per line):</label><br>
-            <textarea id="names"></textarea><br><br>
 
-            <button class="btn" onclick="allocateVSN()">Allocate</button>
+            <label><b>Batch Number</b></label><br>
+            <input type="text" id="batchNumber" style="width: 40%; padding: 6px;"><br><br>
+
+            <label><b>Satsang Date</b></label><br>
+            <input type="date" id="satsangDate" style="width: 40%; padding: 6px;"><br><br>
+
+            <label><b>Enter Names (All Signed Up for This Satsang)</b></label><br>
+            <textarea id="mainNames" placeholder="Enter one name per line"></textarea><br><br>
+
+            <label><b>Enter Backup Names (Backup Chanters)</b></label><br>
+            <textarea id="backupNames" placeholder="Enter one name per line"></textarea><br><br>
+
+            <button class="btn" onclick="allocateFullVSN()">Allocate Full VSN</button>
+            <button class="btn" onclick="allocate108()">Allocate 108 Slokas Only</button>
             <button class="btn" onclick="clearOutput()">Clear</button>
 
-            <h3>Output:</h3>
-            <textarea id="output"></textarea>
+            <br><br>
+
+            <h3>Allocation Output</h3>
+            <textarea id="output" placeholder="Allocation will appear here..."></textarea><br><br>
+
+            <button class="btn" onclick="copyOutput()">Copy Allocation</button>
+            <button class="btn" onclick="downloadOutput()">Download CSV</button>
+
         </div>
     `;
 }
 
-/* SIMPLE VSN ALLOCATION (You will give me final segment structure later) */
-function allocateVSN() {
-    let names = document.getElementById("names").value.trim().split("\n");
-    let output = "";
-    let segments = [
-        "Slokas 1–6", "Slokas 7–12", "Slokas 13–18", "Slokas 19–24",
-        "Slokas 25–30", "Slokas 31–36", "Slokas 37–42", "Slokas 43–48",
-        "Slokas 49–54", "Slokas 55–60", "Slokas 61–66", "Slokas 67–72",
-        "Slokas 73–78", "Slokas 79–84", "Slokas 85–90", "Slokas 91–96",
-        "Slokas 97–102", "Slokas 103–108"
-    ];
+/* Placeholder logic — real logic will be added later */
+function allocateFullVSN() {
+    document.getElementById("output").value = "Full VSN allocation logic will be added here.";
+}
 
-    let nameIndex = 0;
-
-    for (let i = 0; i < segments.length; i++) {
-        output += names[nameIndex] + " → " + segments[i] + "\n";
-        nameIndex = (nameIndex + 1) % names.length;
-    }
-
-    document.getElementById("output").value = output;
+function allocate108() {
+    document.getElementById("output").value = "108 Slokas allocation logic will be added here.";
 }
 
 function clearOutput() {
     document.getElementById("output").value = "";
+}
+
+/* Copy to clipboard */
+function copyOutput() {
+    let text = document.getElementById("output");
+    text.select();
+    document.execCommand("copy");
+    alert("Copied!");
+}
+
+/* Download CSV */
+function downloadOutput() {
+    let text = document.getElementById("output").value;
+    let blob = new Blob([text], { type: "text/csv" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "allocation.csv";
+    link.click();
 }
 </script>
 
