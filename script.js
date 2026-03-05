@@ -1,4 +1,3 @@
-<script>
 /* PASSWORD CHECK */
 function checkPassword() {
     if (document.getElementById("pass").value === "Vaikuntha") {
@@ -225,7 +224,7 @@ function allocateFullVSN(shuffleMode = false) {
     `;
 }
 
-/* PLACEHOLDER FOR 108 SLOKAS (TO BE IMPLEMENTED LATER) */
+/* PLACEHOLDER FOR 108 SLOKAS */
 function allocate108(shuffleMode = false) {
     document.getElementById("output").value =
         "108 Slokas allocation logic will be added.";
@@ -244,7 +243,7 @@ function copyOutput() {
     alert("Copied!");
 }
 
-/* DOWNLOAD OUTPUT (CSV PLACEHOLDER) */
+/* DOWNLOAD OUTPUT */
 function downloadOutput() {
     let text = document.getElementById("output").value;
     let blob = new Blob([text], { type: "text/csv" });
@@ -253,4 +252,3 @@ function downloadOutput() {
     link.download = "allocation.csv";
     link.click();
 }
-</script>
