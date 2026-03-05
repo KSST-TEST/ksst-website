@@ -18,8 +18,8 @@ body {
 .ksst-logo {
     position: absolute;
     top: 15px;
-    right: 20px;
-    width: 80px;
+    left: 20px;
+    width: 120px;
 }
 
 /* Title styling */
@@ -128,4 +128,5 @@ body {
 textarea {
     width: 100%;
 }
+
 
