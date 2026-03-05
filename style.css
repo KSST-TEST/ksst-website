@@ -28,9 +28,10 @@ body {
 }
 
 .welcome-image {
-    width: 55%;
+    width: 20%;
     border-radius: 10px;
     box-shadow: 0 0 10px #d4a017;
+    margin-top: 20px;
 }
 
 .nav-buttons {
@@ -106,3 +107,4 @@ body {
 textarea {
     width: 100%;
 }
+
