@@ -5,13 +5,16 @@ body {
     color: #4a2c2a;
 }
 
+/* Header with centered title + logo on right */
 .header {
     text-align: center;
     padding: 20px;
     background: #7b1e1e;
     color: white;
+    position: relative; /* Needed for logo positioning */
 }
 
+/* KSST Logo */
 .ksst-logo {
     position: absolute;
     top: 15px;
@@ -19,6 +22,7 @@ body {
     width: 80px;
 }
 
+/* Title styling */
 .site-title {
     font-family: "Georgia", serif;
     font-size: 28px;
@@ -29,18 +33,22 @@ body {
     margin-top: -5px;
 }
 
+/* Welcome image container */
 .image-container {
     text-align: center;
     margin-top: 20px;
 }
 
+/* Smaller, devotional welcome image */
 .welcome-image {
     width: 20%;
+    max-width: 320px;
     border-radius: 10px;
     box-shadow: 0 0 10px #d4a017;
     margin-top: 20px;
 }
 
+/* Navigation buttons */
 .nav-buttons {
     text-align: center;
     margin: 20px 0;
@@ -61,11 +69,13 @@ body {
     background: #7b1e1e;
 }
 
+/* Sections */
 .about-section, .welcome-section {
     text-align: center;
     padding: 20px;
 }
 
+/* Footer */
 .footer {
     text-align: center;
     padding: 15px;
@@ -74,6 +84,7 @@ body {
     margin-top: 40px;
 }
 
+/* Documents page cards */
 .doc-section {
     display: flex;
     justify-content: center;
@@ -90,6 +101,7 @@ body {
     box-shadow: 0 0 5px #d4a017;
 }
 
+/* Events table */
 .events-table {
     width: 80%;
     margin: auto;
@@ -102,6 +114,7 @@ body {
     text-align: center;
 }
 
+/* Allocation tool screens */
 #password-screen {
     text-align: center;
     margin-top: 50px;
@@ -111,8 +124,8 @@ body {
     padding: 20px;
 }
 
+/* Textarea for allocation output */
 textarea {
     width: 100%;
 }
-
 
