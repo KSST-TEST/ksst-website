@@ -5,130 +5,115 @@ body {
     color: #4a2c2a;
 }
 
-/* Header with centered title + logo on right */
+/* HEADER */
 .header {
-    text-align: center;
-    padding: 20px;
     background: #7b1e1e;
     color: white;
-    position: relative; /* Needed for logo positioning */
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
-/* KSST Logo */
-.ksst-logo {
+.header-logo {
     position: absolute;
-    top: 15px;
     left: 20px;
-    width: 120px;
+    width: 90px;
 }
 
-/* Title styling */
+.header-om {
+    position: absolute;
+    right: 20px;
+    width: 70px;
+}
+
+.header-text {
+    text-align: center;
+}
+
 .site-title {
     font-family: "Georgia", serif;
-    font-size: 28px;
+    font-size: 30px;
+    margin: 0;
 }
 
 .tagline {
     font-size: 16px;
-    margin-top: -5px;
+    margin-top: 4px;
 }
 
-/* Welcome image container */
-.image-container {
-    text-align: center;
-    margin-top: 20px;
+/* THREE COLUMN LAYOUT */
+.home-layout {
+    display: flex;
+    padding: 20px;
 }
 
-/* Smaller, devotional welcome image */
-.welcome-image {
-    width: 20%;
-    max-width: 320px;
+/* LEFT COLUMN */
+.left-column {
+    width: 25%;
+    padding: 20px;
+    background: #fff3e0;
     border-radius: 10px;
-    box-shadow: 0 0 10px #d4a017;
-    margin-top: 20px;
+    box-shadow: 0 0 8px #d4a017;
 }
 
-/* Navigation buttons */
-.nav-buttons {
-    text-align: center;
-    margin: 20px 0;
-}
-
-.nav-btn {
-    display: inline-block;
-    padding: 12px 20px;
-    margin: 10px;
-    background: #a83232;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-.nav-btn:hover {
-    background: #7b1e1e;
-}
-
-/* Sections */
-.about-section, .welcome-section {
+/* CENTER COLUMN */
+.center-column {
+    width: 50%;
     text-align: center;
     padding: 20px;
 }
 
-/* Footer */
+.welcome-marquee {
+    font-size: 24px;
+    color: #7b1e1e;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.welcome-image {
+    width: 55%;
+    border-radius: 12px;
+    box-shadow: 0 0 12px #d4a017;
+}
+
+.devotional-line {
+    margin-top: 20px;
+    font-size: 22px;
+    color: #d4a017;
+    font-weight: bold;
+}
+
+/* RIGHT COLUMN */
+.right-column {
+    width: 25%;
+    padding: 20px;
+}
+
+.side-btn {
+    display: block;
+    background: #7b1e1e;
+    color: white;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.side-btn:hover {
+    background: #a83232;
+}
+
+/* FOOTER */
 .footer {
+    background: #7b1e1e;
+    color: white;
     text-align: center;
     padding: 15px;
-    background: #7b1e1e;
-    color: white;
     margin-top: 40px;
 }
-
-/* Documents page cards */
-.doc-section {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 30px;
-}
-
-.doc-card {
-    background: #fff3e0;
-    padding: 20px;
-    border-radius: 8px;
-    width: 200px;
-    text-align: center;
-    box-shadow: 0 0 5px #d4a017;
-}
-
-/* Events table */
-.events-table {
-    width: 80%;
-    margin: auto;
-    border-collapse: collapse;
-}
-
-.events-table th, .events-table td {
-    border: 1px solid #a83232;
-    padding: 10px;
-    text-align: center;
-}
-
-/* Allocation tool screens */
-#password-screen {
-    text-align: center;
-    margin-top: 50px;
-}
-
-#tool-screen {
-    padding: 20px;
-}
-
-/* Textarea for allocation output */
-textarea {
-    width: 100%;
-}
-
-
 
 
