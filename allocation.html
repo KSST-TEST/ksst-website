@@ -3,138 +3,44 @@
 <head>
     <title>KSST Sloka Allocation</title>
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* Page layout after login */
-        .main-layout {
-            display: flex;
-            min-height: 90vh;
-        }
-
-        /* Left navigation */
-        .side-nav {
-            width: 260px;
-            background: #7b1e1e;
-            color: white;
-            padding: 20px;
-        }
-
-        .side-nav h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #d4a017;
-            padding-bottom: 8px;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 10px;
-            margin: 8px 0;
-            background: #a83232;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .nav-link:hover {
-            background: #d44a4a;
-        }
-
-        /* Right content area */
-        .content-area {
-            flex: 1;
-            padding: 25px;
-        }
-
-        /* Allocation tool box */
-        .tool-box {
-            background: #fff3e0;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #d4a017;
-        }
-
-        textarea {
-            width: 100%;
-            height: 150px;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            background: #a83232;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            margin: 5px;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background: #7b1e1e;
-        }
-
-        /* Updated Header */
-        .header {
-            text-align: center;
-            padding: 20px;
-            background: #7b1e1e;
-            color: white;
-            position: relative;
-        }
-
-        .ksst-logo {
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            width: 85px;
-        }
-
-        .site-title {
-            font-family: "Georgia", serif;
-            font-size: 26px;
-            margin: 0;
-        }
-
-        .tagline {
-            font-size: 15px;
-            margin-top: 4px;
-        }
-    </style>
 </head>
 
 <body>
 
 <!-- PASSWORD SCREEN -->
 <div id="password-screen">
-    <h2>Welcome KSST Coordinator Access</h2>
+    <h2>Coordinator Access</h2>
     <p>Enter Password:</p>
     <input type="password" id="pass">
     <button class="btn" onclick="checkPassword()">Enter</button>
 </div>
 
-<!-- MAIN SCREEN AFTER LOGIN -->
+<!-- MAIN SCREEN -->
 <div id="tool-screen" style="display:none;">
 
     <!-- HEADER -->
     <div class="header">
         <img src="images/ksst-logo.jpeg" class="ksst-logo">
-        <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
-        <div class="tagline">Celebrating Timeless Dharma</div>
+
+        <div class="header-text">
+            <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
+            <div class="tagline">Celebrating Timeless Dharma</div>
+        </div>
+
+        <img src="images/om.png" class="om-image">
     </div>
 
-    <!-- MAIN LAYOUT -->
-    <div class="main-layout">
+    <!-- MAIN LAYOUT (2 columns) -->
+    <div class="allocation-layout">
 
         <!-- LEFT NAVIGATION -->
         <div class="side-nav">
             <h3>Stothrams</h3>
 
-            <a class="nav-link" onclick="loadVSN()">Shri Vishnu Sahasranamam Stothram</a>
-            <a class="nav-link">Shri Lalitha Sahasranama Stothram</a>
-            <a class="nav-link">Shri Lakshmi Sahasranama Stothram</a>
+            <a class="nav-link" onclick="loadVSN()">Shri Vishnu Sahasranamam</a>
+            <a class="nav-link">Shri Lalitha Sahasranamam</a>
+            <a class="nav-link">Shri Lakshmi Sahasranamam</a>
 
-            <!-- Future placeholders -->
             <a class="nav-link">Stothram 3 (Coming Soon)</a>
             <a class="nav-link">Stothram 4 (Coming Soon)</a>
             <a class="nav-link">Stothram 5 (Coming Soon)</a>
@@ -142,7 +48,7 @@
 
         <!-- RIGHT CONTENT AREA -->
         <div class="content-area" id="content-area">
-            <h2>Welcome KSST Coordinator</h2>
+            <h2>Welcome Coordinator</h2>
             <p>Select a Stothram from the left to begin allocation.</p>
         </div>
 
@@ -173,24 +79,44 @@ function loadVSN() {
 
         <div class="tool-box">
 
-            <label><b>Batch Number</b></label><br>
-            <input type="text" id="batchNumber" style="width: 40%; padding: 6px;"><br><br>
+            <!-- Row 1: Batch + Date -->
+            <div class="row">
+                <div class="col">
+                    <label><b>Batch Number</b></label><br>
+                    <input type="text" id="batchNumber" placeholder="Batch" class="small-input">
+                </div>
 
-            <label><b>Satsang Date</b></label><br>
-            <input type="date" id="satsangDate" style="width: 40%; padding: 6px;"><br><br>
+                <div class="col">
+                    <label><b>Satsang Date</b></label><br>
+                    <input type="text" id="satsangDate" placeholder="dd/mm/yyyy" class="small-input">
+                </div>
+            </div>
 
-            <label><b>Enter Names (All Signed Up for This Satsang)</b></label><br>
-            <textarea id="mainNames" placeholder="Enter one name per line"></textarea><br><br>
+            <br>
 
-            <label><b>Enter Backup Names (Backup Chanters)</b></label><br>
-            <textarea id="backupNames" placeholder="Enter one name per line"></textarea><br><br>
+            <!-- Row 2: Names + Backup Names -->
+            <div class="row">
+                <div class="col">
+                    <label><b>Enter Names (Main)</b></label><br>
+                    <textarea id="mainNames" placeholder="One name per line"></textarea>
+                </div>
 
+                <div class="col">
+                    <label><b>Enter Backup Names</b></label><br>
+                    <textarea id="backupNames" placeholder="One name per line"></textarea>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- Buttons -->
             <button class="btn" onclick="allocateFullVSN()">Allocate Full VSN</button>
             <button class="btn" onclick="allocate108()">Allocate 108 Slokas Only</button>
             <button class="btn" onclick="clearOutput()">Clear</button>
 
             <br><br>
 
+            <!-- Output -->
             <h3>Allocation Output</h3>
             <textarea id="output" placeholder="Allocation will appear here..."></textarea><br><br>
 
@@ -201,20 +127,19 @@ function loadVSN() {
     `;
 }
 
-/* Placeholder logic — real logic will be added later */
+/* Placeholder logic */
 function allocateFullVSN() {
-    document.getElementById("output").value = "Full VSN allocation logic will be added here.";
+    document.getElementById("output").value = "Full VSN allocation logic will be added.";
 }
 
 function allocate108() {
-    document.getElementById("output").value = "108 Slokas allocation logic will be added here.";
+    document.getElementById("output").value = "108 Slokas allocation logic will be added.";
 }
 
 function clearOutput() {
     document.getElementById("output").value = "";
 }
 
-/* Copy to clipboard */
 function copyOutput() {
     let text = document.getElementById("output");
     text.select();
@@ -222,7 +147,6 @@ function copyOutput() {
     alert("Copied!");
 }
 
-/* Download CSV */
 function downloadOutput() {
     let text = document.getElementById("output").value;
     let blob = new Blob([text], { type: "text/csv" });
