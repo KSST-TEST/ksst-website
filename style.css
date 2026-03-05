@@ -12,6 +12,13 @@ body {
     color: white;
 }
 
+.ksst-logo {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 80px;
+}
+
 .site-title {
     font-family: "Georgia", serif;
     font-size: 28px;
@@ -107,4 +114,5 @@ body {
 textarea {
     width: 100%;
 }
+
 
