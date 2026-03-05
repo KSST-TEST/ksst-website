@@ -81,7 +81,8 @@ function loadVSN() {
             <div id="reallocate-buttons"></div>
 
             <button class="btn" onclick="copyOutput()">COPY</button>
-            <button class="btn" onclick="downloadOutput()">DOWNLOAD CSV</button>
+            <button class="btn" onclick="downloadExcel()">DOWNLOAD EXCEL</button>
+            <button class="btn" onclick="downloadPDF()">DOWNLOAD PDF</button>
 
         </div>
     `;
@@ -120,7 +121,23 @@ function shuffle(array) {
     return arr;
 }
 
-/* FULL VSN ALLOCATION LOGIC */
+/* DYNAMIC WIDTH FOR TEXT ALIGNMENT */
+function dynamicWidth(names) {
+    let longest = Math.max(...names.map(n => n.length));
+    return longest + 5;
+}
+
+/* FORMAT LINE (FINAL FORMAT) */
+function formatLine(segment, sloka, main, backup, width) {
+    return (
+        segment.padEnd(20, " ") + " – " +
+        sloka.padEnd(14, " ") + " - " +
+        main.padEnd(width, " ") + " – " +
+        `[ ${backup} ]`
+    );
+}
+
+/* FULL VSN ALLOCATION */
 function allocateFullVSN(shuffleMode = false) {
 
     let mainRaw = document.getElementById("mainNames").value
@@ -135,102 +152,121 @@ function allocateFullVSN(shuffleMode = false) {
     }
 
     const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
-    const backupNames = backupRaw.length > 0 ? backupRaw : ["-"];
+    const backupNames = backupRaw.length > 0 ? backupRaw : ["No Backup"];
 
     let mainIndex = 0;
     let backupIndex = 0;
 
-    const batch = (document.getElementById("batchNumber").value || "").trim();
-    const dateElem = document.getElementById("satsangDate");
-    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
-    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
+    let width = dynamicWidth(mainNames);
 
     const segments = [
-        { label: "Starting Prayer", range: "", code: "N" },
+        { seg: "Starting Prayer", sloka: "" },
 
-        { label: "Poorvangam", range: "1-5-[5]",   code: "A" },
-        { label: "Poorvangam", range: "6-11-[6]",  code: "B" },
-        { label: "Poorvangam", range: "12-16-[5]", code: "C" },
-        { label: "Poorvangam", range: "17-22-[6]", code: "D" },
+        { seg: "Poorvangam", sloka: "1-5-[5]" },
+        { seg: "Prathama", sloka: "6-10-[5]" },
+        { seg: "Dwitiya", sloka: "11-15-[5]" },
+        { seg: "Trithiya", sloka: "16-20-[5]" },
+        { seg: "Chaturtha", sloka: "21-25-[5]" },
+        { seg: "Panchama", sloka: "26-30-[5]" },
+        { seg: "Shashta", sloka: "31-35-[5]" },
+        { seg: "Saptama", sloka: "36-40-[5]" },
+        { seg: "Ashtama", sloka: "41-45-[5]" },
+        { seg: "Navama", sloka: "46-50-[5]" },
+        { seg: "Dashama", sloka: "51-55-[5]" },
+        { seg: "Ekadashi", sloka: "56-60-[5]" },
+        { seg: "Dwadashi", sloka: "61-65-[5]" },
+        { seg: "Trayodashi", sloka: "66-70-[5]" },
+        { seg: "Chaturdashi", sloka: "71-75-[5]" },
+        { seg: "Purnima", sloka: "76-80-[5]" },
 
-        { label: "Nyasa", range: "------------------", code: "E" },
-
-        { label: "Dhyaanam", range: "1-3", code: "F" },
-        { label: "Dhyaanam", range: "4-8", code: "G" },
-
-        { label: "Shlokam", range: "1-6-[6]",     code: "H" },
-        { label: "Shlokam", range: "7-13-[7]",    code: "I" },
-        { label: "Shlokam", range: "14-20-[7]",   code: "J" },
-        { label: "Shlokam", range: "21-27-[7]",   code: "K" },
-        { label: "Shlokam", range: "28-33-[6]",   code: "L" },
-        { label: "Shlokam", range: "34-40-[7]",   code: "M" },
-        { label: "Shlokam", range: "41-47-[7]",   code: "N" },
-        { label: "Shlokam", range: "48-54-[7]",   code: "A" },
-        { label: "Shlokam", range: "55-60-[6]",   code: "B" },
-        { label: "Shlokam", range: "61-67-[7]",   code: "C" },
-        { label: "Shlokam", range: "68-74-[7]",   code: "D" },
-        { label: "Shlokam", range: "75-81-[7]",   code: "E" },
-        { label: "Shlokam", range: "82-87-[6]",   code: "F" },
-        { label: "Shlokam", range: "88-94-[7]",   code: "G" },
-        { label: "Shlokam", range: "95-101-[7]",  code: "H" },
-        { label: "Shlokam", range: "102-108-[7]", code: "I" },
-
-        { label: "Phalashruti", range: "1-6-[6]",   code: "J" },
-        { label: "Phalashruti", range: "7-13-[7]",  code: "K" },
-        { label: "Phalashruti", range: "14-19-[6]", code: "L" },
-        { label: "Phalashruti", range: "20-26-[7]", code: "M" },
-        { label: "Phalashruti", range: "27-33-[7]", code: "N" },
-
-        { label: "KSHAMA PRARTHANA", range: "", code: "N" },
-        { label: "Ending Prayer",    range: "", code: "E" }
+        { seg: "Kshama Prarthana", sloka: "" },
+        { seg: "Ending Prayer", sloka: "" }
     ];
 
     let lines = [];
-
     lines.push("*Om Namo Narayana*");
-    lines.push("----------------------------------------------------------");
-    lines.push(
-        "Batch Number: " + (batch || "") +
-        "        Satsang Date: " + (satsangDate || "") +
-        "          Satsang Time: " + (satsangTime || "") + " IST"
-    );
-    lines.push("----------------------------------------------------------");
     lines.push("");
 
-    segments.forEach(seg => {
-        const main = mainNames[mainIndex % mainNames.length];
-        const backup = backupNames[backupIndex % backupNames.length];
+    segments.forEach(s => {
+        let main = mainNames[mainIndex % mainNames.length];
+        let backup = backupNames[backupIndex % backupNames.length];
+
+        lines.push(formatLine(s.seg, s.sloka, main, backup, width));
 
         mainIndex++;
         backupIndex++;
-
-        let rangePart = seg.range ? (seg.range + "-----") : "";
-        let line =
-            seg.label + ": " +
-            (rangePart ? rangePart : "") +
-            seg.code +
-            "  -----------  " +
-            "[" + backup + "]";
-
-        lines.push(line);
-        lines.push("");
     });
 
     document.getElementById("output").value = lines.join("\n");
 
     document.getElementById("reallocate-buttons").innerHTML = `
-        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE VSN</button>
+        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE FULL VSN</button>
         <button class="btn" onclick="allocate108(true)">REALLOCATE 108 SLOKAS</button>
     `;
 }
 
-/* PLACEHOLDER FOR 108 SLOKAS */
+/* 108 SLOKAS ALLOCATION */
 function allocate108(shuffleMode = false) {
-    document.getElementById("output").value =
-        "108 Slokas allocation logic will be added.";
+
+    let mainRaw = document.getElementById("mainNames").value
+        .split("\n").map(x => x.trim()).filter(x => x !== "");
+
+    let backupRaw = document.getElementById("backupNames").value
+        .split("\n").map(x => x.trim()).filter(x => x !== "");
+
+    if (shuffleMode) {
+        mainRaw = shuffle(mainRaw);
+        backupRaw = shuffle(backupRaw);
+    }
+
+    const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
+    const backupNames = backupRaw.length > 0 ? backupRaw : ["No Backup"];
+
+    let mainIndex = 0;
+    let backupIndex = 0;
+
+    let width = dynamicWidth(mainNames);
+
+    const segments = [
+        { seg: "Starting Prayer", sloka: "" },
+        { seg: "Shlokam", sloka: "1-6-[6]" },
+        { seg: "Shlokam", sloka: "7-13-[7]" },
+        { seg: "Shlokam", sloka: "14-20-[7]" },
+        { seg: "Shlokam", sloka: "21-27-[7]" },
+        { seg: "Shlokam", sloka: "28-33-[6]" },
+        { seg: "Shlokam", sloka: "34-40-[7]" },
+        { seg: "Shlokam", sloka: "41-47-[7]" },
+        { seg: "Shlokam", sloka: "48-54-[7]" },
+        { seg: "Shlokam", sloka: "55-60-[6]" },
+        { seg: "Shlokam", sloka: "61-67-[7]" },
+        { seg: "Shlokam", sloka: "68-74-[7]" },
+        { seg: "Shlokam", sloka: "75-81-[7]" },
+        { seg: "Shlokam", sloka: "82-87-[6]" },
+        { seg: "Shlokam", sloka: "88-94-[7]" },
+        { seg: "Shlokam", sloka: "95-101-[7]" },
+        { seg: "Shlokam", sloka: "102-108-[7]" },
+        { seg: "Kshama Prarthana", sloka: "" },
+        { seg: "Ending Prayer", sloka: "" }
+    ];
+
+    let lines = [];
+    lines.push("*Om Namo Narayana*");
+    lines.push("");
+
+    segments.forEach(s => {
+        let main = mainNames[mainIndex % mainNames.length];
+        let backup = backupNames[backupIndex % backupNames.length];
+
+        lines.push(formatLine(s.seg, s.sloka, main, backup, width));
+
+        mainIndex++;
+        backupIndex++;
+    });
+
+    document.getElementById("output").value = lines.join("\n");
 
     document.getElementById("reallocate-buttons").innerHTML = `
-        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE VSN</button>
+        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE FULL VSN</button>
         <button class="btn" onclick="allocate108(true)">REALLOCATE 108 SLOKAS</button>
     `;
 }
@@ -243,12 +279,44 @@ function copyOutput() {
     alert("Copied!");
 }
 
-/* DOWNLOAD OUTPUT */
-function downloadOutput() {
-    let text = document.getElementById("output").value;
-    let blob = new Blob([text], { type: "text/csv" });
-    let link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "allocation.csv";
-    link.click();
+/* DOWNLOAD EXCEL */
+function downloadExcel() {
+    let output = document.getElementById("output").value.split("\n");
+
+    let rows = [["Segment Name", "Assigned Sloka Number", "Main Devotee", "Backup Chanter"]];
+
+    output.forEach(line => {
+        if (line.includes("–")) {
+            let parts = line.split("–");
+            let seg = parts[0].trim();
+            let sloka = parts[1].split("-")[0].trim();
+            let main = parts[1].split("-")[1].trim();
+            let backup = parts[2].replace("[", "").replace("]", "").trim();
+            rows.push([seg, sloka, main, backup]);
+        }
+    });
+
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Allocation");
+    XLSX.writeFile(wb, "KSST_Allocation.xlsx");
+}
+
+/* DOWNLOAD PDF */
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    doc.setFontSize(12);
+    doc.text("KSST Allocation Report", 14, 15);
+
+    let y = 30;
+    let lines = document.getElementById("output").value.split("\n");
+
+    lines.forEach(line => {
+        doc.text(line, 14, y);
+        y += 7;
+    });
+
+    doc.save("KSST_Allocation.pdf");
 }
