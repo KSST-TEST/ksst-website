@@ -9,7 +9,7 @@
 
 <!-- PASSWORD SCREEN -->
 <div id="password-screen">
-    <h2>Coordinator Access</h2>
+    <h2>Welcome KSST Coordinator</h2>
     <p>Enter Password:</p>
     <input type="password" id="pass">
     <button class="btn" onclick="checkPassword()">ENTER</button>
@@ -48,7 +48,7 @@
 
         <!-- RIGHT CONTENT AREA -->
         <div class="content-area" id="content-area">
-            <h2>Welcome Coordinator</h2>
+            <h2>Welcome KSST Coordinator</h2>
             <p>Select a Stothram from the left to begin allocation.</p>
         </div>
 
@@ -79,7 +79,7 @@ function loadVSN() {
 
         <div class="tool-box">
 
-            <!-- Row 1: Batch + Date -->
+            <!-- Row 1: Batch + Date + Time -->
             <div class="row">
                 <div class="col">
                     <label><b>Batch Number</b></label><br>
@@ -88,7 +88,12 @@ function loadVSN() {
 
                 <div class="col">
                     <label><b>Satsang Date</b></label><br>
-                    <input type="text" id="satsangDate" placeholder="dd/mm/yyyy" class="small-input">
+                    <input type="date" id="satsangDate" class="small-input" onchange="formatDate()">
+                </div>
+
+                <div class="col">
+                    <label><b>Satsang Time <span style="font-size:13px; font-style:italic;">(IST)</span></b></label><br>
+                    <input type="time" id="satsangTime" class="small-input">
                 </div>
             </div>
 
@@ -96,15 +101,33 @@ function loadVSN() {
 
             <!-- Row 2: Names + Backup Names -->
             <div class="row">
+
                 <div class="col">
-                    <label><b>Enter Names (Main)</b></label><br>
+                    <label>
+                        <b>Enter Devotee Names</b><br>
+                        <span style="font-size:13px; font-style:italic;">
+                            (Registered for the Above-Mentioned Satsang Date and Time)
+                        </span>
+                    </label><br>
+
                     <textarea id="mainNames" placeholder="One name per line"></textarea>
+
+                    <button class="btn" onclick="clearMain()">CLEAR MAIN</button>
                 </div>
 
                 <div class="col">
-                    <label><b>Enter Backup Names</b></label><br>
+                    <label>
+                        <b>Enter Backup Devotees</b><br>
+                        <span style="font-size:13px; font-style:italic;">
+                            (Available for the Above Satsang Date & Time)
+                        </span>
+                    </label><br>
+
                     <textarea id="backupNames" placeholder="One name per line"></textarea>
+
+                    <button class="btn" onclick="clearBackup()">CLEAR BACKUP</button>
                 </div>
+
             </div>
 
             <br>
@@ -112,7 +135,6 @@ function loadVSN() {
             <!-- Buttons -->
             <button class="btn" onclick="allocateFullVSN()">ALLOCATE FULL VSN</button>
             <button class="btn" onclick="allocate108()">ALLOCATE 108 SLOKAS</button>
-            <button class="btn" onclick="clearOutput()">CLEAR</button>
 
             <br><br>
 
@@ -127,7 +149,30 @@ function loadVSN() {
     `;
 }
 
-/* Placeholder logic */
+/* FORMAT DATE TO dd/mm/yyyy */
+function formatDate() {
+    let input = document.getElementById("satsangDate").value;
+    if (!input) return;
+
+    let date = new Date(input);
+    let day = String(date.getDate()).padStart(2, '0');
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let year = date.getFullYear();
+
+    document.getElementById("satsangDate").setAttribute("data-formatted", `${day}/${month}/${year}`);
+}
+
+/* CLEAR MAIN NAMES */
+function clearMain() {
+    document.getElementById("mainNames").value = "";
+}
+
+/* CLEAR BACKUP NAMES */
+function clearBackup() {
+    document.getElementById("backupNames").value = "";
+}
+
+/* PLACEHOLDER LOGIC */
 function allocateFullVSN() {
     document.getElementById("output").value = "Full VSN allocation logic will be added.";
 }
