@@ -1,0 +1,108 @@
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: #fdf8f2;
+    margin: 0;
+    color: #4a2c2a;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+    background: #7b1e1e;
+    color: white;
+}
+
+.site-title {
+    font-family: "Georgia", serif;
+    font-size: 28px;
+}
+
+.tagline {
+    font-size: 16px;
+    margin-top: -5px;
+}
+
+.image-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.welcome-image {
+    width: 55%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #d4a017;
+}
+
+.nav-buttons {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.nav-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    margin: 10px;
+    background: #a83232;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.nav-btn:hover {
+    background: #7b1e1e;
+}
+
+.about-section, .welcome-section {
+    text-align: center;
+    padding: 20px;
+}
+
+.footer {
+    text-align: center;
+    padding: 15px;
+    background: #7b1e1e;
+    color: white;
+    margin-top: 40px;
+}
+
+.doc-section {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px;
+}
+
+.doc-card {
+    background: #fff3e0;
+    padding: 20px;
+    border-radius: 8px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0 0 5px #d4a017;
+}
+
+.events-table {
+    width: 80%;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+.events-table th, .events-table td {
+    border: 1px solid #a83232;
+    padding: 10px;
+    text-align: center;
+}
+
+#password-screen {
+    text-align: center;
+    margin-top: 50px;
+}
+
+#tool-screen {
+    padding: 20px;
+}
+
+textarea {
+    width: 100%;
+}

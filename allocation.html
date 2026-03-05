@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sloka Allocation Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="password-screen">
+    <h2>Coordinator Access</h2>
+    <p>Enter Password</p>
+    <input type="password" id="password-input">
+    <button onclick="checkPassword()">Submit</button>
+    <p id="error-msg"></p>
+</div>
+
+<div id="tool-screen" style="display:none;">
+
+    <header class="header">
+        <h1>KSST Sloka Allocation Tool</h1>
+    </header>
+
+    <section class="tool-section">
+
+        <label>Select Sloka:</label>
+        <select id="sloka-select">
+            <option value="vsn">Vishnu Sahasranamam</option>
+            <option value="108">108 Names</option>
+        </select>
+
+        <label>Mode:</label>
+        <select id="mode-select">
+            <option value="full">Full VSN</option>
+            <option value="108only">108 Only</option>
+        </select>
+
+        <label>Enter Participant Names (one per line):</label>
+        <textarea id="names-input" rows="6"></textarea>
+
+        <button onclick="allocate()">Generate Allocation</button>
+
+        <h3>Output</h3>
+        <pre id="output-box"></pre>
+
+        <button onclick="copyOutput()">Copy</button>
+        <button onclick="downloadText()">Download</button>
+
+    </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
