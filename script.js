@@ -168,38 +168,38 @@ function allocateFullVSN(shuffleMode = false) {
     const segments = [
         { seg: "Starting Prayer", sloka: "" },
 
-        { seg: "Poorvangam",  sloka: "1-5-[5]" },
-        { seg: "Poorvangam",  sloka: "6-11-[6]" },
-        { seg: "Poorvangam",  sloka: "12-16-[5]" },
-        { seg: "Poorvangam",  sloka: "17-22-[6]" },
+        { seg: "Poorvangam",  sloka: "1-5" },
+        { seg: "Poorvangam",  sloka: "6-11" },
+        { seg: "Poorvangam",  sloka: "12-16" },
+        { seg: "Poorvangam",  sloka: "17-22" },
 
         { seg: "Nyasa",       sloka: "" },
 
         { seg: "Dhyaanam",    sloka: "1-3" },
         { seg: "Dhyaanam",    sloka: "4-8" },
 
-        { seg: "Shlokam",     sloka: "1-6-[6]" },
-        { seg: "Shlokam",     sloka: "7-13-[7]" },
-        { seg: "Shlokam",     sloka: "14-20-[7]" },
-        { seg: "Shlokam",     sloka: "21-27-[7]" },
-        { seg: "Shlokam",     sloka: "28-33-[6]" },
-        { seg: "Shlokam",     sloka: "34-40-[7]" },
-        { seg: "Shlokam",     sloka: "41-47-[7]" },
-        { seg: "Shlokam",     sloka: "48-54-[7]" },
-        { seg: "Shlokam",     sloka: "55-60-[6]" },
-        { seg: "Shlokam",     sloka: "61-67-[7]" },
-        { seg: "Shlokam",     sloka: "68-74-[7]" },
-        { seg: "Shlokam",     sloka: "75-81-[7]" },
-        { seg: "Shlokam",     sloka: "82-87-[6]" },
-        { seg: "Shlokam",     sloka: "88-94-[7]" },
-        { seg: "Shlokam",     sloka: "95-101-[7]" },
-        { seg: "Shlokam",     sloka: "102-108-[7]" },
+        { seg: "Shlokam",     sloka: "1-6" },
+        { seg: "Shlokam",     sloka: "7-13" },
+        { seg: "Shlokam",     sloka: "14-20" },
+        { seg: "Shlokam",     sloka: "21-27" },
+        { seg: "Shlokam",     sloka: "28-33" },
+        { seg: "Shlokam",     sloka: "34-40" },
+        { seg: "Shlokam",     sloka: "41-47" },
+        { seg: "Shlokam",     sloka: "48-54" },
+        { seg: "Shlokam",     sloka: "55-60" },
+        { seg: "Shlokam",     sloka: "61-67" },
+        { seg: "Shlokam",     sloka: "68-74" },
+        { seg: "Shlokam",     sloka: "75-81" },
+        { seg: "Shlokam",     sloka: "82-87" },
+        { seg: "Shlokam",     sloka: "88-94" },
+        { seg: "Shlokam",     sloka: "95-101" },
+        { seg: "Shlokam",     sloka: "102-108" },
 
-        { seg: "Phalashruti", sloka: "1-6-[6]" },
-        { seg: "Phalashruti", sloka: "7-13-[7]" },
-        { seg: "Phalashruti", sloka: "14-19-[6]" },
-        { seg: "Phalashruti", sloka: "20-26-[7]" },
-        { seg: "Phalashruti", sloka: "27-33-[7]" },
+        { seg: "Phalashruti", sloka: "1-6" },
+        { seg: "Phalashruti", sloka: "7-13" },
+        { seg: "Phalashruti", sloka: "14-19" },
+        { seg: "Phalashruti", sloka: "20-26" },
+        { seg: "Phalashruti", sloka: "27-33" },
 
         { seg: "KSHAMA PRARTHANA", sloka: "" },
         { seg: "Ending Prayer",    sloka: "" }
@@ -230,21 +230,17 @@ function allocateFullVSN(shuffleMode = false) {
             lines.push(`${label} : ${main} – [ ${backup} ]`);
             lines.push("");
         } else {
-            let slokaClean = s.sloka.includes("-[")
-                ? s.sloka.split("-[")[0]
-                : s.sloka;
-
-            lines.push(formatLine(s.seg, slokaClean, main, backup, width));
+            lines.push(formatLine(s.seg, s.sloka, main, backup, width));
         }
 
         mainIndex++;
         backupIndex++;
 
         if (
-            (s.seg === "Poorvangam" && s.sloka === "17-22-[6]") ||
+            (s.seg === "Poorvangam" && s.sloka === "17-22") ||
             (s.seg === "Dhyaanam" && s.sloka === "4-8") ||
-            (s.seg === "Shlokam" && s.sloka === "102-108-[7]") ||
-            (s.seg === "Phalashruti" && s.sloka === "27-33-[7]")
+            (s.seg === "Shlokam" && s.sloka === "102-108") ||
+            (s.seg === "Phalashruti" && s.sloka === "27-33")
         ) {
             lines.push("");
         }
@@ -288,22 +284,22 @@ function allocate108(shuffleMode = false) {
     const segments = [
         { seg: "Starting Prayer", sloka: "" },
 
-        { seg: "Shlokam", sloka: "1-6-[6]" },
-        { seg: "Shlokam", sloka: "7-13-[7]" },
-        { seg: "Shlokam", sloka: "14-20-[7]" },
-        { seg: "Shlokam", sloka: "21-27-[7]" },
-        { seg: "Shlokam", sloka: "28-33-[6]" },
-        { seg: "Shlokam", sloka: "34-40-[7]" },
-        { seg: "Shlokam", sloka: "41-47-[7]" },
-        { seg: "Shlokam", sloka: "48-54-[7]" },
-        { seg: "Shlokam", sloka: "55-60-[6]" },
-        { seg: "Shlokam", sloka: "61-67-[7]" },
-        { seg: "Shlokam", sloka: "68-74-[7]" },
-        { seg: "Shlokam", sloka: "75-81-[7]" },
-        { seg: "Shlokam", sloka: "82-87-[6]" },
-        { seg: "Shlokam", sloka: "88-94-[7]" },
-        { seg: "Shlokam", sloka: "95-101-[7]" },
-        { seg: "Shlokam", sloka: "102-108-[7]" },
+        { seg: "Shlokam", sloka: "1-6" },
+        { seg: "Shlokam", sloka: "7-13" },
+        { seg: "Shlokam", sloka: "14-20" },
+        { seg: "Shlokam", sloka: "21-27" },
+        { seg: "Shlokam", sloka: "28-33" },
+        { seg: "Shlokam", sloka: "34-40" },
+        { seg: "Shlokam", sloka: "41-47" },
+        { seg: "Shlokam", sloka: "48-54" },
+        { seg: "Shlokam", sloka: "55-60" },
+        { seg: "Shlokam", sloka: "61-67" },
+        { seg: "Shlokam", sloka: "68-74" },
+        { seg: "Shlokam", sloka: "75-81" },
+        { seg: "Shlokam", sloka: "82-87" },
+        { seg: "Shlokam", sloka: "88-94" },
+        { seg: "Shlokam", sloka: "95-101" },
+        { seg: "Shlokam", sloka: "102-108" },
 
         { seg: "KSHAMA PRARTHANA", sloka: "" },
         { seg: "Ending Prayer",    sloka: "" }
@@ -333,17 +329,13 @@ function allocate108(shuffleMode = false) {
             lines.push(`${label} : ${main} – [ ${backup} ]`);
             lines.push("");
         } else {
-            let slokaClean = s.sloka.includes("-[")
-                ? s.sloka.split("-[")[0]
-                : s.sloka;
-
-            lines.push(formatLine(s.seg, slokaClean, main, backup, width));
+            lines.push(formatLine(s.seg, s.sloka, main, backup, width));
         }
 
         mainIndex++;
         backupIndex++;
 
-        if (s.seg === "Shlokam" && s.sloka === "102-108-[7]") {
+        if (s.seg === "Shlokam" && s.sloka === "102-108") {
             lines.push("");
         }
     });
@@ -390,9 +382,8 @@ function downloadExcel() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
-        // SPECIAL LINES: STARTING PRAYER / NYASA / KSHAMA PRARTHANA / ENDING PRAYER
+        // SPECIAL LINES
         if (line.includes(":") && line.includes("–")) {
-            // Example: STARTING PRAYER : Aarav – [ Karthik ]
             let parts = line.split(":");
             let seg = parts[0].trim();
             let right = parts[1].trim();
@@ -407,16 +398,13 @@ function downloadExcel() {
 
         // NORMAL LINES
         if (line.includes("–")) {
-            // Example: Poorvangam – 1-5 - Vihaan – [ Rohan ]
             let parts = line.split("–");
 
             let seg = parts[0].trim();
 
             let slokaAndMain = parts[1].split(" - ");
-            let slokaRaw = (slokaAndMain[0] || "").trim();   // "1-5"
-            let main = (slokaAndMain[1] || "").trim();        // "Vihaan"
-
-            let sloka = slokaRaw; // already clean (no [ ])
+            let sloka = (slokaAndMain[0] || "").trim();
+            let main = (slokaAndMain[1] || "").trim();
 
             let backup = (parts[2] || "").replace("[", "").replace("]", "").trim();
 
@@ -433,22 +421,4 @@ function downloadExcel() {
 /* DOWNLOAD PDF */
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
-    let doc = new jsPDF();
-
-    doc.setFontSize(12);
-    doc.text("KSST Allocation Report", 14, 15);
-
-    let y = 30;
-    let lines = document.getElementById("output").value.split("\n");
-
-    lines.forEach(line => {
-        if (y > 280) {
-            doc.addPage();
-            y = 20;
-        }
-        doc.text(line, 14, y);
-        y += 7;
-    });
-
-    doc.save("KSST_Allocation.pdf");
-}
+    let doc = new
