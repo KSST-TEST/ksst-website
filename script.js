@@ -159,32 +159,60 @@ function allocateFullVSN(shuffleMode = false) {
 
     let width = dynamicWidth(mainNames);
 
+    const batch = (document.getElementById("batchNumber").value || "").trim();
+    const dateElem = document.getElementById("satsangDate");
+    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
+    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
+
     const segments = [
         { seg: "Starting Prayer", sloka: "" },
 
-        { seg: "Poorvangam", sloka: "1-5-[5]" },
-        { seg: "Prathama", sloka: "6-10-[5]" },
-        { seg: "Dwitiya", sloka: "11-15-[5]" },
-        { seg: "Trithiya", sloka: "16-20-[5]" },
-        { seg: "Chaturtha", sloka: "21-25-[5]" },
-        { seg: "Panchama", sloka: "26-30-[5]" },
-        { seg: "Shashta", sloka: "31-35-[5]" },
-        { seg: "Saptama", sloka: "36-40-[5]" },
-        { seg: "Ashtama", sloka: "41-45-[5]" },
-        { seg: "Navama", sloka: "46-50-[5]" },
-        { seg: "Dashama", sloka: "51-55-[5]" },
-        { seg: "Ekadashi", sloka: "56-60-[5]" },
-        { seg: "Dwadashi", sloka: "61-65-[5]" },
-        { seg: "Trayodashi", sloka: "66-70-[5]" },
-        { seg: "Chaturdashi", sloka: "71-75-[5]" },
-        { seg: "Purnima", sloka: "76-80-[5]" },
+        { seg: "Poorvangam",  sloka: "1-5-[5]" },
+        { seg: "Poorvangam",  sloka: "6-11-[6]" },
+        { seg: "Poorvangam",  sloka: "12-16-[5]" },
+        { seg: "Poorvangam",  sloka: "17-22-[6]" },
 
-        { seg: "Kshama Prarthana", sloka: "" },
-        { seg: "Ending Prayer", sloka: "" }
+        { seg: "Nyasa",       sloka: "------------------" },
+
+        { seg: "Dhyaanam",    sloka: "1-3" },
+        { seg: "Dhyaanam",    sloka: "4-8" },
+
+        { seg: "Shlokam",     sloka: "1-6-[6]" },
+        { seg: "Shlokam",     sloka: "7-13-[7]" },
+        { seg: "Shlokam",     sloka: "14-20-[7]" },
+        { seg: "Shlokam",     sloka: "21-27-[7]" },
+        { seg: "Shlokam",     sloka: "28-33-[6]" },
+        { seg: "Shlokam",     sloka: "34-40-[7]" },
+        { seg: "Shlokam",     sloka: "41-47-[7]" },
+        { seg: "Shlokam",     sloka: "48-54-[7]" },
+        { seg: "Shlokam",     sloka: "55-60-[6]" },
+        { seg: "Shlokam",     sloka: "61-67-[7]" },
+        { seg: "Shlokam",     sloka: "68-74-[7]" },
+        { seg: "Shlokam",     sloka: "75-81-[7]" },
+        { seg: "Shlokam",     sloka: "82-87-[6]" },
+        { seg: "Shlokam",     sloka: "88-94-[7]" },
+        { seg: "Shlokam",     sloka: "95-101-[7]" },
+        { seg: "Shlokam",     sloka: "102-108-[7]" },
+
+        { seg: "Phalashruti", sloka: "1-6-[6]" },
+        { seg: "Phalashruti", sloka: "7-13-[7]" },
+        { seg: "Phalashruti", sloka: "14-19-[6]" },
+        { seg: "Phalashruti", sloka: "20-26-[7]" },
+        { seg: "Phalashruti", sloka: "27-33-[7]" },
+
+        { seg: "KSHAMA PRARTHANA", sloka: "" },
+        { seg: "Ending Prayer",    sloka: "" }
     ];
 
     let lines = [];
     lines.push("*Om Namo Narayana*");
+    lines.push("----------------------------------------------------------");
+    lines.push(
+        "Batch Number: " + (batch || "") +
+        "   Satsang Date: " + (satsangDate || "") +
+        "   Satsang Time: " + (satsangTime || "") + " IST"
+    );
+    lines.push("----------------------------------------------------------");
     lines.push("");
 
     segments.forEach(s => {
@@ -227,8 +255,14 @@ function allocate108(shuffleMode = false) {
 
     let width = dynamicWidth(mainNames);
 
+    const batch = (document.getElementById("batchNumber").value || "").trim();
+    const dateElem = document.getElementById("satsangDate");
+    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
+    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
+
     const segments = [
         { seg: "Starting Prayer", sloka: "" },
+
         { seg: "Shlokam", sloka: "1-6-[6]" },
         { seg: "Shlokam", sloka: "7-13-[7]" },
         { seg: "Shlokam", sloka: "14-20-[7]" },
@@ -245,12 +279,20 @@ function allocate108(shuffleMode = false) {
         { seg: "Shlokam", sloka: "88-94-[7]" },
         { seg: "Shlokam", sloka: "95-101-[7]" },
         { seg: "Shlokam", sloka: "102-108-[7]" },
-        { seg: "Kshama Prarthana", sloka: "" },
-        { seg: "Ending Prayer", sloka: "" }
+
+        { seg: "KSHAMA PRARTHANA", sloka: "" },
+        { seg: "Ending Prayer",    sloka: "" }
     ];
 
     let lines = [];
     lines.push("*Om Namo Narayana*");
+    lines.push("----------------------------------------------------------");
+    lines.push(
+        "Batch Number: " + (batch || "") +
+        "   Satsang Date: " + (satsangDate || "") +
+        "   Satsang Time: " + (satsangTime || "") + " IST"
+    );
+    lines.push("----------------------------------------------------------");
     lines.push("");
 
     segments.forEach(s => {
