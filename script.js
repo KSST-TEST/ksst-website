@@ -127,7 +127,7 @@ function dynamicWidth(names) {
     return longest + 5;
 }
 
-/* FORMAT LINE (FINAL FORMAT) */
+/* FORMAT LINE (NORMAL FORMAT) */
 function formatLine(segment, sloka, main, backup, width) {
     return (
         segment.padEnd(20, " ") + " – " +
@@ -172,7 +172,7 @@ function allocateFullVSN(shuffleMode = false) {
         { seg: "Poorvangam",  sloka: "12-16-[5]" },
         { seg: "Poorvangam",  sloka: "17-22-[6]" },
 
-        { seg: "Nyasa",       sloka: "------------------" },
+        { seg: "Nyasa",       sloka: "" },
 
         { seg: "Dhyaanam",    sloka: "1-3" },
         { seg: "Dhyaanam",    sloka: "4-8" },
@@ -215,14 +215,41 @@ function allocateFullVSN(shuffleMode = false) {
     lines.push("----------------------------------------------------------");
     lines.push("");
 
-    segments.forEach(s => {
+    segments.forEach((s, index) => {
         let main = mainNames[mainIndex % mainNames.length];
         let backup = backupNames[backupIndex % backupNames.length];
 
-        lines.push(formatLine(s.seg, s.sloka, main, backup, width));
+        // SPECIAL FORMATTING
+        if (
+            s.seg === "Starting Prayer" ||
+            s.seg === "Nyasa" ||
+            s.seg === "KSHAMA PRARTHANA" ||
+            s.seg === "Ending Prayer"
+        ) {
+            let label = s.seg.toUpperCase();
+            lines.push(`${label} : ${main} – [ ${backup} ]`);
+            lines.push("");
+        } else {
+            // NORMAL FORMAT
+            let slokaClean = s.sloka.includes("-[")
+                ? s.sloka.split("-[")[0]
+                : s.sloka;
+
+            lines.push(formatLine(s.seg, slokaClean, main, backup, width));
+        }
 
         mainIndex++;
         backupIndex++;
+
+        // EXTRA BLANK LINES AFTER GROUPS
+        if (
+            (s.seg === "Poorvangam" && s.sloka === "17-22-[6]") ||
+            (s.seg === "Dhyaanam" && s.sloka === "4-8") ||
+            (s.seg === "Shlokam" && s.sloka === "102-108-[7]") ||
+            (s.seg === "Phalashruti" && s.sloka === "27-33-[7]")
+        ) {
+            lines.push("");
+        }
     });
 
     document.getElementById("output").value = lines.join("\n");
@@ -295,14 +322,32 @@ function allocate108(shuffleMode = false) {
     lines.push("----------------------------------------------------------");
     lines.push("");
 
-    segments.forEach(s => {
+    segments.forEach((s, index) => {
         let main = mainNames[mainIndex % mainNames.length];
         let backup = backupNames[backupIndex % backupNames.length];
 
-        lines.push(formatLine(s.seg, s.sloka, main, backup, width));
+        if (
+            s.seg === "Starting Prayer" ||
+            s.seg === "KSHAMA PRARTHANA" ||
+            s.seg === "Ending Prayer"
+        ) {
+            let label = s.seg.toUpperCase();
+            lines.push(`${label} : ${main} – [ ${backup} ]`);
+            lines.push("");
+        } else {
+            let slokaClean = s.sloka.includes("-[")
+                ? s.sloka.split("-[")[0]
+                : s.sloka;
+
+            lines.push(formatLine(s.seg, slokaClean, main, backup, width));
+        }
 
         mainIndex++;
         backupIndex++;
+
+        if (s.seg === "Shlokam" && s.sloka === "102-108-[7]") {
+            lines.push("");
+        }
     });
 
     document.getElementById("output").value = lines.join("\n");
@@ -325,40 +370,45 @@ function copyOutput() {
 function downloadExcel() {
     let output = document.getElementById("output").value.split("\n");
 
-    let rows = [["Segment Name", "Assigned Sloka Number", "Main Devotee", "Backup Chanter"]];
+    const batch = (document.getElementById("batchNumber").value || "").trim();
+    const dateElem = document.getElementById("satsangDate");
+    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
+    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
+
+    let rows = [];
+
+    rows.push(["Batch Number", batch]);
+    rows.push(["Satsang Date", satsangDate]);
+    rows.push(["Satsang Time (IST)", satsangTime]);
+    rows.push([]);
+
+    rows.push(["Segment Name", "Assigned Sloka Number", "Main Devotee", "Backup Chanter"]);
 
     output.forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        if (line.startsWith("*Om Namo")) return;
+        if (line.startsWith("-----")) return;
+        if (line.startsWith("Batch Number:")) return;
+
+        if (line.includes(":") && line.includes("–")) {
+            let parts = line.split(":");
+            let seg = parts[0].trim();
+            let right = parts[1].trim();
+
+            let rightParts = right.split("–");
+            let main = rightParts[0].trim();
+            let backup = (rightParts[1] || "").replace("[", "").replace("]", "").trim();
+
+            rows.push([seg, "", main, backup]);
+            return;
+        }
+
         if (line.includes("–")) {
             let parts = line.split("–");
+
             let seg = parts[0].trim();
-            let sloka = parts[1].split("-")[0].trim();
-            let main = parts[1].split("-")[1].trim();
-            let backup = parts[2].replace("[", "").replace("]", "").trim();
-            rows.push([seg, sloka, main, backup]);
-        }
-    });
 
-    let wb = XLSX.utils.book_new();
-    let ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, "Allocation");
-    XLSX.writeFile(wb, "KSST_Allocation.xlsx");
-}
-
-/* DOWNLOAD PDF */
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF();
-
-    doc.setFontSize(12);
-    doc.text("KSST Allocation Report", 14, 15);
-
-    let y = 30;
-    let lines = document.getElementById("output").value.split("\n");
-
-    lines.forEach(line => {
-        doc.text(line, 14, y);
-        y += 7;
-    });
-
-    doc.save("KSST_Allocation.pdf");
-}
+            let slokaAndMain = parts[1].split(" - ");
+            let
