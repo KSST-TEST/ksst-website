@@ -3,6 +3,7 @@ function checkPassword() {
     if (document.getElementById("pass").value === "Vaikuntha") {
         document.getElementById("password-screen").style.display = "none";
         document.getElementById("tool-screen").style.display = "block";
+        loadVSN();
     } else {
         alert("Incorrect Password");
     }
@@ -215,11 +216,10 @@ function allocateFullVSN(shuffleMode = false) {
     lines.push("----------------------------------------------------------");
     lines.push("");
 
-    segments.forEach((s, index) => {
+    segments.forEach((s) => {
         let main = mainNames[mainIndex % mainNames.length];
         let backup = backupNames[backupIndex % backupNames.length];
 
-        // SPECIAL FORMATTING
         if (
             s.seg === "Starting Prayer" ||
             s.seg === "Nyasa" ||
@@ -230,7 +230,6 @@ function allocateFullVSN(shuffleMode = false) {
             lines.push(`${label} : ${main} – [ ${backup} ]`);
             lines.push("");
         } else {
-            // NORMAL FORMAT
             let slokaClean = s.sloka.includes("-[")
                 ? s.sloka.split("-[")[0]
                 : s.sloka;
@@ -241,7 +240,6 @@ function allocateFullVSN(shuffleMode = false) {
         mainIndex++;
         backupIndex++;
 
-        // EXTRA BLANK LINES AFTER GROUPS
         if (
             (s.seg === "Poorvangam" && s.sloka === "17-22-[6]") ||
             (s.seg === "Dhyaanam" && s.sloka === "4-8") ||
@@ -322,7 +320,7 @@ function allocate108(shuffleMode = false) {
     lines.push("----------------------------------------------------------");
     lines.push("");
 
-    segments.forEach((s, index) => {
+    segments.forEach((s) => {
         let main = mainNames[mainIndex % mainNames.length];
         let backup = backupNames[backupIndex % backupNames.length];
 
@@ -392,7 +390,9 @@ function downloadExcel() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
+        // SPECIAL LINES: STARTING PRAYER / NYASA / KSHAMA PRARTHANA / ENDING PRAYER
         if (line.includes(":") && line.includes("–")) {
+            // Example: STARTING PRAYER : Aarav – [ Karthik ]
             let parts = line.split(":");
             let seg = parts[0].trim();
             let right = parts[1].trim();
@@ -405,10 +405,50 @@ function downloadExcel() {
             return;
         }
 
+        // NORMAL LINES
         if (line.includes("–")) {
+            // Example: Poorvangam – 1-5 - Vihaan – [ Rohan ]
             let parts = line.split("–");
 
             let seg = parts[0].trim();
 
             let slokaAndMain = parts[1].split(" - ");
-            let
+            let slokaRaw = (slokaAndMain[0] || "").trim();   // "1-5"
+            let main = (slokaAndMain[1] || "").trim();        // "Vihaan"
+
+            let sloka = slokaRaw; // already clean (no [ ])
+
+            let backup = (parts[2] || "").replace("[", "").replace("]", "").trim();
+
+            rows.push([seg, sloka, main, backup]);
+        }
+    });
+
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Allocation");
+    XLSX.writeFile(wb, "KSST_Allocation.xlsx");
+}
+
+/* DOWNLOAD PDF */
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    doc.setFontSize(12);
+    doc.text("KSST Allocation Report", 14, 15);
+
+    let y = 30;
+    let lines = document.getElementById("output").value.split("\n");
+
+    lines.forEach(line => {
+        if (y > 280) {
+            doc.addPage();
+            y = 20;
+        }
+        doc.text(line, 14, y);
+        y += 7;
+    });
+
+    doc.save("KSST_Allocation.pdf");
+}
