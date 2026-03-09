@@ -1,5 +1,5 @@
 /* DOWNLOAD EXCEL */
-function downloadExcel() {
+function downloadExcel(is108 = false) {
     let output = document.getElementById("output").value.split("\n");
 
     const batch = (document.getElementById("batchNumber").value || "").trim();
@@ -7,9 +7,11 @@ function downloadExcel() {
     const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
     const satsangTime = (document.getElementById("satsangTime").value || "").trim();
 
+    let safeDate = satsangDate.replace(/\//g, "-");
+
     let rows = [];
 
-    // Header rows
+    // Header rows (bold + highlighted)
     rows.push(["Batch Number", batch]);
     rows.push(["Satsang Date", satsangDate]);
     rows.push(["Satsang Time (IST)", satsangTime]);
@@ -50,9 +52,68 @@ function downloadExcel() {
         }
     });
 
-    // Create Excel workbook
+    // Create workbook + sheet
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.aoa_to_sheet(rows);
+
+    // Apply formatting
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    for (let R = range.s.r; R <= range.e.r; R++) {
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            let cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+            let cell = ws[cellRef];
+            if (!cell) continue;
+
+            // Base style
+            cell.s = {
+                font: { name: "Calibri", sz: 11 },
+                alignment: { vertical: "center", wrapText: true },
+                border: {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                }
+            };
+
+            // Highlight Batch/Date/Time rows
+            if (R >= 0 && R <= 2) {
+                cell.s.fill = { fgColor: { rgb: "FFF2CC" } }; // light yellow
+                cell.s.font.bold = true;
+            }
+
+            // Table header row (saffron)
+            if (R === 4) {
+                cell.s.fill = { fgColor: { rgb: "FF9933" } }; // saffron
+                cell.s.font = { name: "Calibri", bold: true, color: { rgb: "000000" } };
+                cell.s.alignment = { horizontal: "center", vertical: "center", wrapText: true };
+            }
+
+            // Alternating row colors
+            if (R > 4) {
+                if (R % 2 === 0) {
+                    cell.s.fill = { fgColor: { rgb: "FFF7E6" } }; // very light saffron
+                }
+            }
+        }
+    }
+
+    // Auto column width
+    ws['!cols'] = [
+        { wch: 25 },
+        { wch: 18 },
+        { wch: 30 }
+    ];
+
+    // Auto row height
+    ws['!rows'] = rows.map(() => ({ hpt: 18 }));
+
+    // File naming
+    let fileName = is108
+        ? `VSN_108_Allocation_${safeDate}.xlsx`
+        : `VSN_FullAllocation_${safeDate}.xlsx`;
+
     XLSX.utils.book_append_sheet(wb, ws, "Allocation");
-    XLSX.writeFile(wb, "KSST_Allocation.xlsx");
+    XLSX.writeFile(wb, fileName);
 }
