@@ -427,6 +427,8 @@ function downloadPDF() {
         format: "a4"
     });
 
+    let output = document.getElementById("output").value.split("\n");
+
     let y = 40;
 
     doc.setFont("Helvetica", "bold");
@@ -437,7 +439,7 @@ function downloadPDF() {
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(12);
 
-    doc.text("Batch Number: " + document.getElementById("batch").value, 40, y);
+    doc.text("Batch Number: " + document.getElementById("batchNumber").value, 40, y);
     y += 18;
     doc.text("Satsang Date: " + document.getElementById("satsangDate").value, 40, y);
     y += 18;
