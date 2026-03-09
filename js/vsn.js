@@ -1,3 +1,43 @@
+const VSN_CONFIG = {
+    name: "Shri Vishnu Sahasranamam",
+
+    buttons: [
+        { label: "ALLOCATE FULL VSN", action: "allocateFullVSN" },
+        { label: "ALLOCATE 108 SLOKAS", action: "allocate108VSN" }
+    ],
+
+    specialSegments: {
+        randomUnique: ["STARTING PRAYER", "KSHAMA PRARTHANA", "ENDING PRAYER"],
+        single: [
+            { label: "NYASA" },
+            { label: "Dhyaanam", range: "1-3" },
+            { label: "Dhyaanam", range: "4-8" }
+        ]
+    },
+
+    majorSegments: [
+        // Poorvangam
+        { label: "Poorvangam", range: "1-5" },
+        { label: "Poorvangam", range: "6-11" },
+        { label: "Poorvangam", range: "12-16" },
+        { label: "Poorvangam", range: "17-22" },
+
+        // Shlokam (add all your existing blocks)
+        // Example:
+        { label: "Shlokam", range: "1-6" },
+        { label: "Shlokam", range: "7-13" },
+        // ...
+        { label: "Shlokam", range: "102-108" },
+
+        // Phalashruti
+        { label: "Phalashruti", range: "1-6" },
+        { label: "Phalashruti", range: "7-13" },
+        { label: "Phalashruti", range: "14-19" },
+        { label: "Phalashruti", range: "20-26" },
+        { label: "Phalashruti", range: "27-33" }
+    ]
+};
+
 /* LOAD VSN ALLOCATION TOOL */
 function loadVSN() {
     document.getElementById("content-area").innerHTML = `
