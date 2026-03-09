@@ -428,7 +428,12 @@ function downloadPDF() {
     });
 
     // Extract output lines
-    let output = document.getElementById("output").value.split("\n");
+    let outputElement = document.getElementById("output");
+    if (!outputElement) {
+        console.error("Output textarea not found");
+        return;
+    }
+    let output = outputElement.value.split("\n");
 
     // Header section
     let y = 40;
@@ -441,11 +446,15 @@ function downloadPDF() {
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(12);
 
-    doc.text("Batch Number: " + document.getElementById("batchNumber").value, 40, y);
+    let batchEl = document.getElementById("batchNumber");
+    let dateEl = document.getElementById("satsangDate");
+    let timeEl = document.getElementById("satsangTime");
+
+    doc.text("Batch Number: " + (batchEl ? batchEl.value : ""), 40, y);
     y += 18;
-    doc.text("Satsang Date: " + document.getElementById("satsangDate").value, 40, y);
+    doc.text("Satsang Date: " + (dateEl ? dateEl.value : ""), 40, y);
     y += 18;
-    doc.text("Satsang Time (IST): " + document.getElementById("satsangTime").value, 40, y);
+    doc.text("Satsang Time (IST): " + (timeEl ? timeEl.value : ""), 40, y);
     y += 25;
 
     // Prepare table rows
@@ -462,12 +471,16 @@ function downloadPDF() {
         // SPECIAL LINES (e.g., STARTING PRAYER : A – [ X ])
         if (line.includes(":") && line.includes("–")) {
             let parts = line.split(":");
+            if (parts.length < 2) return;
+
             let seg = parts[0].trim();
             let right = parts[1].trim();
 
             let rightParts = right.split("–");
-            let main = rightParts[0].trim();
-            let backup = rightParts[1] ? rightParts[1].replace("[", "").replace("]", "").trim() : "";
+            let main = (rightParts[0] || "").trim();
+            let backup = rightParts[1]
+                ? rightParts[1].replace("[", "").replace("]", "").trim()
+                : "";
 
             rows.push([seg, "", main, backup]);
             return;
@@ -476,18 +489,29 @@ function downloadPDF() {
         // NORMAL LINES (e.g., Shlokam – 1-6 - A – [ X ])
         if (line.includes("–")) {
             let parts = line.split("–");
+            if (parts.length < 2) return;
 
-            let seg = parts[0].trim();
+            let seg = (parts[0] || "").trim();
 
-            let slokaAndMain = parts[1].split(" - ");
+            let slokaAndMain = (parts[1] || "").split(" - ");
             let sloka = (slokaAndMain[0] || "").trim();
             let main = (slokaAndMain[1] || "").trim();
 
-            let backup = parts[2] ? parts[2].replace("[", "").replace("]", "").trim() : "";
+            let backup = parts[2]
+                ? parts[2].replace("[", "").replace("]", "").trim()
+                : "";
 
             rows.push([seg, sloka, main, backup]);
         }
     });
+
+    // If no rows, avoid empty table
+    if (rows.length === 0) {
+        console.warn("No rows prepared for PDF table");
+        doc.text("No allocation data available.", 40, y);
+        doc.save("KSST_Allocation.pdf");
+        return;
+    }
 
     // Generate table with saffron header
     doc.autoTable({
