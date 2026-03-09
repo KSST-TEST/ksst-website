@@ -1,5 +1,5 @@
-/* DOWNLOAD PDF (Option B – Saffron Devotional Header) */
-function downloadPDF() {
+/* DOWNLOAD PDF */
+function downloadPDF(is108 = false) {
     const { jsPDF } = window.jspdf;
     let doc = new jsPDF({
         orientation: "portrait",
@@ -9,33 +9,38 @@ function downloadPDF() {
 
     // Extract output lines
     let outputElement = document.getElementById("output");
-    if (!outputElement) {
-        console.error("Output textarea not found");
-        return;
-    }
+    if (!outputElement) return;
     let output = outputElement.value.split("\n");
 
-    // Header section
-    let y = 40;
+    const batch = document.getElementById("batchNumber").value || "";
+    const dateElem = document.getElementById("satsangDate");
+    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
+    const satsangTime = document.getElementById("satsangTime").value || "";
 
+    let safeDate = satsangDate.replace(/\//g, "-");
+
+    // HEADER
     doc.setFont("Calibri", "bold");
     doc.setFontSize(16);
+    doc.text("Hari Om Namo Narayana", 40, 40);
+
+    // WATERMARK placeholders (images will be added after upload)
+    // doc.addImage(ksstLogo, "PNG", 40, 20, 50, 50);
+    // doc.addImage(omSymbol, "PNG", 500, 20, 50, 50);
+
+    let y = 80;
+
+    doc.setFont("Calibri", "bold");
+    doc.setFontSize(14);
     doc.text("KSST Allocation Report", 40, y);
     y += 25;
 
     doc.setFont("Calibri", "normal");
     doc.setFontSize(12);
 
-    let batchEl = document.getElementById("batchNumber");
-    let dateEl = document.getElementById("satsangDate");
-    let timeEl = document.getElementById("satsangTime");
-
-    doc.text("Batch Number: " + (batchEl ? batchEl.value : ""), 40, y);
-    y += 18;
-    doc.text("Satsang Date: " + (dateEl ? dateEl.value : ""), 40, y);
-    y += 18;
-    doc.text("Satsang Time (IST): " + (timeEl ? timeEl.value : ""), 40, y);
-    y += 25;
+    doc.text("Batch Number: " + batch, 40, y); y += 18;
+    doc.text("Satsang Date: " + satsangDate, 40, y); y += 18;
+    doc.text("Satsang Time (IST): " + satsangTime, 40, y); y += 25;
 
     // Prepare table rows
     let rows = [];
@@ -48,68 +53,55 @@ function downloadPDF() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
-        // SPECIAL LINES (e.g., STARTING PRAYER : A)
+        // SPECIAL LINES
         if (line.includes(":") && !line.includes("–")) {
             let parts = line.split(":");
-            if (parts.length < 2) return;
-
             let seg = parts[0].trim();
             let main = parts[1].trim();
-
             rows.push([seg, "", main]);
             return;
         }
 
-        // NORMAL LINES (e.g., Shlokam – 1-6 - A)
+        // NORMAL LINES
         if (line.includes("–")) {
             let parts = line.split("–");
-            if (parts.length < 2) return;
+            let seg = parts[0].trim();
 
-            let seg = (parts[0] || "").trim();
-
-            let slokaAndMain = (parts[1] || "").split(" - ");
-            let sloka = (slokaAndMain[0] || "").trim();
-            let main = (slokaAndMain[1] || "").trim();
+            let slokaAndMain = parts[1].split(" - ");
+            let sloka = slokaAndMain[0].trim();
+            let main = slokaAndMain[1].trim();
 
             rows.push([seg, sloka, main]);
         }
     });
 
-    // If no rows, avoid empty table
-    if (rows.length === 0) {
-        console.warn("No rows prepared for PDF table");
-        doc.text("No allocation data available.", 40, y);
-        doc.save("KSST_Allocation.pdf");
-        return;
-    }
-
-    // Generate table with saffron header
+    // Table
     doc.autoTable({
         startY: y,
         head: [["Segment Name", "Sloka", "Main"]],
         body: rows,
         styles: {
             font: "Calibri",
-            fontSize: 9,
-            cellPadding: 2,
-            overflow: "linebreak"
+            fontSize: 10,
+            cellPadding: 3
         },
         headStyles: {
             fillColor: [255, 153, 51], // saffron
             textColor: 0,
-            fontStyle: "bold",
-            fontSize: 10,
-            font: "Calibri"
+            fontStyle: "bold"
         },
-        columnStyles: {
-            0: { cellWidth: 120 }, // Segment
-            1: { cellWidth: 80 },  // Sloka
-            2: { cellWidth: 140 }, // Main
-        },
-        margin: { left: 20, right: 20 },
-        tableWidth: "auto",
-        pageBreak: "avoid"
+        margin: { left: 20, right: 20 }
     });
 
-    doc.save("KSST_Allocation.pdf");
+    // FOOTER
+    doc.setFont("Calibri", "italic");
+    doc.setFontSize(11);
+    doc.text("KSST Satsang Seva", 40, 820);
+
+    // File naming
+    let fileName = is108
+        ? `VSN_108_Allocation_${safeDate}.pdf`
+        : `VSN_FullAllocation_${safeDate}.pdf`;
+
+    doc.save(fileName);
 }
