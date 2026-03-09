@@ -417,7 +417,6 @@ function downloadExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Allocation");
     XLSX.writeFile(wb, "KSST_Allocation.xlsx");
 }
-
 /* DOWNLOAD PDF */
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
@@ -463,6 +462,7 @@ function downloadPDF() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
+        // SPECIAL LINES
         if (line.includes(":") && line.includes("–")) {
             let parts = line.split(":");
             let seg = parts[0].trim();
@@ -470,7 +470,7 @@ function downloadPDF() {
 
             let rightParts = right.split("–");
             let main = rightParts[0].trim();
-            let backup = (rightParts[1] || "").replace("[", "").replace("]", "").trim();
+            let backup = rightParts[1] ? rightParts[1].replace("[", "").replace("]", "").trim() : "";
 
             doc.text(seg, 40, y);
             doc.text(main, 320, y);
@@ -479,6 +479,7 @@ function downloadPDF() {
             return;
         }
 
+        // NORMAL LINES
         if (line.includes("–")) {
             let parts = line.split("–");
 
@@ -488,7 +489,7 @@ function downloadPDF() {
             let sloka = (slokaAndMain[0] || "").trim();
             let main = (slokaAndMain[1] || "").trim();
 
-            let backup = (parts[2] || "").replace("[", "").replace("]", "").trim();
+            let backup = parts[2] ? parts[2].replace("[", "").replace("]", "").trim() : "";
 
             doc.text(seg, 40, y);
             doc.text(sloka, 220, y);
