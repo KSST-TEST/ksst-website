@@ -9,13 +9,16 @@ function downloadExcel() {
 
     let rows = [];
 
+    // Header rows
     rows.push(["Batch Number", batch]);
     rows.push(["Satsang Date", satsangDate]);
     rows.push(["Satsang Time (IST)", satsangTime]);
     rows.push([]);
 
-    rows.push(["Segment Name", "Assigned Sloka Number", "Main Devotee", "Backup Chanter"]);
+    // Table header (NO BACKUP)
+    rows.push(["Segment Name", "Assigned Sloka Number", "Main Devotee"]);
 
+    // Parse output lines
     output.forEach(line => {
         line = line.trim();
         if (!line) return;
@@ -24,40 +27,32 @@ function downloadExcel() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
-        // SPECIAL LINES
-        if (line.includes(":") && line.includes("–")) {
+        // SPECIAL LINES (e.g., STARTING PRAYER : A)
+        if (line.includes(":") && !line.includes("–")) {
             let parts = line.split(":");
             let seg = parts[0].trim();
-            let right = parts[1].trim();
+            let main = parts[1].trim();
 
-            let rightParts = right.split("–");
-            let main = rightParts[0].trim();
-            let backup = (rightParts[1] || "").replace("[", "").replace("]", "").trim();
-
-            rows.push([seg, "", main, backup]);
+            rows.push([seg, "", main]);
             return;
         }
 
-        // NORMAL LINES
+        // NORMAL LINES (e.g., Shlokam – 1-6 - A)
         if (line.includes("–")) {
             let parts = line.split("–");
+            let seg = (parts[0] || "").trim();
 
-            let seg = parts[0].trim();
-
-            let slokaAndMain = parts[1].split(" - ");
+            let slokaAndMain = (parts[1] || "").split(" - ");
             let sloka = (slokaAndMain[0] || "").trim();
             let main = (slokaAndMain[1] || "").trim();
 
-            let backup = (parts[2] || "").replace("[", "").replace("]", "").trim();
-
-            rows.push([seg, sloka, main, backup]);
+            rows.push([seg, sloka, main]);
         }
     });
 
+    // Create Excel workbook
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.aoa_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, "Allocation");
     XLSX.writeFile(wb, "KSST_Allocation.xlsx");
 }
-
-
