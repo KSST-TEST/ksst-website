@@ -19,16 +19,23 @@ function downloadPDF(is108 = false) {
 
     let safeDate = satsangDate.replace(/\//g, "-");
 
+    // Load watermark images
+    let ksstLogo = new Image();
+    ksstLogo.src = "images/ksst-logo.png";
+
+    let omLogo = new Image();
+    omLogo.src = "images/om.png";
+
     // HEADER
     doc.setFont("Calibri", "bold");
     doc.setFontSize(16);
     doc.text("Hari Om Namo Narayana", 40, 40);
 
-    // WATERMARK placeholders (images will be added after upload)
-    // doc.addImage(ksstLogo, "PNG", 40, 20, 50, 50);
-    // doc.addImage(omSymbol, "PNG", 500, 20, 50, 50);
+    // WATERMARK IMAGES
+    doc.addImage(ksstLogo, "PNG", 40, 20, 50, 50);     // top-left
+    doc.addImage(omLogo, "PNG", 500, 20, 50, 50);      // top-right
 
-    let y = 80;
+    let y = 90;
 
     doc.setFont("Calibri", "bold");
     doc.setFontSize(14);
@@ -75,7 +82,7 @@ function downloadPDF(is108 = false) {
         }
     });
 
-    // Table
+    // TABLE
     doc.autoTable({
         startY: y,
         head: [["Segment Name", "Sloka", "Main"]],
