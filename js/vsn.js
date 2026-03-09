@@ -38,6 +38,19 @@ const VSN_CONFIG = {
     ]
 };
 
+
+function loadVSN() {
+    loadStothramUI(VSN_CONFIG);
+}
+
+function allocateFullVSN() {
+    runAllocation(VSN_CONFIG, { mode: "full" });
+}
+
+function allocate108VSN() {
+    runAllocation(VSN_CONFIG, { mode: "108-only" });
+}
+
 /* LOAD VSN ALLOCATION TOOL */
 function loadVSN() {
     document.getElementById("content-area").innerHTML = `
