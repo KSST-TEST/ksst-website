@@ -18,12 +18,12 @@ function downloadPDF() {
     // Header section
     let y = 40;
 
-    doc.setFont("Helvetica", "bold");
+    doc.setFont("Calibri", "bold");
     doc.setFontSize(16);
     doc.text("KSST Allocation Report", 40, y);
     y += 25;
 
-    doc.setFont("Helvetica", "normal");
+    doc.setFont("Calibri", "normal");
     doc.setFontSize(12);
 
     let batchEl = document.getElementById("batchNumber");
@@ -48,25 +48,19 @@ function downloadPDF() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
-        // SPECIAL LINES (e.g., STARTING PRAYER : A – [ X ])
-        if (line.includes(":") && line.includes("–")) {
+        // SPECIAL LINES (e.g., STARTING PRAYER : A)
+        if (line.includes(":") && !line.includes("–")) {
             let parts = line.split(":");
             if (parts.length < 2) return;
 
             let seg = parts[0].trim();
-            let right = parts[1].trim();
+            let main = parts[1].trim();
 
-            let rightParts = right.split("–");
-            let main = (rightParts[0] || "").trim();
-            let backup = rightParts[1]
-                ? rightParts[1].replace("[", "").replace("]", "").trim()
-                : "";
-
-            rows.push([seg, "", main, backup]);
+            rows.push([seg, "", main]);
             return;
         }
 
-        // NORMAL LINES (e.g., Shlokam – 1-6 - A – [ X ])
+        // NORMAL LINES (e.g., Shlokam – 1-6 - A)
         if (line.includes("–")) {
             let parts = line.split("–");
             if (parts.length < 2) return;
@@ -77,11 +71,7 @@ function downloadPDF() {
             let sloka = (slokaAndMain[0] || "").trim();
             let main = (slokaAndMain[1] || "").trim();
 
-            let backup = parts[2]
-                ? parts[2].replace("[", "").replace("]", "").trim()
-                : "";
-
-            rows.push([seg, sloka, main, backup]);
+            rows.push([seg, sloka, main]);
         }
     });
 
@@ -94,32 +84,32 @@ function downloadPDF() {
     }
 
     // Generate table with saffron header
-doc.autoTable({
-    startY: y,
-    head: [["Segment Name", "Sloka", "Main", "Backup"]],
-    body: rows,
-    styles: {
-        font: "Helvetica",
-        fontSize: 9,          // smaller font
-        cellPadding: 2,       // tighter rows
-        overflow: "linebreak"
-    },
-    headStyles: {
-        fillColor: [255, 153, 51], // saffron
-        textColor: 0,
-        fontStyle: "bold",
-        fontSize: 10
-    },
-    columnStyles: {
-        0: { cellWidth: 120 }, // Segment
-        1: { cellWidth: 80 },  // Sloka
-        2: { cellWidth: 140 }, // Main
-        3: { cellWidth: 80 }   // Backup
-    },
-    margin: { left: 20, right: 20 }, // narrower margins
-    tableWidth: "auto",
-    pageBreak: "avoid"
-});
+    doc.autoTable({
+        startY: y,
+        head: [["Segment Name", "Sloka", "Main"]],
+        body: rows,
+        styles: {
+            font: "Calibri",
+            fontSize: 9,
+            cellPadding: 2,
+            overflow: "linebreak"
+        },
+        headStyles: {
+            fillColor: [255, 153, 51], // saffron
+            textColor: 0,
+            fontStyle: "bold",
+            fontSize: 10,
+            font: "Calibri"
+        },
+        columnStyles: {
+            0: { cellWidth: 120 }, // Segment
+            1: { cellWidth: 80 },  // Sloka
+            2: { cellWidth: 140 }, // Main
+        },
+        margin: { left: 20, right: 20 },
+        tableWidth: "auto",
+        pageBreak: "avoid"
+    });
 
     doc.save("KSST_Allocation.pdf");
 }
