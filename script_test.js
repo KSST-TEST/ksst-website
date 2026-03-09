@@ -514,25 +514,33 @@ function downloadPDF() {
     }
 
     // Generate table with saffron header
-    doc.autoTable({
-        startY: y,
-        head: [["Segment Name", "Sloka", "Main Devotee", "Backup"]],
-        body: rows,
-        styles: {
-            font: "Helvetica",
-            fontSize: 11,
-            cellPadding: 5
-        },
-        headStyles: {
-            fillColor: [255, 153, 51], // Saffron
-            textColor: 0,
-            fontStyle: "bold"
-        },
-        alternateRowStyles: {
-            fillColor: [255, 245, 230] // very light saffron tint
-        },
-        margin: { left: 40, right: 40 }
-    });
+doc.autoTable({
+    startY: y,
+    head: [["Segment Name", "Sloka", "Main", "Backup"]],
+    body: rows,
+    styles: {
+        font: "Helvetica",
+        fontSize: 9,          // smaller font
+        cellPadding: 2,       // tighter rows
+        overflow: "linebreak"
+    },
+    headStyles: {
+        fillColor: [255, 153, 51], // saffron
+        textColor: 0,
+        fontStyle: "bold",
+        fontSize: 10
+    },
+    columnStyles: {
+        0: { cellWidth: 120 }, // Segment
+        1: { cellWidth: 80 },  // Sloka
+        2: { cellWidth: 140 }, // Main
+        3: { cellWidth: 80 }   // Backup
+    },
+    margin: { left: 20, right: 20 }, // narrower margins
+    tableWidth: "auto",
+    pageBreak: "avoid"
+});
 
     doc.save("KSST_Allocation.pdf");
 }
+
