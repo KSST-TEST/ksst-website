@@ -1,1 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KSST Sloka Allocation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="password-screen">
+    <h2>Welcome KSST Coordinator</h2>
+    <p>Enter Password:</p>
+    <input type="password" id="pass">
+    <button class="btn" onclick="checkPassword()">ENTER</button>
+</div>
+
+<!-- MAIN SCREEN -->
+<div id="tool-screen" style="display:none;">
+
+    <!-- HEADER -->
+    <div class="header">
+        <img src="images/ksst-logo.jpeg" class="ksst-logo">
+
+        <div class="header-text">
+            <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
+            <div class="tagline">Celebrating Timeless Dharma</div>
+        </div>
+
+        <img src="images/om.png" class="om-image">
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="allocation-layout">
+
+        <!-- LEFT NAVIGATION -->
+        <div class="side-nav">
+            <h3>Stothrams</h3>
+
+            <!-- IMPORTANT: loadVSN() MUST be called here -->
+            <a class="nav-link" onclick="loadVSN()">Shri Vishnu Sahasranamam</a>
+
+            <a class="nav-link">Shri Lalitha Sahasranamam</a>
+            <a class="nav-link">Shri Lakshmi Sahasranamam</a>
+
+            <a class="nav-link">Stothram 3 (Coming Soon)</a>
+            <a class="nav-link">Stothram 4 (Coming Soon)</a>
+            <a class="nav-link">Stothram 5 (Coming Soon)</a>
+        </div>
+
+        <!-- RIGHT CONTENT AREA -->
+        <div class="content-area" id="content-area">
+            <h2>Welcome KSST Coordinator</h2>
+            <p>Select a Stothram from the left to begin allocation.</p>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
+    </div>
+
+</div>
+
+<!-- LIBRARIES + LOGIC -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<!-- IMPORTANT: Only load script.js ONCE -->
+<script src="script_test.js?v=12345"></script>
+
+</body>
+</html>
+
+
+
+
+
+
+
 
