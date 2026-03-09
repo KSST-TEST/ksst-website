@@ -141,11 +141,21 @@ function allocate(is108 = false) {
         window.currentFullAllocation();
     }
 }
-</script>
 
+
+/* STEP 1 — Dynamic Stothram Loader */
+    // ... your existing JS here ...
+
+</script>
+<script src="js/allocationEngine.js"></script>
+<script src="js/vsn.js"></script>
+<script src="js/lalithasn.js"></script>
+<script src="js/lakshmisn.js"></script>
+
+  
 </head>
 
-<body>
+<body onload="loadVSN()">
 
 <div class="header">Hari Om Namo Narayana</div>
 <div id="toolTitle">Allocation Tool</div>
