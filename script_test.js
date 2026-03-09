@@ -421,4 +421,80 @@ function downloadExcel() {
 /* DOWNLOAD PDF */
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
-    let doc = new
+    let doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4"
+    });
+
+    let y = 40;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("KSST Allocation Report", 40, y);
+    y += 25;
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+
+    doc.text("Batch Number: " + document.getElementById("batch").value, 40, y);
+    y += 18;
+    doc.text("Satsang Date: " + document.getElementById("satsangDate").value, 40, y);
+    y += 18;
+    doc.text("Satsang Time (IST): " + document.getElementById("satsangTime").value, 40, y);
+    y += 25;
+
+    doc.setFont("Helvetica", "bold");
+    doc.text("Segment Name", 40, y);
+    doc.text("Sloka", 220, y);
+    doc.text("Main Devotee", 320, y);
+    doc.text("Backup", 480, y);
+    y += 15;
+
+    doc.setFont("Helvetica", "normal");
+
+    output.forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        if (line.startsWith("*Om Namo")) return;
+        if (line.startsWith("-----")) return;
+        if (line.startsWith("Batch Number:")) return;
+
+        if (line.includes(":") && line.includes("–")) {
+            let parts = line.split(":");
+            let seg = parts[0].trim();
+            let right = parts[1].trim();
+
+            let rightParts = right.split("–");
+            let main = rightParts[0].trim();
+            let backup = (rightParts[1] || "").replace("[", "").replace("]", "").trim();
+
+            doc.text(seg, 40, y);
+            doc.text(main, 320, y);
+            doc.text(backup, 480, y);
+            y += 15;
+            return;
+        }
+
+        if (line.includes("–")) {
+            let parts = line.split("–");
+
+            let seg = parts[0].trim();
+
+            let slokaAndMain = parts[1].split(" - ");
+            let sloka = (slokaAndMain[0] || "").trim();
+            let main = (slokaAndMain[1] || "").trim();
+
+            let backup = (parts[2] || "").replace("[", "").replace("]", "").trim();
+
+            doc.text(seg, 40, y);
+            doc.text(sloka, 220, y);
+            doc.text(main, 320, y);
+            doc.text(backup, 480, y);
+            y += 15;
+        }
+    });
+
+    doc.save("KSST_Allocation.pdf");
+}
