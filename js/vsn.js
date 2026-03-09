@@ -25,7 +25,7 @@ function loadVSN() {
 
             <br>
 
-            <!-- Row 2: Names + Backup Names -->
+            <!-- Row 2: Names  -->
             <div class="row">
 
                 <div class="col">
@@ -41,20 +41,7 @@ function loadVSN() {
                     <button class="btn" onclick="clearMain()">CLEAR MAIN</button>
                 </div>
 
-                <div class="col">
-                    <label>
-                        <b>Enter Backup Devotees</b><br>
-                        <span style="font-size:13px; font-style:italic;">
-                            (Available for the Above Satsang Date & Time)
-                        </span>
-                    </label><br>
-
-                    <textarea id="backupNames" placeholder="One name per line"></textarea>
-
-                    <button class="btn" onclick="clearBackup()">CLEAR BACKUP</button>
-                </div>
-
-            </div>
+               </div>
 
             <br>
 
@@ -96,11 +83,6 @@ function clearMain() {
     document.getElementById("mainNames").value = "";
 }
 
-/* CLEAR BACKUP NAMES */
-function clearBackup() {
-    document.getElementById("backupNames").value = "";
-}
-
 /* SHUFFLE ARRAY */
 function shuffle(array) {
     let arr = [...array];
@@ -118,12 +100,11 @@ function dynamicWidth(names) {
 }
 
 /* FORMAT LINE (NORMAL FORMAT) */
-function formatLine(segment, sloka, main, backup, width) {
+function formatLine(segment, sloka, main, width) {
     return (
         segment.padEnd(20, " ") + " – " +
         sloka.padEnd(14, " ") + " - " +
-        main.padEnd(width, " ") + " – " +
-        `[ ${backup} ]`
+        main.padEnd(width, " ")
     );
 }
 
@@ -133,20 +114,13 @@ function allocateFullVSN(shuffleMode = false) {
     let mainRaw = document.getElementById("mainNames").value
         .split("\n").map(x => x.trim()).filter(x => x !== "");
 
-    let backupRaw = document.getElementById("backupNames").value
-        .split("\n").map(x => x.trim()).filter(x => x !== "");
-
     if (shuffleMode) {
         mainRaw = shuffle(mainRaw);
-        backupRaw = shuffle(backupRaw);
     }
-
     const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
-    const backupNames = backupRaw.length > 0 ? backupRaw : ["No Backup"];
-
+    
     let mainIndex = 0;
-    let backupIndex = 0;
-
+   
     let width = dynamicWidth(mainNames);
 
     const batch = (document.getElementById("batchNumber").value || "").trim();
@@ -207,8 +181,7 @@ function allocateFullVSN(shuffleMode = false) {
 
     segments.forEach((s) => {
         let main = mainNames[mainIndex % mainNames.length];
-        let backup = backupNames[backupIndex % backupNames.length];
-
+   
         if (
             s.seg === "Starting Prayer" ||
             s.seg === "Nyasa" ||
@@ -216,14 +189,12 @@ function allocateFullVSN(shuffleMode = false) {
             s.seg === "Ending Prayer"
         ) {
             let label = s.seg.toUpperCase();
-            lines.push(`${label} : ${main} – [ ${backup} ]`);
+            lines.push(`${label} : ${main}`);
             lines.push("");
         } else {
-            lines.push(formatLine(s.seg, s.sloka, main, backup, width));
+             lines.push(formatLine(s.seg, s.sloka, main, width));
         }
-
         mainIndex++;
-        backupIndex++;
 
         if (
             (s.seg === "Poorvangam" && s.sloka === "17-22") ||
@@ -249,19 +220,13 @@ function allocate108(shuffleMode = false) {
     let mainRaw = document.getElementById("mainNames").value
         .split("\n").map(x => x.trim()).filter(x => x !== "");
 
-    let backupRaw = document.getElementById("backupNames").value
-        .split("\n").map(x => x.trim()).filter(x => x !== "");
-
     if (shuffleMode) {
         mainRaw = shuffle(mainRaw);
-        backupRaw = shuffle(backupRaw);
     }
 
     const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
-    const backupNames = backupRaw.length > 0 ? backupRaw : ["No Backup"];
 
     let mainIndex = 0;
-    let backupIndex = 0;
 
     let width = dynamicWidth(mainNames);
 
@@ -307,7 +272,6 @@ function allocate108(shuffleMode = false) {
 
     segments.forEach((s) => {
         let main = mainNames[mainIndex % mainNames.length];
-        let backup = backupNames[backupIndex % backupNames.length];
 
         if (
             s.seg === "Starting Prayer" ||
@@ -315,14 +279,13 @@ function allocate108(shuffleMode = false) {
             s.seg === "Ending Prayer"
         ) {
             let label = s.seg.toUpperCase();
-            lines.push(`${label} : ${main} – [ ${backup} ]`);
+            lines.push(`${label} : ${main}`);
             lines.push("");
         } else {
-            lines.push(formatLine(s.seg, s.sloka, main, backup, width));
+            lines.push(formatLine(s.seg, s.sloka, main, width));
         }
 
         mainIndex++;
-        backupIndex++;
 
         if (s.seg === "Shlokam" && s.sloka === "102-108") {
             lines.push("");
