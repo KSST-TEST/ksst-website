@@ -417,7 +417,8 @@ function downloadExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Allocation");
     XLSX.writeFile(wb, "KSST_Allocation.xlsx");
 }
-/* DOWNLOAD PDF */
+
+/* DOWNLOAD PDF (Option B – Saffron Devotional Header) */
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     let doc = new jsPDF({
@@ -426,12 +427,14 @@ function downloadPDF() {
         format: "a4"
     });
 
+    // Extract output lines
     let output = document.getElementById("output").value.split("\n");
 
+    // Header section
     let y = 40;
 
     doc.setFont("Helvetica", "bold");
-    doc.setFontSize(14);
+    doc.setFontSize(16);
     doc.text("KSST Allocation Report", 40, y);
     y += 25;
 
@@ -445,14 +448,8 @@ function downloadPDF() {
     doc.text("Satsang Time (IST): " + document.getElementById("satsangTime").value, 40, y);
     y += 25;
 
-    doc.setFont("Helvetica", "bold");
-    doc.text("Segment Name", 40, y);
-    doc.text("Sloka", 220, y);
-    doc.text("Main Devotee", 320, y);
-    doc.text("Backup", 480, y);
-    y += 15;
-
-    doc.setFont("Helvetica", "normal");
+    // Prepare table rows
+    let rows = [];
 
     output.forEach(line => {
         line = line.trim();
@@ -462,7 +459,7 @@ function downloadPDF() {
         if (line.startsWith("-----")) return;
         if (line.startsWith("Batch Number:")) return;
 
-        // SPECIAL LINES
+        // SPECIAL LINES (e.g., STARTING PRAYER : A – [ X ])
         if (line.includes(":") && line.includes("–")) {
             let parts = line.split(":");
             let seg = parts[0].trim();
@@ -472,14 +469,11 @@ function downloadPDF() {
             let main = rightParts[0].trim();
             let backup = rightParts[1] ? rightParts[1].replace("[", "").replace("]", "").trim() : "";
 
-            doc.text(seg, 40, y);
-            doc.text(main, 320, y);
-            doc.text(backup, 480, y);
-            y += 15;
+            rows.push([seg, "", main, backup]);
             return;
         }
 
-        // NORMAL LINES
+        // NORMAL LINES (e.g., Shlokam – 1-6 - A – [ X ])
         if (line.includes("–")) {
             let parts = line.split("–");
 
@@ -491,12 +485,29 @@ function downloadPDF() {
 
             let backup = parts[2] ? parts[2].replace("[", "").replace("]", "").trim() : "";
 
-            doc.text(seg, 40, y);
-            doc.text(sloka, 220, y);
-            doc.text(main, 320, y);
-            doc.text(backup, 480, y);
-            y += 15;
+            rows.push([seg, sloka, main, backup]);
         }
+    });
+
+    // Generate table with saffron header
+    doc.autoTable({
+        startY: y,
+        head: [["Segment Name", "Sloka", "Main Devotee", "Backup"]],
+        body: rows,
+        styles: {
+            font: "Helvetica",
+            fontSize: 11,
+            cellPadding: 5
+        },
+        headStyles: {
+            fillColor: [255, 153, 51], // Saffron
+            textColor: 0,
+            fontStyle: "bold"
+        },
+        alternateRowStyles: {
+            fillColor: [255, 245, 230] // very light saffron tint
+        },
+        margin: { left: 40, right: 40 }
     });
 
     doc.save("KSST_Allocation.pdf");
