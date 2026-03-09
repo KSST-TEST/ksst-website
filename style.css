@@ -24,6 +24,16 @@ body {
     height: auto;
 }
 
+#pass {
+    width: 260px;
+    height: 40px;
+    font-size: 20px;
+    padding: 6px 10px;
+    border: 2px solid #a83232;   /* KSST maroon */
+    border-radius: 6px;
+    outline: none;
+}
+
 /* Om Image (Right) */
 .om-image {
     position: absolute;
@@ -275,3 +285,4 @@ textarea {
 .btn:hover {
     background: #d35400;
 }
+
