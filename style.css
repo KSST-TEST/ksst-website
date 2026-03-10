@@ -1,27 +1,123 @@
-/* GLOBAL */
+/* ============================================================
+   GLOBAL THEME
+   ============================================================ */
 body {
-    font-family: "Segoe UI", sans-serif;
+    font-family: "Calibri", sans-serif;
     background: #fff8e6;
     margin: 0;
     color: #4a2c2a;
 }
 
-/* HEADER */
+/* ============================================================
+   HEADER
+   ============================================================ */
 .header {
     background: #e67e22; /* saffron */
     color: white;
     padding: 20px;
     text-align: center;
-    position: relative;
+    font-size: 26px;
+    font-weight: bold;
+    font-family: "Georgia", serif;
 }
 
-/* KSST Logo (Left) */
-.ksst-logo {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    width: 70px;
-    height: auto;
+/* ============================================================
+   INPUT FIELDS
+   ============================================================ */
+.small-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    font-family: Calibri;
+}
+
+/* ============================================================
+   TEXTAREAS
+   ============================================================ */
+textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    resize: vertical;
+    font-family: Calibri;
+}
+
+/* Output textarea (taller) */
+#output {
+    height: 500px;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    padding: 12px 20px;
+    background: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    margin: 6px 0;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background: #d35400;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.allocation-container {
+    width: 95%;
+    max-width: 1300px;
+    margin: auto;
+    display: flex;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.left-panel, .right-panel {
+    flex: 1;
+}
+
+/* ============================================================
+   LABELS
+   ============================================================ */
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-size: 16px;
+    color: #4a2c2a;
+}
+
+/* ============================================================
+   BUTTON ROWS
+   ============================================================ */
+.btn-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   PASSWORD SCREEN
+   ============================================================ */
+#password-screen {
+    text-align: center;
+    margin-top: 50px;
 }
 
 #pass {
@@ -29,260 +125,14 @@ body {
     height: 40px;
     font-size: 20px;
     padding: 6px 10px;
-    border: 2px solid #a83232;   /* KSST maroon */
+    border: 2px solid #a83232;
     border-radius: 6px;
     outline: none;
 }
 
-/* Om Image (Right) */
-.om-image {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    width: 55px;
-    height: auto;
-}
-
-/* Header Text */
-.site-title {
-    font-family: "Georgia", serif;
-    font-size: 28px;
-    margin: 0;
-}
-
-.tagline {
-    font-size: 15px;
-    margin-top: 4px;
-}
-
-/* HOMEPAGE 3-COLUMN LAYOUT */
-.home-layout {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    gap: 20px;
-}
-
-/* LEFT COLUMN */
-.left-column {
-    width: 22%;
-    background: #fff3d4;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #d4a017;
-}
-
-/* CENTER COLUMN */
-.center-column {
-    width: 50%;
-    text-align: center;
-    padding: 20px;
-}
-
-/* Moving Welcome Text */
-.welcome-marquee {
-    font-size: 24px;
-    color: #e67e22;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-/* Lakshmi Narayana Image */
-.welcome-image {
-    width: 40%;
-    max-width: 350px;
-    border-radius: 12px;
-    box-shadow: 0 0 12px #d4a017;
-    display: block;
-    margin: 20px auto;
-}
-
-/* Devotional Line */
-.devotional-line {
-    margin-top: 20px;
-    font-size: 22px;
-    color: #d4a017;
-    font-weight: bold;
-}
-
-/* RIGHT COLUMN */
-.right-column {
-    width: 22%;
-    padding: 20px;
-    background: #fff3d4;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #d4a017;
-}
-
-/* Right Navigation Buttons */
-.side-btn {
-    display: block;
-    background: #e67e22;
-    color: white;
-    padding: 12px;
-    margin: 10px 0;
-    text-align: center;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.side-btn:hover {
-    background: #d35400;
-}
-
-/* FOOTER */
-.footer {
-    text-align: center;
-    padding: 15px;
-    background: #e67e22;
-    color: white;
-    margin-top: 40px;
-}
-
-/* DOCUMENTS PAGE */
-.doc-section {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 30px;
-}
-
-.doc-card {
-    background: #fff3d4;
-    padding: 20px;
-    border-radius: 8px;
-    width: 200px;
-    text-align: center;
-    box-shadow: 0 0 5px #d4a017;
-}
-
-/* EVENTS TABLE */
-.events-table {
-    width: 80%;
-    margin: auto;
-    border-collapse: collapse;
-}
-
-.events-table th,
-.events-table td {
-    border: 1px solid #e67e22;
-    padding: 10px;
-    text-align: center;
-}
-
-/* ALLOCATION TOOL */
-#password-screen {
-    text-align: center;
-    margin-top: 50px;
-}
-
+/* ============================================================
+   TOOL SCREEN
+   ============================================================ */
 #tool-screen {
     padding: 20px;
 }
-
-/* Allocation 2-column layout */
-.allocation-layout {
-    display: flex;
-    padding: 20px;
-    gap: 20px;
-}
-
-/* Left navigation */
-.side-nav {
-    width: 250px;
-    background: #f7c566;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #d4a017;
-}
-
-.side-nav h3 {
-    margin-bottom: 15px;
-}
-
-.nav-link {
-    display: block;
-    padding: 10px;
-    margin: 8px 0;
-    background: #e67e22;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
-}
-
-.nav-link:hover {
-    background: #d35400;
-}
-
-/* Right content area */
-.content-area {
-    flex: 1;
-    background: #fff8e6;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px #d4a017;
-}
-
-/* Tool box */
-.tool-box {
-    background: #fff3d4;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px #d4a017;
-}
-
-/* Two-column rows */
-.row {
-    display: flex;
-    gap: 20px;
-}
-
-.col {
-    flex: 1;
-}
-
-/* Small input fields */
-.small-input {
-    width: 90%;
-    padding: 8px;
-    font-size: 15px;
-    border: 2px solid #e67e22;
-    border-radius: 6px;
-    background: #fffaf0;
-}
-
-/* TEXTAREAS — big + draggable */
-textarea {
-    width: 100%;
-    min-height: 220px;
-    resize: both;
-    padding: 10px;
-    font-size: 16px;
-    border: 2px solid #e67e22;
-    border-radius: 8px;
-    background: #fffaf0;
-}
-
-/* BUTTONS — bold, capitalized */
-.btn {
-    padding: 14px 22px;
-    background: #e67e22;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    margin: 6px;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-family: "Georgia", serif;
-    letter-spacing: 1px;
-}
-
-.btn:hover {
-    background: #d35400;
-}
-
