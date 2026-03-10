@@ -6,6 +6,7 @@ const VSN_CONFIG = {
         { label: "ALLOCATE 108 SLOKAS", action: "allocate108VSN" }
     ],
 
+    /* Keep your existing structure */
     specialSegments: {
         randomUnique: ["STARTING PRAYER", "KSHAMA PRARTHANA", "ENDING PRAYER"],
         single: [
@@ -16,27 +17,99 @@ const VSN_CONFIG = {
     },
 
     majorSegments: [
-        // Poorvangam
         { label: "Poorvangam", range: "1-5" },
         { label: "Poorvangam", range: "6-11" },
         { label: "Poorvangam", range: "12-16" },
         { label: "Poorvangam", range: "17-22" },
 
-        // Shlokam (add all your existing blocks)
-        // Example:
         { label: "Shlokam", range: "1-6" },
         { label: "Shlokam", range: "7-13" },
-        // ...
+        { label: "Shlokam", range: "14-20" },
+        { label: "Shlokam", range: "21-27" },
+        { label: "Shlokam", range: "28-33" },
+        { label: "Shlokam", range: "34-40" },
+        { label: "Shlokam", range: "41-47" },
+        { label: "Shlokam", range: "48-54" },
+        { label: "Shlokam", range: "55-60" },
+        { label: "Shlokam", range: "61-67" },
+        { label: "Shlokam", range: "68-74" },
+        { label: "Shlokam", range: "75-81" },
+        { label: "Shlokam", range: "82-87" },
+        { label: "Shlokam", range: "88-94" },
+        { label: "Shlokam", range: "95-101" },
         { label: "Shlokam", range: "102-108" },
 
-        // Phalashruti
         { label: "Phalashruti", range: "1-6" },
         { label: "Phalashruti", range: "7-13" },
         { label: "Phalashruti", range: "14-19" },
         { label: "Phalashruti", range: "20-26" },
         { label: "Phalashruti", range: "27-33" }
+    ],
+
+    /* Add new segment lists for the engine */
+    segments_full: [
+        { seg: "Starting Prayer", sloka: "" },
+
+        { seg: "Poorvangam",  sloka: "1-5" },
+        { seg: "Poorvangam",  sloka: "6-11" },
+        { seg: "Poorvangam",  sloka: "12-16" },
+        { seg: "Poorvangam",  sloka: "17-22" },
+
+        { seg: "Nyasa", sloka: "" },
+
+        { seg: "Dhyaanam", sloka: "1-3" },
+        { seg: "Dhyaanam", sloka: "4-8" },
+
+        { seg: "Shlokam", sloka: "1-6" },
+        { seg: "Shlokam", sloka: "7-13" },
+        { seg: "Shlokam", sloka: "14-20" },
+        { seg: "Shlokam", sloka: "21-27" },
+        { seg: "Shlokam", sloka: "28-33" },
+        { seg: "Shlokam", sloka: "34-40" },
+        { seg: "Shlokam", sloka: "41-47" },
+        { seg: "Shlokam", sloka: "48-54" },
+        { seg: "Shlokam", sloka: "55-60" },
+        { seg: "Shlokam", sloka: "61-67" },
+        { seg: "Shlokam", sloka: "68-74" },
+        { seg: "Shlokam", sloka: "75-81" },
+        { seg: "Shlokam", sloka: "82-87" },
+        { seg: "Shlokam", sloka: "88-94" },
+        { seg: "Shlokam", sloka: "95-101" },
+        { seg: "Shlokam", sloka: "102-108" },
+
+        { seg: "Phalashruti", sloka: "1-6" },
+        { seg: "Phalashruti", sloka: "7-13" },
+        { seg: "Phalashruti", sloka: "14-19" },
+        { seg: "Phalashruti", sloka: "20-26" },
+        { seg: "Phalashruti", sloka: "27-33" },
+
+        { seg: "KSHAMA PRARTHANA", sloka: "" },
+        { seg: "Ending Prayer", sloka: "" }
+    ],
+
+    segments_108: [
+        { seg: "Starting Prayer", sloka: "" },
+
+        { seg: "Shlokam", sloka: "1-6" },
+        { seg: "Shlokam", sloka: "7-13" },
+        { seg: "Shlokam", sloka: "14-20" },
+        { seg: "Shlokam", sloka: "21-27" },
+        { seg: "Shlokam", sloka: "28-33" },
+        { seg: "Shlokam", sloka: "34-40" },
+        { seg: "Shlokam", sloka: "41-47" },
+        { seg: "Shlokam", sloka: "48-54" },
+        { seg: "Shlokam", sloka: "55-60" },
+        { seg: "Shlokam", sloka: "61-67" },
+        { seg: "Shlokam", sloka: "68-74" },
+        { seg: "Shlokam", sloka: "75-81" },
+        { seg: "Shlokam", sloka: "82-87" },
+        { seg: "Shlokam", sloka: "88-94" },
+        { seg: "Shlokam", sloka: "95-101" },
+        { seg: "Shlokam", sloka: "102-108" },
+
+        { seg: "KSHAMA PRARTHANA", sloka: "" },
+        { seg: "Ending Prayer", sloka: "" }
     ]
-};
 
 
 function loadVSN() {
