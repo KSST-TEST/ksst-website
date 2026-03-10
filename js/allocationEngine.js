@@ -83,6 +83,16 @@ function runAllocation(config, options) {
     console.log("Engine computed width:", width);
 
 
+   /* STEP 4 — Select segment list based on mode */
+let segments = [];
+
+if (options && options.mode === "108-only") {
+    segments = config.segments_108;
+} else {
+    segments = config.segments_full;
+}
+
+console.log("Engine received segments:", segments);
     /* ============================================================
        STOP HERE — DO NOT ADD ANYTHING ELSE YET.
        Next steps will gradually move logic from vsn.js into here.
