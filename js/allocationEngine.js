@@ -1,10 +1,11 @@
 /* ============================================================
-   UNIVERSAL ALLOCATION ENGINE (STAGE 9 — FULLY FUNCTIONAL)
+   UNIVERSAL ALLOCATION ENGINE (FINAL VERSION)
+   With History Input Support + Clean Modular Structure
    ============================================================ */
 
 
 /* ============================================================
-   UNIVERSAL SHUFFLE
+   SHUFFLE (Universal)
    ============================================================ */
 function shuffle(array) {
     let arr = [...array];
@@ -17,7 +18,7 @@ function shuffle(array) {
 
 
 /* ============================================================
-   UNIVERSAL DYNAMIC WIDTH
+   DYNAMIC WIDTH (Universal)
    ============================================================ */
 function dynamicWidth(names) {
     let longest = Math.max(...names.map(n => n.length));
@@ -26,7 +27,7 @@ function dynamicWidth(names) {
 
 
 /* ============================================================
-   UNIVERSAL FORMAT LINE
+   FORMAT LINE (Universal)
    ============================================================ */
 function formatLine(segment, sloka, main, width) {
     return (
@@ -38,10 +39,33 @@ function formatLine(segment, sloka, main, width) {
 
 
 /* ============================================================
-   DYNAMIC UI LOADER (placeholder)
+   HISTORY PARSER (NEW)
+   Reads previous allocations and extracts names.
    ============================================================ */
-function loadStothramUI(config) {
-    // Future dynamic UI builder
+function parseHistoryInput() {
+    let raw = document.getElementById("historyInput").value.trim();
+    if (!raw) return [];
+
+    let lines = raw.split("\n").map(x => x.trim()).filter(x => x !== "");
+
+    // Extract names from lines like:
+    // "Shlokam – 1-6 - Lakshmi"
+    // "STARTING PRAYER : Sita"
+    let names = [];
+
+    lines.forEach(line => {
+        if (line.includes(" - ")) {
+            let parts = line.split(" - ");
+            let name = parts[1]?.trim();
+            if (name) names.push(name);
+        } else if (line.includes(":")) {
+            let parts = line.split(":");
+            let name = parts[1]?.trim();
+            if (name) names.push(name);
+        }
+    });
+
+    return names;
 }
 
 
@@ -59,13 +83,21 @@ function runAllocation(config, options) {
     let mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
 
 
-    /* STEP 1B — Shuffle if requested */
+    /* STEP 2 — Read history input */
+    let historyNames = parseHistoryInput();
+
+    // (Fairness logic can be added later here)
+    // For now, we simply log it.
+    console.log("History names:", historyNames);
+
+
+    /* STEP 3 — Shuffle if requested */
     if (options && options.shuffle === true) {
         mainNames = shuffle(mainNames);
     }
 
 
-    /* STEP 2 — Read batch/date/time */
+    /* STEP 4 — Read batch/date/time */
     const batch = (document.getElementById("batchNumber").value || "").trim();
 
     const dateElem = document.getElementById("satsangDate");
@@ -76,11 +108,11 @@ function runAllocation(config, options) {
         (document.getElementById("satsangTime").value || "").trim();
 
 
-    /* STEP 3 — Compute dynamic width */
+    /* STEP 5 — Compute dynamic width */
     const width = dynamicWidth(mainNames);
 
 
-    /* STEP 4 — Select segment list */
+    /* STEP 6 — Select segment list */
     let segments = [];
 
     if (options && options.mode === "108-only") {
@@ -90,7 +122,7 @@ function runAllocation(config, options) {
     }
 
 
-    /* STEP 5 — Generate header */
+    /* STEP 7 — Generate header */
     let finalLines = [];
 
     finalLines.push("*Om Namo Narayana*");
@@ -104,7 +136,7 @@ function runAllocation(config, options) {
     finalLines.push("");
 
 
-    /* STEP 6 — Cycle through names */
+    /* STEP 8 — Cycle through names */
     let mainIndex = 0;
     let rawAllocations = [];
 
@@ -121,7 +153,7 @@ function runAllocation(config, options) {
     });
 
 
-    /* STEP 7 — Special segment formatting */
+    /* STEP 9 — Special segment formatting */
     let formattedLines = [];
 
     rawAllocations.forEach(item => {
@@ -144,7 +176,7 @@ function runAllocation(config, options) {
     });
 
 
-    /* STEP 8 — Group blank lines */
+    /* STEP 10 — Group blank lines */
     let outputLines = [];
 
     rawAllocations.forEach((item, index) => {
@@ -164,17 +196,13 @@ function runAllocation(config, options) {
     });
 
 
-    /* ============================================================
-       STEP 9 — OUTPUT TO TEXTAREA (FULLY FUNCTIONAL)
-       ============================================================ */
+    /* STEP 11 — OUTPUT TO TEXTAREA */
     finalLines.push(...outputLines);
 
     document.getElementById("output").value = finalLines.join("\n");
 
 
-    /* ============================================================
-       STEP 10 — REALLOCATE BUTTONS
-       ============================================================ */
+    /* STEP 12 — REALLOCATE BUTTONS */
     document.getElementById("reallocate-buttons").innerHTML = `
         <button class="btn" onclick="runAllocation(VSN_CONFIG, { mode: '${options.mode}', shuffle: true })">
             REALLOCATE
