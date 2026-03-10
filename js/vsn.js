@@ -52,7 +52,7 @@ function allocate108VSN() {
 }
 
 /* LOAD VSN ALLOCATION TOOL */
-function loadVSN() {
+function loadVSN_OLD_UI() {
     document.getElementById("content-area").innerHTML = `
         <h2>Shri Vishnu Sahasranamam – Allocation Tool</h2>
 
