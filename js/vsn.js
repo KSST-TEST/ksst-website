@@ -1,52 +1,18 @@
+/* ============================================================
+   VSN CONFIGURATION (FINAL CLEAN VERSION)
+   Uses the Universal Allocation Engine
+   ============================================================ */
+
 const VSN_CONFIG = {
     name: "Shri Vishnu Sahasranamam",
 
+    /* Buttons (standardized for all stotrams) */
     buttons: [
-        { label: "ALLOCATE FULL VSN", action: "allocateFullVSN" },
-        { label: "ALLOCATE 108 SLOKAS", action: "allocate108VSN" }
+        { label: "Allocate Full", action: "allocateFullVSN" },
+        { label: "Allocate Only Slokas", action: "allocate108VSN" }
     ],
 
-    /* Keep your existing structure */
-    specialSegments: {
-        randomUnique: ["STARTING PRAYER", "KSHAMA PRARTHANA", "ENDING PRAYER"],
-        single: [
-            { label: "NYASA" },
-            { label: "Dhyaanam", range: "1-3" },
-            { label: "Dhyaanam", range: "4-8" }
-        ]
-    },
-
-    majorSegments: [
-        { label: "Poorvangam", range: "1-5" },
-        { label: "Poorvangam", range: "6-11" },
-        { label: "Poorvangam", range: "12-16" },
-        { label: "Poorvangam", range: "17-22" },
-
-        { label: "Shlokam", range: "1-6" },
-        { label: "Shlokam", range: "7-13" },
-        { label: "Shlokam", range: "14-20" },
-        { label: "Shlokam", range: "21-27" },
-        { label: "Shlokam", range: "28-33" },
-        { label: "Shlokam", range: "34-40" },
-        { label: "Shlokam", range: "41-47" },
-        { label: "Shlokam", range: "48-54" },
-        { label: "Shlokam", range: "55-60" },
-        { label: "Shlokam", range: "61-67" },
-        { label: "Shlokam", range: "68-74" },
-        { label: "Shlokam", range: "75-81" },
-        { label: "Shlokam", range: "82-87" },
-        { label: "Shlokam", range: "88-94" },
-        { label: "Shlokam", range: "95-101" },
-        { label: "Shlokam", range: "102-108" },
-
-        { label: "Phalashruti", range: "1-6" },
-        { label: "Phalashruti", range: "7-13" },
-        { label: "Phalashruti", range: "14-19" },
-        { label: "Phalashruti", range: "20-26" },
-        { label: "Phalashruti", range: "27-33" }
-    ],
-
-    /* Add new segment lists for the engine */
+    /* FULL VSN SEGMENTS */
     segments_full: [
         { seg: "Starting Prayer", sloka: "" },
 
@@ -87,6 +53,7 @@ const VSN_CONFIG = {
         { seg: "Ending Prayer", sloka: "" }
     ],
 
+    /* 108 ONLY SEGMENTS */
     segments_108: [
         { seg: "Starting Prayer", sloka: "" },
 
@@ -108,12 +75,18 @@ const VSN_CONFIG = {
         { seg: "Shlokam", sloka: "102-108" },
 
         { seg: "KSHAMA PRARTHANA", sloka: "" },
-        { seg: "Ending Prayer", sloka: "" }
+        { seg: "Ending Prayer",    sloka: "" }
     ]
+};
 
+
+/* ============================================================
+   ENGINE HOOKS
+   ============================================================ */
 
 function loadVSN() {
-    loadStothramUI(VSN_CONFIG);
+    // Future: dynamic UI builder
+    // For now, nothing needed here.
 }
 
 function allocateFullVSN() {
@@ -123,314 +96,3 @@ function allocateFullVSN() {
 function allocate108VSN() {
     runAllocation(VSN_CONFIG, { mode: "108-only" });
 }
-
-/* LOAD VSN ALLOCATION TOOL */
-function loadVSN_OLD_UI() {
-    document.getElementById("content-area").innerHTML = `
-        <h2>Shri Vishnu Sahasranamam – Allocation Tool</h2>
-
-        <div class="tool-box">
-
-            <!-- Row 1: Batch + Date + Time -->
-            <div class="row">
-                <div class="col">
-                    <label><b>Batch Number</b></label><br>
-                    <input type="text" id="batchNumber" placeholder="Batch" class="small-input">
-                </div>
-
-                <div class="col">
-                    <label><b>Satsang Date</b></label><br>
-                    <input type="date" id="satsangDate" class="small-input" onchange="formatDate()">
-                </div>
-
-                <div class="col">
-                    <label><b>Satsang Time <span style="font-size:13px; font-style:italic;">(IST)</span></b></label><br>
-                    <input type="time" id="satsangTime" class="small-input">
-                </div>
-            </div>
-
-            <br>
-
-            <!-- Row 2: Names  -->
-            <div class="row">
-
-                <div class="col">
-                    <label>
-                        <b>Enter Devotee Names</b><br>
-                        <span style="font-size:13px; font-style:italic;">
-                            (Registered for the Above-Mentioned Satsang Date and Time)
-                        </span>
-                    </label><br>
-
-                    <textarea id="mainNames" placeholder="One name per line"></textarea>
-
-                    <button class="btn" onclick="clearMain()">CLEAR MAIN</button>
-                </div>
-
-               </div>
-
-            <br>
-
-            <!-- Buttons -->
-            <button class="btn" onclick="allocateFullVSN()">ALLOCATE FULL VSN</button>
-            <button class="btn" onclick="allocate108()">ALLOCATE 108 SLOKAS</button>
-
-            <br><br>
-
-            <!-- Output -->
-            <h3>Allocation Output</h3>
-            <textarea id="output" placeholder="Allocation will appear here..."></textarea><br><br>
-
-            <div id="reallocate-buttons"></div>
-
-            <button class="btn" onclick="copyOutput()">COPY</button>
-            <button class="btn" onclick="downloadExcel()">DOWNLOAD EXCEL</button>
-            <button class="btn" onclick="downloadPDF()">DOWNLOAD PDF</button>
-
-        </div>
-    `;
-}
-
-/* FORMAT DATE TO dd/mm/yyyy */
-function formatDate() {
-    let input = document.getElementById("satsangDate").value;
-    if (!input) return;
-
-    let date = new Date(input);
-    let day = String(date.getDate()).padStart(2, '0');
-    let month = String(date.getMonth() + 1).padStart(2, '0');
-    let year = date.getFullYear();
-
-    document.getElementById("satsangDate").setAttribute("data-formatted", `${day}/${month}/${year}`);
-}
-
-/* CLEAR MAIN NAMES */
-function clearMain() {
-    document.getElementById("mainNames").value = "";
-}
-
-/* SHUFFLE ARRAY */
-function shuffle(array) {
-    let arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
-
-/* DYNAMIC WIDTH FOR TEXT ALIGNMENT */
-function dynamicWidth(names) {
-    let longest = Math.max(...names.map(n => n.length));
-    return longest + 5;
-}
-
-/* FORMAT LINE (NORMAL FORMAT) */
-function formatLine(segment, sloka, main, width) {
-    return (
-        segment.padEnd(20, " ") + " – " +
-        sloka.padEnd(14, " ") + " - " +
-        main.padEnd(width, " ")
-    );
-}
-
-/* FULL VSN ALLOCATION */
-function allocateFullVSN(shuffleMode = false) {
-
-    let mainRaw = document.getElementById("mainNames").value
-        .split("\n").map(x => x.trim()).filter(x => x !== "");
-
-    if (shuffleMode) {
-        mainRaw = shuffle(mainRaw);
-    }
-    const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
-    
-    let mainIndex = 0;
-   
-    let width = dynamicWidth(mainNames);
-
-    const batch = (document.getElementById("batchNumber").value || "").trim();
-    const dateElem = document.getElementById("satsangDate");
-    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
-    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
-
-    const segments = [
-        { seg: "Starting Prayer", sloka: "" },
-
-        { seg: "Poorvangam",  sloka: "1-5" },
-        { seg: "Poorvangam",  sloka: "6-11" },
-        { seg: "Poorvangam",  sloka: "12-16" },
-        { seg: "Poorvangam",  sloka: "17-22" },
-
-        { seg: "Nyasa",       sloka: "" },
-
-        { seg: "Dhyaanam",    sloka: "1-3" },
-        { seg: "Dhyaanam",    sloka: "4-8" },
-
-        { seg: "Shlokam",     sloka: "1-6" },
-        { seg: "Shlokam",     sloka: "7-13" },
-        { seg: "Shlokam",     sloka: "14-20" },
-        { seg: "Shlokam",     sloka: "21-27" },
-        { seg: "Shlokam",     sloka: "28-33" },
-        { seg: "Shlokam",     sloka: "34-40" },
-        { seg: "Shlokam",     sloka: "41-47" },
-        { seg: "Shlokam",     sloka: "48-54" },
-        { seg: "Shlokam",     sloka: "55-60" },
-        { seg: "Shlokam",     sloka: "61-67" },
-        { seg: "Shlokam",     sloka: "68-74" },
-        { seg: "Shlokam",     sloka: "75-81" },
-        { seg: "Shlokam",     sloka: "82-87" },
-        { seg: "Shlokam",     sloka: "88-94" },
-        { seg: "Shlokam",     sloka: "95-101" },
-        { seg: "Shlokam",     sloka: "102-108" },
-
-        { seg: "Phalashruti", sloka: "1-6" },
-        { seg: "Phalashruti", sloka: "7-13" },
-        { seg: "Phalashruti", sloka: "14-19" },
-        { seg: "Phalashruti", sloka: "20-26" },
-        { seg: "Phalashruti", sloka: "27-33" },
-
-        { seg: "KSHAMA PRARTHANA", sloka: "" },
-        { seg: "Ending Prayer",    sloka: "" }
-    ];
-
-    let lines = [];
-    lines.push("*Om Namo Narayana*");
-    lines.push("----------------------------------------------------------");
-    lines.push(
-        "Batch Number: " + (batch || "") +
-        "   Satsang Date: " + (satsangDate || "") +
-        "   Satsang Time: " + (satsangTime || "") + " IST"
-    );
-    lines.push("----------------------------------------------------------");
-    lines.push("");
-
-    segments.forEach((s) => {
-        let main = mainNames[mainIndex % mainNames.length];
-   
-        if (
-            s.seg === "Starting Prayer" ||
-            s.seg === "Nyasa" ||
-            s.seg === "KSHAMA PRARTHANA" ||
-            s.seg === "Ending Prayer"
-        ) {
-            let label = s.seg.toUpperCase();
-            lines.push(`${label} : ${main}`);
-            lines.push("");
-        } else {
-             lines.push(formatLine(s.seg, s.sloka, main, width));
-        }
-        mainIndex++;
-
-        if (
-            (s.seg === "Poorvangam" && s.sloka === "17-22") ||
-            (s.seg === "Dhyaanam" && s.sloka === "4-8") ||
-            (s.seg === "Shlokam" && s.sloka === "102-108") ||
-            (s.seg === "Phalashruti" && s.sloka === "27-33")
-        ) {
-            lines.push("");
-        }
-    });
-
-    document.getElementById("output").value = lines.join("\n");
-
-    document.getElementById("reallocate-buttons").innerHTML = `
-        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE FULL VSN</button>
-        <button class="btn" onclick="allocate108(true)">REALLOCATE 108 SLOKAS</button>
-    `;
-}
-
-/* 108 SLOKAS ALLOCATION */
-function allocate108(shuffleMode = false) {
-
-    let mainRaw = document.getElementById("mainNames").value
-        .split("\n").map(x => x.trim()).filter(x => x !== "");
-
-    if (shuffleMode) {
-        mainRaw = shuffle(mainRaw);
-    }
-
-    const mainNames = mainRaw.length > 0 ? mainRaw : ["-"];
-
-    let mainIndex = 0;
-
-    let width = dynamicWidth(mainNames);
-
-    const batch = (document.getElementById("batchNumber").value || "").trim();
-    const dateElem = document.getElementById("satsangDate");
-    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
-    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
-
-    const segments = [
-        { seg: "Starting Prayer", sloka: "" },
-
-        { seg: "Shlokam", sloka: "1-6" },
-        { seg: "Shlokam", sloka: "7-13" },
-        { seg: "Shlokam", sloka: "14-20" },
-        { seg: "Shlokam", sloka: "21-27" },
-        { seg: "Shlokam", sloka: "28-33" },
-        { seg: "Shlokam", sloka: "34-40" },
-        { seg: "Shlokam", sloka: "41-47" },
-        { seg: "Shlokam", sloka: "48-54" },
-        { seg: "Shlokam", sloka: "55-60" },
-        { seg: "Shlokam", sloka: "61-67" },
-        { seg: "Shlokam", sloka: "68-74" },
-        { seg: "Shlokam", sloka: "75-81" },
-        { seg: "Shlokam", sloka: "82-87" },
-        { seg: "Shlokam", sloka: "88-94" },
-        { seg: "Shlokam", sloka: "95-101" },
-        { seg: "Shlokam", sloka: "102-108" },
-
-        { seg: "KSHAMA PRARTHANA", sloka: "" },
-        { seg: "Ending Prayer",    sloka: "" }
-    ];
-
-    let lines = [];
-    lines.push("*Om Namo Narayana*");
-    lines.push("----------------------------------------------------------");
-    lines.push(
-        "Batch Number: " + (batch || "") +
-        "   Satsang Date: " + (satsangDate || "") +
-        "   Satsang Time: " + (satsangTime || "") + " IST"
-    );
-    lines.push("----------------------------------------------------------");
-    lines.push("");
-
-    segments.forEach((s) => {
-        let main = mainNames[mainIndex % mainNames.length];
-
-        if (
-            s.seg === "Starting Prayer" ||
-            s.seg === "KSHAMA PRARTHANA" ||
-            s.seg === "Ending Prayer"
-        ) {
-            let label = s.seg.toUpperCase();
-            lines.push(`${label} : ${main}`);
-            lines.push("");
-        } else {
-            lines.push(formatLine(s.seg, s.sloka, main, width));
-        }
-
-        mainIndex++;
-
-        if (s.seg === "Shlokam" && s.sloka === "102-108") {
-            lines.push("");
-        }
-    });
-
-    document.getElementById("output").value = lines.join("\n");
-
-    document.getElementById("reallocate-buttons").innerHTML = `
-        <button class="btn" onclick="allocateFullVSN(true)">REALLOCATE FULL VSN</button>
-        <button class="btn" onclick="allocate108(true)">REALLOCATE 108 SLOKAS</button>
-    `;
-}
-
-/* COPY OUTPUT */
-function copyOutput() {
-    let text = document.getElementById("output");
-    text.select();
-    document.execCommand("copy");
-    alert("Copied!");
-}
-
