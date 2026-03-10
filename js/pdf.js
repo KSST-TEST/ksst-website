@@ -1,23 +1,34 @@
-/* DOWNLOAD PDF */
+/* ============================================================
+   DOWNLOAD PDF (FINAL CLEAN VERSION)
+   Uses engine output directly from #output textarea
+   ============================================================ */
+
 function downloadPDF(is108 = false) {
     const { jsPDF } = window.jspdf;
 
+    /* STEP 1 — Read batch/date/time */
     const batch = document.getElementById("batchNumber").value || "";
+
     const dateElem = document.getElementById("satsangDate");
-    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
-    const satsangTime = document.getElementById("satsangTime").value || "";
+    const satsangDate =
+        dateElem.getAttribute("data-formatted") || dateElem.value || "";
+
+    const satsangTime =
+        document.getElementById("satsangTime").value || "";
+
     const safeDate = satsangDate.replace(/\//g, "-");
 
+    /* STEP 2 — Read output lines */
     let output = document.getElementById("output").value.split("\n");
 
-    // Load images
+    /* STEP 3 — Load watermark images */
     let ksstLogo = new Image();
     let omLogo = new Image();
 
     ksstLogo.src = "images/ksst-logo.png";
     omLogo.src = "images/om.png";
 
-    // Wait for both images to load
+    /* STEP 4 — Wait for images to load */
     ksstLogo.onload = () => {
         omLogo.onload = () => {
 
@@ -27,14 +38,14 @@ function downloadPDF(is108 = false) {
                 format: "a4"
             });
 
-            // HEADER
+            /* HEADER */
             doc.setFont("Calibri", "bold");
             doc.setFontSize(16);
             doc.text("Hari Om Namo Narayana", 40, 40);
 
-            // WATERMARK IMAGES
-            doc.addImage(ksstLogo, "PNG", 40, 20, 50, 50);     // top-left
-            doc.addImage(omLogo, "PNG", 500, 20, 50, 50);      // top-right
+            // Watermark images
+            doc.addImage(ksstLogo, "PNG", 40, 20, 50, 50);  // left
+            doc.addImage(omLogo, "PNG", 500, 20, 50, 50);   // right
 
             let y = 90;
 
@@ -50,7 +61,7 @@ function downloadPDF(is108 = false) {
             doc.text("Satsang Date: " + satsangDate, 40, y); y += 18;
             doc.text("Satsang Time (IST): " + satsangTime, 40, y); y += 25;
 
-            // Prepare table rows
+            /* STEP 5 — Prepare table rows */
             let rows = [];
 
             output.forEach(line => {
@@ -83,7 +94,7 @@ function downloadPDF(is108 = false) {
                 }
             });
 
-            // TABLE
+            /* STEP 6 — TABLE */
             doc.autoTable({
                 startY: y,
                 head: [["Segment Name", "Sloka", "Main"]],
@@ -101,12 +112,12 @@ function downloadPDF(is108 = false) {
                 margin: { left: 20, right: 20 }
             });
 
-            // FOOTER
+            /* FOOTER */
             doc.setFont("Calibri", "italic");
             doc.setFontSize(11);
             doc.text("KSST Satsang Seva", 40, 820);
 
-            // File naming
+            /* STEP 7 — File naming */
             let fileName = is108
                 ? `VSN_108_Allocation_${safeDate}.pdf`
                 : `VSN_FullAllocation_${safeDate}.pdf`;
