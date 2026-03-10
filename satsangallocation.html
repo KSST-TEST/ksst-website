@@ -6,99 +6,30 @@
 
 <link rel="stylesheet" href="style.css">
 
-<style>
-    /* Inline additions specific to this page */
+<!-- External libs (place in same folder or CDN as you prefer) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
 
-    .allocation-container {
-        width: 95%;
-        max-width: 1300px;
-        margin: auto;
-        display: flex;
-        gap: 25px;
-        margin-top: 25px;
-    }
-
-    .left-panel, .right-panel {
-        flex: 1;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 15px;
-        margin-bottom: 6px;
-        font-size: 16px;
-        color: #4a2c2a;
-    }
-
-    textarea {
-        width: 100%;
-        height: 180px; /* SAME HEIGHT for both fields */
-        resize: vertical;
-        padding: 10px;
-        font-size: 15px;
-        border: 2px solid #e67e22;
-        border-radius: 6px;
-        background: #fffaf0;
-        font-family: Calibri;
-    }
-
-    #output {
-        height: 500px;
-        resize: vertical;
-    }
-
-    .btn-row {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: 12px 20px;
-        font-size: 15px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        font-family: Calibri;
-        background: #e67e22;
-        color: white;
-    }
-
-    .btn:hover {
-        background: #d35400;
-    }
-</style>
-
+<script src="js/auth.js"></script>
 <script src="js/allocationEngine.js"></script>
 <script src="js/vsn.js"></script>
-<script src="js/lalithasn.js"></script>
-<script src="js/lakshmisn.js"></script>
 <script src="js/excel.js"></script>
 <script src="js/pdf.js"></script>
-<script src="js/auth.js"></script>
 
 <script>
-/* ============================================================
-   DYNAMIC STOTHRAM LOADER
-   ============================================================ */
-function loadStothram(stothramName, fullFn, slokaFn) {
-    document.getElementById("toolTitle").innerText =
-        stothramName + " – Allocation Tool";
-
-    window.currentFullAllocation = fullFn;
-    window.currentSlokaAllocation = slokaFn;
+function onStothramClick(key) {
+    if (key === 'vsn') {
+        loadVSN();
+    } else {
+        alert("This stothram is not yet configured.");
+    }
 }
 
-/* ============================================================
-   VALIDATION
-   ============================================================ */
 function validateInputs() {
-    let names = document.getElementById("mainNames").value.trim();
-    let date = document.getElementById("satsangDate").value.trim();
-    let time = document.getElementById("satsangTime").value.trim();
+    const names = document.getElementById("mainNames").value.trim();
+    const date = document.getElementById("satsangDate").value.trim();
+    const time = document.getElementById("satsangTime").value.trim();
 
     if (!names) {
         alert("Please enter devotee names.");
@@ -112,88 +43,187 @@ function validateInputs() {
         alert("Please enter Satsang Time.");
         return false;
     }
+    if (!window.currentStothramConfig) {
+        alert("Please select a stothram from the left panel.");
+        return false;
+    }
     return true;
 }
 
-/* ============================================================
-   CLEAR ALL
-   ============================================================ */
-function clearAll() {
+function allocateFull() {
+    if (!validateInputs()) return;
+    runAllocation(false);
+}
+
+function allocateSlokas() {
+    if (!validateInputs()) return;
+    runAllocation(true);
+}
+
+function clearAllFields() {
     document.getElementById("batchNumber").value = "";
     document.getElementById("satsangDate").value = "";
     document.getElementById("satsangTime").value = "";
     document.getElementById("mainNames").value = "";
     document.getElementById("historyInput").value = "";
+    document.getElementById("historyFile").value = "";
     document.getElementById("output").value = "";
+    window.lastAllocation = null;
 }
 
-/* ============================================================
-   ALLOCATE (Dynamic)
-   ============================================================ */
-function allocateFull() {
-    if (!validateInputs()) return;
-    window.currentFullAllocation();
+function clearNamesField() {
+    document.getElementById("mainNames").value = "";
 }
 
-function allocateSlokas() {
-    if (!validateInputs()) return;
-    window.currentSlokaAllocation();
+function clearHistoryField() {
+    document.getElementById("historyInput").value = "";
+    document.getElementById("historyFile").value = "";
+}
+
+function handleHistoryFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const existing = document.getElementById("historyInput").value.trim();
+        const text = e.target.result;
+        document.getElementById("historyInput").value =
+            (existing ? existing + "\n" : "") + text;
+    };
+    reader.readAsText(file);
+}
+
+function reallocateCurrent() {
+    if (!window.lastAllocation) {
+        alert("Please run an allocation first.");
+        return;
+    }
+    const shuffled = reallocateFromLast(window.lastAllocation);
+    window.lastAllocation = shuffled;
+    document.getElementById("output").value = formatAllocationOutput(shuffled);
+}
+
+function downloadExcelFromOutput() {
+    const output = document.getElementById("output").value.trim();
+    if (!output) {
+        alert("No allocation found. Please allocate first.");
+        return;
+    }
+    downloadExcelFromText(output);
+}
+
+function downloadPDFFromOutput() {
+    const output = document.getElementById("output").value.trim();
+    if (!output) {
+        alert("No allocation found. Please allocate first.");
+        return;
+    }
+    downloadPDFFromText(output);
 }
 </script>
-
 </head>
 
-<body onload="loadVSN()">
+<body>
 
-<div class="header">Hari Om Namo Narayana</div>
-<div id="toolTitle" style="text-align:center; font-size:22px; margin-top:10px; font-weight:bold;">
-    Allocation Tool
+<div id="password-screen">
+    <div class="header">Hari Om Namo Narayana</div>
+    <div style="text-align:center; margin-top:40px;">
+        <h2>KSST Coordinator Access</h2>
+        <input type="password" id="pass" placeholder="Enter Password">
+        <br><br>
+        <button class="btn" onclick="checkPassword()">Login</button>
+    </div>
 </div>
 
-<div class="allocation-container">
+<div id="tool-screen" style="display:none;">
+    <div class="header">Hari Om Namo Narayana</div>
 
-    <!-- LEFT PANEL -->
-    <div class="left-panel">
+    <div class="main-layout">
 
-        <label>Batch Number</label>
-        <input type="text" id="batchNumber" class="small-input">
-
-        <label>Satsang Date</label>
-        <input type="date" id="satsangDate" class="small-input">
-
-        <label>Satsang Time (IST)</label>
-        <input type="text" id="satsangTime" class="small-input" placeholder="e.g., 6:00 PM">
-
-        <label>Enter Devotee Names (one name per line)</label>
-        <textarea id="mainNames"></textarea>
-
-        <label>Provide History Allocation(s) here (Optional)</label>
-        <textarea id="historyInput"></textarea>
-
-        <div class="btn-row">
-            <button class="btn" onclick="allocateFull()">Allocate Full</button>
-            <button class="btn" onclick="allocateSlokas()">Allocate Only Slokas</button>
-            <button class="btn" onclick="clearAll()">Clear All</button>
+        <!-- LEFT NAVIGATION -->
+        <div class="nav-panel">
+            <div class="nav-title">Stothram Selection</div>
+            <button class="nav-item" onclick="onStothramClick('vsn')">
+                Śrī Viṣṇu Sahasranāma
+            </button>
+            <button class="nav-item disabled">
+                Śrī Lalitā Sahasranāma (Coming Soon)
+            </button>
+            <button class="nav-item disabled">
+                Śrī Mahālakṣmī Sahasranāma (Coming Soon)
+            </button>
+            <button class="nav-item disabled">
+                Stothram 3 (Coming Soon)
+            </button>
+            <button class="nav-item disabled">
+                Stothram 4 (Coming Soon)
+            </button>
+            <button class="nav-item disabled">
+                Stothram 5 (Coming Soon)
+            </button>
         </div>
 
-        <div class="btn-row">
-            <button class="btn" onclick="downloadExcel(false)">Download Excel (Full)</button>
-            <button class="btn" onclick="downloadExcel(true)">Download Excel (108)</button>
+        <!-- MAIN TOOL AREA -->
+        <div class="tool-panel">
 
-            <button class="btn" onclick="downloadPDF(false)">Download PDF (Full)</button>
-            <button class="btn" onclick="downloadPDF(true)">Download PDF (108)</button>
+            <div id="toolTitle" class="tool-title">
+                Please select a Stothram from the left panel
+            </div>
+
+            <div class="allocation-container">
+
+                <!-- LEFT PANEL -->
+                <div class="left-panel">
+
+                    <label>Batch Number</label>
+                    <input type="text" id="batchNumber" class="small-input">
+
+                    <label>Satsang Date</label>
+                    <input type="date" id="satsangDate" class="small-input">
+
+                    <label>Satsang Time (IST)</label>
+                    <input type="text" id="satsangTime" class="small-input" placeholder="e.g., 6:00 PM">
+
+                    <label>Enter Devotee Names (one name per line)</label>
+                    <textarea id="mainNames"></textarea>
+                    <div class="inline-btn-row">
+                        <button class="btn-secondary" onclick="clearNamesField()">Clear Names</button>
+                    </div>
+
+                    <label>Provide History Allocation(s) here (Optional)</label>
+                    <textarea id="historyInput" placeholder="Format: Segment - Range - Name"></textarea>
+                    <div class="inline-btn-row">
+                        <input type="file" id="historyFile" accept=".txt" onchange="handleHistoryFileUpload(this)">
+                        <button class="btn-secondary" onclick="clearHistoryField()">Clear History</button>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn" onclick="allocateFull()">Allocate Full</button>
+                        <button class="btn" onclick="allocateSlokas()">Allocate Only Ślokam</button>
+                        <button class="btn" onclick="reallocateCurrent()">ReAllocate</button>
+                        <button class="btn" onclick="clearAllFields()">Clear All Fields</button>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT PANEL -->
+                <div class="right-panel">
+                    <label>Here is your Allocation:</label>
+                    <textarea id="output" readonly></textarea>
+
+                    <div class="btn-row below-output">
+                        <button class="btn" onclick="downloadExcelFromOutput()">Download Excel</button>
+                        <button class="btn" onclick="downloadPDFFromOutput()">Download PDF</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
-
-        <div id="reallocate-buttons" style="margin-top:15px;"></div>
-
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="right-panel">
-        <label>Here is your Allocation:</label>
-        <textarea id="output" readonly></textarea>
+    <div class="footer">
+        KSST Satsang Seva • Viṣṇu Sahasranāma Allocation Tool
     </div>
-
 </div>
 
 </body>
