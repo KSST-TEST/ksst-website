@@ -1,26 +1,38 @@
-/* DOWNLOAD EXCEL */
+/* ============================================================
+   DOWNLOAD EXCEL (FINAL CLEAN VERSION)
+   Uses engine output directly from #output textarea
+   ============================================================ */
+
 function downloadExcel(is108 = false) {
+
+    /* STEP 1 — Read output lines */
     let output = document.getElementById("output").value.split("\n");
 
+    /* STEP 2 — Read batch/date/time */
     const batch = (document.getElementById("batchNumber").value || "").trim();
+
     const dateElem = document.getElementById("satsangDate");
-    const satsangDate = dateElem.getAttribute("data-formatted") || dateElem.value || "";
-    const satsangTime = (document.getElementById("satsangTime").value || "").trim();
+    const satsangDate =
+        dateElem.getAttribute("data-formatted") || dateElem.value || "";
+
+    const satsangTime =
+        (document.getElementById("satsangTime").value || "").trim();
 
     let safeDate = satsangDate.replace(/\//g, "-");
 
+    /* STEP 3 — Prepare rows */
     let rows = [];
 
-    // Header rows (bold + highlighted)
+    // Header rows
     rows.push(["Batch Number", batch]);
     rows.push(["Satsang Date", satsangDate]);
     rows.push(["Satsang Time (IST)", satsangTime]);
     rows.push([]);
 
-    // Table header (NO BACKUP)
+    // Table header
     rows.push(["Segment Name", "Assigned Sloka Number", "Main Devotee"]);
 
-    // Parse output lines
+    /* STEP 4 — Parse output lines */
     output.forEach(line => {
         line = line.trim();
         if (!line) return;
@@ -52,15 +64,16 @@ function downloadExcel(is108 = false) {
         }
     });
 
-    // Create workbook + sheet
+    /* STEP 5 — Create workbook */
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.aoa_to_sheet(rows);
 
-    // Apply formatting
+    /* STEP 6 — Apply formatting */
     const range = XLSX.utils.decode_range(ws['!ref']);
 
     for (let R = range.s.r; R <= range.e.r; R++) {
         for (let C = range.s.c; C <= range.e.c; C++) {
+
             let cellRef = XLSX.utils.encode_cell({ r: R, c: C });
             let cell = ws[cellRef];
             if (!cell) continue;
@@ -99,17 +112,17 @@ function downloadExcel(is108 = false) {
         }
     }
 
-    // Auto column width
+    /* STEP 7 — Auto column width */
     ws['!cols'] = [
         { wch: 25 },
         { wch: 18 },
         { wch: 30 }
     ];
 
-    // Auto row height
+    /* STEP 8 — Auto row height */
     ws['!rows'] = rows.map(() => ({ hpt: 18 }));
 
-    // File naming
+    /* STEP 9 — File naming */
     let fileName = is108
         ? `VSN_108_Allocation_${safeDate}.xlsx`
         : `VSN_FullAllocation_${safeDate}.xlsx`;
