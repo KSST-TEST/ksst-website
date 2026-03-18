@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KSST – Coordinator Access</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+    <img src="images/ksst-logo.jpeg" class="ksst-logo">
+
+    <div class="header-text">
+        <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
+        <div class="tagline">Coordinator Access</div>
+    </div>
+
+    <img src="images/om.png" class="om-image">
+</header>
+
+<div class="login-container">
+    <h2>Hari Om Namo Narayana</h2>
+
+    <div class="login-box">
+        <label for="passInput">Enter Password</label>
+        <input type="password" id="passInput" class="login-input" placeholder="Password">
+
+        <button class="btn" onclick="checkLogin()">Login</button>
+        <div id="errorMsg" class="error-msg"></div>
+    </div>
+</div>
+
+<footer class="footer">
+    © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
+</footer>
+
+<script>
+function checkLogin() {
+    const entered = document.getElementById("passInput").value.trim();
+    if (entered === "Vaikuntha") {
+        window.location.href = "satsangallocation.html";
+    } else {
+        document.getElementById("errorMsg").innerText = "Incorrect password.";
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<div class="tool-panel">
+
+    <h2 class="tool-title">Śrī Viṣṇu Sahasranāma — Allocation</h2>
+
+    <div class="allocation-container">
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+
+            <label>Batch Name</label>
+            <input type="text" id="batchName" class="small-input" placeholder="Enter Batch Name">
+
+            <label style="margin-top:12px;">Satsang No#</label>
+            <input type="number" id="satsangNo" class="small-input" placeholder="1">
+
+            <label style="margin-top:12px;">Devotee Names</label>
+            <textarea id="namesInput" rows="12" placeholder="Enter one name per line"></textarea>
+
+            <div class="btn-row">
+                <button class="btn" onclick="runVSN()">Allocate</button>
+                <button class="btn-secondary" onclick="clearVSN()">Clear</button>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+
+            <label>History (Previous Allocations)</label>
+            <textarea id="historyInput" rows="12" placeholder="Paste previous satsang allocation here"></textarea>
+
+            <label style="margin-top:12px;">Output</label>
+            <textarea id="output" readonly></textarea>
+
+            <div class="below-output">
+                <button class="btn-secondary" onclick="exportVSNExcel()">Export Excel</button>
+                <button class="btn-secondary" onclick="exportVSNPDF()">Export PDF</button>
+            </div>
+            <script src="vsn.js"></script>
+            <script src="vsn-excel.js"></script>
+            <script src="vsn-pdf.js"></script>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+function runVSN() {
+    const rawNames = document.getElementById("namesInput").value
+        .split(/\r?\n/)
+        .map(x => x.trim())
+        .filter(x => x);
+
+    const satsangNo = document.getElementById("satsangNo").value.trim();
+    const historyText = document.getElementById("historyInput").value;
+
+    const allocations = allocateVSN({
+        rawNames,
+        satsangNo,
+        historyText
+    });
+
+    renderVSNOutput(allocations);
+}
+
+function renderVSNOutput(list) {
+    const lines = list.map(item =>
+        `${item.segment} ${item.from}–${item.to}: ${item.name}`
+    );
+    document.getElementById("output").value = lines.join("\n");
+}
+
+function clearVSN() {
+    document.getElementById("namesInput").value = "";
+    document.getElementById("historyInput").value = "";
+    document.getElementById("output").value = "";
+}
+
+function exportVSNExcel() {
+    alert("Excel export will be added next.");
+}
+
+function exportVSNPDF() {
+    alert("PDF export will be added next.");
+}
+</script>

@@ -1,3 +1,5 @@
+// allocationEngine.js
+
 window.currentStothramConfig = null;
 window.lastAllocation = null;
 
@@ -62,31 +64,21 @@ function createRanges(start, end, count) {
     return ranges;
 }
 
-function applyKSSTRuleOnPoorvangaPortions(poorvangaPortions, names) {
-    const result = {
-        hasKSST: false,
-        ksstName: null,
-        forcedIndex: null
-    };
-
-    const idx = names.findIndex(n => n.toUpperCase() === "KSST");
-    if (idx === -1) return result;
-
-    result.hasKSST = true;
-    result.ksstName = names[idx];
-
-    const limit = Math.min(6, poorvangaPortions.length);
-    if (limit > 0) {
-        result.forcedIndex = 0; // first portion within first 6
+// Pick a Poorvāṅga portion that overlaps 1–10 for KSST
+function pickKSSTPoorvangaPortion(poorRanges) {
+    for (let i = 0; i < poorRanges.length; i++) {
+        const r = poorRanges[i];
+        if (r.start <= 10 && r.end >= 1) {
+            return i;
+        }
     }
-
-    return result;
+    return null;
 }
 
-function runAllocation(slokasOnly) {
+function runAllocation(mode) {
     const config = window.currentStothramConfig;
     if (!config) {
-        alert("Please select a stothram first.");
+        alert("Please select a stothram from the left panel.");
         return;
     }
 
@@ -101,7 +93,8 @@ function runAllocation(slokasOnly) {
 
     const devotees = names.map(n => ({
         name: n,
-        load: 0
+        load: 0,
+        blocked: false
     }));
 
     function findDevoteeForSegment(segLabel) {
@@ -109,10 +102,13 @@ function runAllocation(slokasOnly) {
         let bestScore = Infinity;
 
         devotees.forEach(d => {
+            if (d.blocked) return;
+
             const histSet = historyMap[d.name] || new Set();
             const hasSeen = histSet.has(segLabel) ? 1 : 0;
             const totalSeen = histSet.size;
             const score = d.load * 100 + hasSeen * 10 + totalSeen;
+
             if (score < bestScore) {
                 bestScore = score;
                 best = d;
@@ -123,25 +119,61 @@ function runAllocation(slokasOnly) {
     }
 
     const allocation = [];
-
-    // 1. Fixed segments (except Dhyānam ranges handled explicitly)
     const fixed = config.fixedSegments;
+    const nDev = devotees.length;
 
-    // Starting Prayer
-    const startSeg = fixed.find(f => f.id === "starting_prayer");
-    if (startSeg) {
-        const d = findDevoteeForSegment(startSeg.label);
-        if (d) {
-            allocation.push({
-                label: startSeg.label,
-                range: "",
-                name: d.name
-            });
-            d.load++;
+    // Ranges
+
+    // Poorvāṅga: enforce minimum block size = 2
+    const poorTotal = config.totals.poorvangaEnd - config.totals.poorvangaStart + 1; // 22
+    let poorCount = Math.floor(poorTotal / 2); // max number of 2-sloka blocks
+
+    if (nDev < poorCount) {
+        // fewer devotees → fewer, larger blocks
+        poorCount = nDev;
+    }
+
+    const poorRanges = createRanges(
+        config.totals.poorvangaStart,
+        config.totals.poorvangaEnd,
+        poorCount
+    );
+
+    const slokaRanges = createRanges(
+        config.totals.slokaStart,
+        config.totals.slokaEnd,
+        nDev
+    );
+    const phalaRanges = createRanges(
+        config.totals.phalashrutiStart,
+        config.totals.phalashrutiEnd,
+        nDev
+    );
+
+    // KSST rule (only for FULL mode): exactly once, Poorvāṅga 1–10 only
+    let ksstName = null;
+    let ksstPoorIndex = null;
+    if (mode === "full") {
+        const hasKSST = devotees.some(d => d.name.toUpperCase() === "KSST");
+        if (hasKSST) {
+            ksstName = devotees.find(d => d.name.toUpperCase() === "KSST").name;
+            ksstPoorIndex = pickKSSTPoorvangaPortion(poorRanges);
         }
     }
 
-    // Mahalakshmi Ashtakam – TBD
+    // 1. Starting Prayer
+    const startSeg = fixed.find(f => f.id === "starting_prayer");
+    if (startSeg) {
+        const d = findDevoteeForSegment(startSeg.label);
+        allocation.push({
+            label: startSeg.label,
+            range: "",
+            name: d ? d.name : "TBD"
+        });
+        if (d) d.load++;
+    }
+
+    // 2. Śrī Mahālakṣmī Aṣṭakam (TBD)
     const mahaSeg = fixed.find(f => f.id === "mahalakshmi_ashtakam");
     if (mahaSeg) {
         allocation.push({
@@ -151,180 +183,122 @@ function runAllocation(slokasOnly) {
         });
     }
 
-    // Nyāsa
-    const nyasaSeg = fixed.find(f => f.id === "nyasa");
-    if (nyasaSeg) {
-        const d = findDevoteeForSegment(nyasaSeg.label);
-        if (d) {
+    if (mode === "full") {
+        // 3. Poorvāṅga (with KSST rule)
+        const poorvangaPortions = poorRanges.map((r, idx) => ({
+            label: "Poorvāṅga",
+            range: r.start + "–" + r.end,
+            index: idx
+        }));
+
+        poorvangaPortions.forEach((p, idx) => {
+            let chosenDevotee;
+
+            if (ksstName && ksstPoorIndex === idx) {
+                chosenDevotee = devotees.find(d => d.name === ksstName);
+                if (chosenDevotee) {
+                    chosenDevotee.blocked = true; // KSST used once, then blocked
+                }
+            } else {
+                chosenDevotee = findDevoteeForSegment(p.label);
+            }
+
+            allocation.push({
+                label: p.label,
+                range: p.range,
+                name: chosenDevotee ? chosenDevotee.name : "TBD"
+            });
+
+            if (chosenDevotee) chosenDevotee.load++;
+        });
+
+        // 4. Nyāsa
+        const nyasaSeg = fixed.find(f => f.id === "nyasa");
+        if (nyasaSeg) {
+            const d = findDevoteeForSegment(nyasaSeg.label);
             allocation.push({
                 label: nyasaSeg.label,
                 range: "",
-                name: d.name
+                name: d ? d.name : "TBD"
             });
-            d.load++;
+            if (d) d.load++;
         }
-    }
 
-    // Dhyānam 1–3
-    const dh1 = fixed.find(f => f.id === "dhyana_1_3");
-    if (dh1) {
-        const d = findDevoteeForSegment(dh1.label);
-        if (d) {
+        // 5. Dhyānam 1–3
+        const dh1 = fixed.find(f => f.id === "dhyana_1_3");
+        if (dh1) {
+            const d = findDevoteeForSegment(dh1.label);
             allocation.push({
                 label: dh1.label,
                 range: dh1.range || "1–3",
-                name: d.name
+                name: d ? d.name : "TBD"
             });
-            d.load++;
+            if (d) d.load++;
         }
-    }
 
-    // Dhyānam 4–8
-    const dh2 = fixed.find(f => f.id === "dhyana_4_8");
-    if (dh2) {
-        const d = findDevoteeForSegment(dh2.label);
-        if (d) {
+        // 6. Dhyānam 4–8
+        const dh2 = fixed.find(f => f.id === "dhyana_4_8");
+        if (dh2) {
+            const d = findDevoteeForSegment(dh2.label);
             allocation.push({
                 label: dh2.label,
                 range: dh2.range || "4–8",
-                name: d.name
+                name: d ? d.name : "TBD"
             });
-            d.load++;
+            if (d) d.load++;
         }
-    }
 
-    // 2. Major segments: Poorvāṅga, Ślokam, Phalaśruti
-    const nDev = devotees.length;
-
-    const poorRanges = createRanges(
-        config.totals.poorvangaStart,
-        config.totals.poorvangaEnd,
-        nDev
-    );
-
-    const slokaRanges = createRanges(
-        config.totals.slokaStart,
-        config.totals.slokaEnd,
-        nDev
-    );
-
-    const phalaRanges = createRanges(
-        config.totals.phalashrutiStart,
-        config.totals.phalashrutiEnd,
-        nDev
-    );
-
-    const poorvangaPortions = poorRanges.map((r, idx) => ({
-        label: "Poorvāṅga",
-        range: r.start + "–" + r.end,
-        index: idx
-    }));
-
-    const ksstRule = applyKSSTRuleOnPoorvangaPortions(poorvangaPortions, names);
-
-    // Assign Poorvāṅga
-    poorvangaPortions.forEach((p, idx) => {
-        let chosenDevotee;
-        if (ksstRule.hasKSST && ksstRule.forcedIndex === idx) {
-            chosenDevotee = devotees.find(d => d.name === ksstRule.ksstName);
-        } else {
-            chosenDevotee = findDevoteeForSegment(p.label);
-        }
-        if (chosenDevotee) {
-            allocation.push({
-                label: p.label,
-                range: p.range,
-                name: chosenDevotee.name
-            });
-            chosenDevotee.load++;
-        } else {
-            allocation.push({
-                label: p.label,
-                range: p.range,
-                name: "TBD"
-            });
-        }
-    });
-
-    if (!slokasOnly) {
-        // Ślokam + Phalaśruti
+        // 7. Main Ślokam portions
         slokaRanges.forEach(r => {
-            const segLabel = "Ślokam";
+            const segLabel = "Main Ślokam";
             const d = findDevoteeForSegment(segLabel);
-            if (d) {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: d.name
-                });
-                d.load++;
-            } else {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: "TBD"
-                });
-            }
+            allocation.push({
+                label: segLabel,
+                range: r.start + "–" + r.end,
+                name: d ? d.name : "TBD"
+            });
+            if (d) d.load++;
         });
 
+        // 8. Phalaśruti portions
         phalaRanges.forEach(r => {
             const segLabel = "Phalaśruti";
             const d = findDevoteeForSegment(segLabel);
-            if (d) {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: d.name
-                });
-                d.load++;
-            } else {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: "TBD"
-                });
-            }
+            allocation.push({
+                label: segLabel,
+                range: r.start + "–" + r.end,
+                name: d ? d.name : "TBD"
+            });
+            if (d) d.load++;
         });
-    } else {
-        // Only Ślokam
+
+    } else if (mode === "108") {
+
+        // 108-ONLY MODE (NO Poorvanga, NO Nyasa, NO Dhyānam, NO Phalaśruti)
         slokaRanges.forEach(r => {
-            const segLabel = "Ślokam";
+            const segLabel = "Main Ślokam";
             const d = findDevoteeForSegment(segLabel);
-            if (d) {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: d.name
-                });
-                d.load++;
-            } else {
-                allocation.push({
-                    label: segLabel,
-                    range: r.start + "–" + r.end,
-                    name: "TBD"
-                });
-            }
+
+            allocation.push({
+                label: segLabel,
+                range: r.start + "–" + r.end,
+                name: d ? d.name : "TBD"
+            });
+
+            if (d) d.load++;
         });
     }
 
-    // 3. Closing: Kṣamā Prārthanā & Ending Prayer
+    // Last: Kṣamā Prārthanā & Ending Prayer
     const kshSeg = fixed.find(f => f.id === "kshama_ending");
     if (kshSeg) {
         const d = findDevoteeForSegment(kshSeg.label);
-        if (d) {
-            allocation.push({
-                label: kshSeg.label,
-                range: "",
-                name: d.name
-            });
-            d.load++;
-        } else {
-            allocation.push({
-                label: kshSeg.label,
-                range: "",
-                name: "TBD"
-            });
-        }
+        allocation.push({
+            label: kshSeg.label,
+            range: "",
+            name: d ? d.name : "TBD"
+        });
+        if (d) d.load++;
     }
 
     window.lastAllocation = allocation;
@@ -378,11 +352,77 @@ function reallocateFromLast(lastAllocation) {
     return combined;
 }
 
+// FINAL OUTPUT FORMAT with header + gaps after Poorvāṅga, Dhyānam, Main Ślokam, Phalaśruti
 function formatAllocationOutput(allocation) {
-    return allocation
-        .map(item => {
-            const rangePart = item.range ? " - " + item.range : " - ";
-            return item.label + rangePart + " - " + item.name;
-        })
-        .join("\n");
+    const lines = [];
+
+    // HEADER SECTION
+    const batch = (document.getElementById("batchNumber")?.value || "").trim() || "—";
+    const date = (document.getElementById("satsangDate")?.value || "").trim() || "—";
+    const time = (document.getElementById("satsangTime")?.value || "").trim() || "—";
+
+    lines.push("*Om Namo Narayana*");
+    lines.push("-----------------------------------------------------------------------");
+    lines.push(`Batch Number: ${batch}   Satsang Date: ${date}   Satsang Time: ${time} IST`);
+    lines.push("-----------------------------------------------------------------------");
+    lines.push("");
+
+    const singleColonLabels = [
+        "Starting Prayer",
+        "Śrī Mahālakṣmī Aṣṭakam",
+        "Nyāsa",
+        "Kṣamā Prārthanā & Ending Prayer"
+    ];
+
+    // Group by label type
+    const poorvanga = allocation.filter(a => a.label === "Poorvāṅga");
+    const dhyanam = allocation.filter(a => a.label === "Dhyānam");
+    const mainSlokam = allocation.filter(a => a.label === "Main Ślokam");
+    const phala = allocation.filter(a => a.label === "Phalaśruti");
+    const others = allocation.filter(a =>
+        !["Poorvāṅga", "Dhyānam", "Main Ślokam", "Phalaśruti"].includes(a.label)
+    );
+
+    function pushItem(item) {
+        if (singleColonLabels.includes(item.label)) {
+            lines.push(`${item.label}:   ${item.name}`);
+            lines.push("");
+        } else {
+            const rangePart = item.range ? ` - ${item.range}` : "";
+            lines.push(`${item.label}${rangePart} -> ${item.name}`);
+        }
+    }
+
+    // 1. Starting Prayer, Mahalakshmi
+    others
+        .filter(o =>
+            ["Starting Prayer", "Śrī Mahālakṣmī Aṣṭakam"].includes(o.label)
+        )
+        .forEach(pushItem);
+
+    // 2. Poorvāṅga block
+    poorvanga.forEach(pushItem);
+    if (poorvanga.length) lines.push("");
+
+    // 3. Nyāsa
+    others.filter(o => o.label === "Nyāsa").forEach(pushItem);
+
+    // 4. Dhyānam block
+    dhyanam.forEach(pushItem);
+    if (dhyanam.length) lines.push("");
+
+    // 5. Main Ślokam block
+    mainSlokam.forEach(pushItem);
+    if (mainSlokam.length) lines.push("");
+
+    // 6. Phalaśruti block
+    phala.forEach(pushItem);
+    if (phala.length) lines.push("");
+
+    // 7. Kṣamā Prārthanā & Ending Prayer
+    others
+        .filter(o => o.label === "Kṣamā Prārthanā & Ending Prayer")
+        .forEach(pushItem);
+
+    return lines.join("\n");
 }

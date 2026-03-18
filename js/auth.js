@@ -1,7 +1,6 @@
 /* ============================================================
    SIMPLE PASSWORD CHECK (FINAL CLEAN VERSION)
    ============================================================ */
-
 function checkPassword() {
     const entered = document.getElementById("pass").value.trim();
 

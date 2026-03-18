@@ -6,225 +6,91 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- External libs (place in same folder or CDN as you prefer) -->
+<!-- External libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
 
-<script src="js/auth.js"></script>
+<!-- Shared engines -->
 <script src="js/allocationEngine.js"></script>
-<script src="js/vsn.js"></script>
 <script src="js/excel.js"></script>
 <script src="js/pdf.js"></script>
 
 <script>
-function onStothramClick(key) {
-    if (key === 'vsn') {
-        loadVSN();
-    } else {
-        alert("This stothram is not yet configured.");
-    }
-}
+/* ============================================================
+   DYNAMIC STOTHRAM LOADER
+   Loads /vsn/vsn.html, /lalitha/lalitha.html, /lakshmi/lakshmi.html
+   into the #tool-panel container.
+   ============================================================ */
+function onStothramClick(stothram) {
+    const panel = document.getElementById("tool-panel");
 
-function validateInputs() {
-    const names = document.getElementById("mainNames").value.trim();
-    const date = document.getElementById("satsangDate").value.trim();
-    const time = document.getElementById("satsangTime").value.trim();
+    panel.innerHTML = "<div class='tool-title'>Loading...</div>";
 
-    if (!names) {
-        alert("Please enter devotee names.");
-        return false;
-    }
-    if (!date) {
-        alert("Please select Satsang Date.");
-        return false;
-    }
-    if (!time) {
-        alert("Please enter Satsang Time.");
-        return false;
-    }
-    if (!window.currentStothramConfig) {
-        alert("Please select a stothram from the left panel.");
-        return false;
-    }
-    return true;
-}
-
-function allocateFull() {
-    if (!validateInputs()) return;
-    runAllocation(false);
-}
-
-function allocateSlokas() {
-    if (!validateInputs()) return;
-    runAllocation(true);
-}
-
-function clearAllFields() {
-    document.getElementById("batchNumber").value = "";
-    document.getElementById("satsangDate").value = "";
-    document.getElementById("satsangTime").value = "";
-    document.getElementById("mainNames").value = "";
-    document.getElementById("historyInput").value = "";
-    document.getElementById("historyFile").value = "";
-    document.getElementById("output").value = "";
-    window.lastAllocation = null;
-}
-
-function clearNamesField() {
-    document.getElementById("mainNames").value = "";
-}
-
-function clearHistoryField() {
-    document.getElementById("historyInput").value = "";
-    document.getElementById("historyFile").value = "";
-}
-
-function handleHistoryFileUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const existing = document.getElementById("historyInput").value.trim();
-        const text = e.target.result;
-        document.getElementById("historyInput").value =
-            (existing ? existing + "\n" : "") + text;
-    };
-    reader.readAsText(file);
-}
-
-function reallocateCurrent() {
-    if (!window.lastAllocation) {
-        alert("Please run an allocation first.");
-        return;
-    }
-    const shuffled = reallocateFromLast(window.lastAllocation);
-    window.lastAllocation = shuffled;
-    document.getElementById("output").value = formatAllocationOutput(shuffled);
-}
-
-function downloadExcelFromOutput() {
-    const output = document.getElementById("output").value.trim();
-    if (!output) {
-        alert("No allocation found. Please allocate first.");
-        return;
-    }
-    downloadExcelFromText(output);
-}
-
-function downloadPDFFromOutput() {
-    const output = document.getElementById("output").value.trim();
-    if (!output) {
-        alert("No allocation found. Please allocate first.");
-        return;
-    }
-    downloadPDFFromText(output);
+    fetch(stothram + "/" + stothram + ".html")
+        .then(response => response.text())
+        .then(html => {
+            panel.innerHTML = html;
+        })
+        .catch(err => {
+            panel.innerHTML = "<div class='tool-title'>Unable to load stothram.</div>";
+        });
 }
 </script>
+
 </head>
 
 <body>
 
-<div id="password-screen">
-    <div class="header">Hari Om Namo Narayana</div>
-    <div style="text-align:center; margin-top:40px;">
-        <h2>KSST Coordinator Access</h2>
-        <input type="password" id="pass" placeholder="Enter Password">
-        <br><br>
-        <button class="btn" onclick="checkPassword()">Login</button>
+<!-- HEADER -->
+<header class="header">
+    <img src="images/ksst-logo.jpeg" class="ksst-logo">
+
+    <div class="header-text">
+        <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
+        <div class="tagline">Satsang Allocation</div>
     </div>
-</div>
 
-<div id="tool-screen" style="display:none;">
-    <div class="header">Hari Om Namo Narayana</div>
+    <img src="images/om.png" class="om-image">
+</header>
 
-    <div class="main-layout">
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
 
-        <!-- LEFT NAVIGATION -->
-        <div class="nav-panel">
-            <div class="nav-title">Stothram Selection</div>
-            <button class="nav-item" onclick="onStothramClick('vsn')">
-                Śrī Viṣṇu Sahasranāma
-            </button>
-            <button class="nav-item disabled">
-                Śrī Lalitā Sahasranāma (Coming Soon)
-            </button>
-            <button class="nav-item disabled">
-                Śrī Mahālakṣmī Sahasranāma (Coming Soon)
-            </button>
-            <button class="nav-item disabled">
-                Stothram 3 (Coming Soon)
-            </button>
-            <button class="nav-item disabled">
-                Stothram 4 (Coming Soon)
-            </button>
-            <button class="nav-item disabled">
-                Stothram 5 (Coming Soon)
-            </button>
-        </div>
+    <!-- LEFT NAVIGATION -->
+    <div class="nav-panel">
+        <div class="nav-title">Stothram Selection</div>
 
-        <!-- MAIN TOOL AREA -->
-        <div class="tool-panel">
+        <button class="nav-item" onclick="onStothramClick('vsn')">
+            Śrī Viṣṇu Sahasranāma
+        </button>
 
-            <div id="toolTitle" class="tool-title">
-                Please select a Stothram from the left panel
-            </div>
+        <button class="nav-item" onclick="onStothramClick('lalitha')">
+            Śrī Lalitā Sahasranāma
+        </button>
 
-            <div class="allocation-container">
+        <button class="nav-item" onclick="onStothramClick('lakshmi')">
+            Śrī Mahālakṣmī Sahasranāma
+        </button>
+		
+		<button class="nav-item disabled">Stothram (Placeholder)</button>
+        <button class="nav-item disabled">Stothram (Placeholder)</button>
 
-                <!-- LEFT PANEL -->
-                <div class="left-panel">
+    </div>
 
-                    <label>Batch Number</label>
-                    <input type="text" id="batchNumber" class="small-input">
-
-                    <label>Satsang Date</label>
-                    <input type="date" id="satsangDate" class="small-input">
-
-                    <label>Satsang Time (IST)</label>
-                    <input type="text" id="satsangTime" class="small-input" placeholder="e.g., 6:00 PM">
-
-                    <label>Enter Devotee Names (one name per line)</label>
-                    <textarea id="mainNames"></textarea>
-                    <div class="inline-btn-row">
-                        <button class="btn-secondary" onclick="clearNamesField()">Clear Names</button>
-                    </div>
-
-                    <label>Provide History Allocation(s) here (Optional)</label>
-                    <textarea id="historyInput" placeholder="Format: Segment - Range - Name"></textarea>
-                    <div class="inline-btn-row">
-                        <input type="file" id="historyFile" accept=".txt" onchange="handleHistoryFileUpload(this)">
-                        <button class="btn-secondary" onclick="clearHistoryField()">Clear History</button>
-                    </div>
-
-                    <div class="btn-row">
-                        <button class="btn" onclick="allocateFull()">Allocate Full</button>
-                        <button class="btn" onclick="allocateSlokas()">Allocate Only Ślokam</button>
-                        <button class="btn" onclick="reallocateCurrent()">ReAllocate</button>
-                        <button class="btn" onclick="clearAllFields()">Clear All Fields</button>
-                    </div>
-
-                </div>
-
-                <!-- RIGHT PANEL -->
-                <div class="right-panel">
-                    <label>Here is your Allocation:</label>
-                    <textarea id="output" readonly></textarea>
-
-                    <div class="btn-row below-output">
-                        <button class="btn" onclick="downloadExcelFromOutput()">Download Excel</button>
-                        <button class="btn" onclick="downloadPDFFromOutput()">Download PDF</button>
-                    </div>
-                </div>
-
-            </div>
+    <!-- TOOL PANEL (Dynamic Content Loads Here) -->
+    <div id="tool-panel" class="tool-panel">
+        <div class="tool-title">
+            Please select a stothram from the left panel.
         </div>
     </div>
 
-    <div class="footer">
-        KSST Satsang Seva • Viṣṇu Sahasranāma Allocation Tool
-    </div>
 </div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
+</footer>
 
 </body>
 </html>
