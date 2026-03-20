@@ -39,6 +39,8 @@
 function checkLogin() {
     const entered = document.getElementById("passInput").value.trim();
     if (entered === "Vaikuntha") {
+        // Set authentication flag in sessionStorage so satsangallocation.html recognizes it
+        sessionStorage.setItem("ksst_authenticated", "true");
         window.location.href = "satsangallocation.html";
     } else {
         document.getElementById("errorMsg").innerText = "Incorrect password.";
