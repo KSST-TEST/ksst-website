@@ -1,0 +1,88 @@
+<div class="tool-panel lakshmi-panel">
+
+    <h2 class="tool-title">Sri Lakshmi Sahasra Nama Stotram — Allocation Tool</h2>
+
+    <!-- TOP ROW - SMALL INPUT FIELDS -->
+    <div class="lakshmi-top-inputs">
+        <div class="input-group">
+            <label>Batch Number</label>
+            <input type="text" id="lakshmi-batchNumber" class="lakshmi-small-input" placeholder="">
+        </div>
+        <div class="input-group">
+            <label>Satsang No#</label>
+            <input type="text" id="lakshmi-satsangNo" class="lakshmi-small-input" placeholder="1">
+        </div>
+        <div class="input-group">
+            <label>Satsang Date</label>
+            <input type="date" id="lakshmi-satsangDate" class="lakshmi-small-input">
+        </div>
+        <div class="input-group">
+            <label>Satsang Time (IST)</label>
+            <input type="time" id="lakshmi-satsangTime" class="lakshmi-small-input" placeholder="e.g., 6:00 PM">
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT - TWO COLUMNS -->
+    <div class="lakshmi-main-container">
+
+        <!-- LEFT COLUMN -->
+        <div class="lakshmi-left-column">
+
+            <!-- DEVOTEE NAMES INPUT -->
+            <div class="lakshmi-input-section">
+                <label class="lakshmi-section-title">Enter Devotee Names (one name per line)</label>
+                <textarea id="lakshmi-namesInput" class="lakshmi-textarea" rows="10" placeholder="Enter one name per line"></textarea>
+            </div>
+
+            <!-- HISTORY INPUT -->
+            <div class="lakshmi-input-section">
+                <label class="lakshmi-section-title">Provide History Allocation(s) here (Optional)</label>
+                <p style="font-size: 12px; color: #666; margin: 5px 0;">
+                    📝 Paste previous allocation output (supports multiple formats and files)
+                </p>
+                <textarea id="lakshmi-historyInput" class="lakshmi-textarea" rows="6" placeholder="Paste previous allocations here. Supported formats:&#10;• Poorvāṅga 1-4 -> Name&#10;• Main Ślokam 5-8: Name&#10;• Phalaśruti 1-3 Name&#10;&#10;Tool will auto-detect format and prevent unfair repeats!"></textarea>
+                
+                <div class="lakshmi-file-row">
+                    <button class="lakshmi-btn-file" onclick="document.getElementById('lakshmi-fileInput').click()">Choose File</button>
+                    <span id="lakshmi-fileName" class="lakshmi-file-name">No file chosen</span>
+                </div>
+                <input type="file" id="lakshmi-fileInput" style="display:none;" accept=".txt,.csv,.xlsx" onchange="handleLakshmiFileUpload(event)">
+
+                <button class="lakshmi-btn-small" onclick="clearLakshmiHistory()">Clear History</button>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="lakshmi-action-buttons">
+                <div class="lakshmi-action-row">
+                    <button class="lakshmi-btn-primary" onclick="runLakshmiAllocateFull()">Allocate Full</button>
+                    <button class="lakshmi-btn-primary" onclick="runLakshmiAllocateSlokam()">Allocate Only Ślokam</button>
+                    <button class="lakshmi-btn-primary" onclick="reLakshmiAllocate()">ReAllocate</button>
+                </div>
+                <button class="lakshmi-btn-small" onclick="clearLakshmiAllFields()">Clear All Fields</button>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="lakshmi-right-column">
+
+            <!-- OUTPUT SECTION -->
+            <div class="lakshmi-output-section">
+                <label class="lakshmi-section-title">Here is your Allocation:</label>
+                <div class="lakshmi-output-box">
+                    <div id="lakshmi-output"></div>
+                </div>
+            </div>
+
+            <!-- DOWNLOAD BUTTONS -->
+            <div class="lakshmi-download-buttons">
+                <button class="lakshmi-btn-download" onclick="copyLakshmiOutput(this)">Copy Output</button>
+                <button class="lakshmi-btn-download" onclick="onLakshmiExportExcel()">Download Excel</button>
+                <button class="lakshmi-btn-download" onclick="onLakshmiExportPDF()">Download PDF</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

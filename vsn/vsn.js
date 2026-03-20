@@ -226,6 +226,7 @@ function allocateVSN(params) {
         console.log("Classified participants:", { guruji, ksst, main });
         
         const allocations = [];
+        let globalPersonIndex = 0;  // Track across ALL segments - continuous round-robin
     
         // Helper: distribute segment fairly across ALL people with flexible chunk sizes
         function distributeSegment(segmentName, totalSlokas, participantList, minChunk = 4, maxChunk = 8) {
@@ -233,27 +234,13 @@ function allocateVSN(params) {
             
             if (!participantList || participantList.length === 0) return segmentAllocations;
 
-            // Randomize starting point for round-robin consistency
-            const startIndex = Math.floor(Math.random() * participantList.length);
-            
             const numPeople = participantList.length;
             let slokaIndex = 1;  // Start from sloka 1
-            let allocationsCount = {};
-            
-            // Initialize allocation counter for tracking fairness
-            for (let i = 0; i < numPeople; i++) {
-                allocationsCount[i] = 0;
-            }
-            
-            // Distribute slokas round-robin until all are allocated
-            // Ensure everyone gets at least 1 allocation
-            const minSlokaPerPerson = Math.max(minChunk, Math.floor(totalSlokas / (numPeople * maxChunk)));
-            let personIndex = 0;
             
             while (slokaIndex <= totalSlokas) {
-                const person = participantList[(startIndex + personIndex) % numPeople];
+                const person = participantList[globalPersonIndex % numPeople];
                 const remaining = totalSlokas - slokaIndex + 1;
-                const peopleRemaining = numPeople - (personIndex % numPeople);
+                const peopleRemaining = numPeople - (globalPersonIndex % numPeople);
                 
                 // Calculate chunk size fairness
                 let chunkSize;
@@ -284,25 +271,9 @@ function allocateVSN(params) {
                     });
                     
                     slokaIndex = endSloka + 1;
-                    allocationsCount[(startIndex + personIndex) % numPeople]++;
                 }
                 
-                personIndex++;
-                
-                // Safety check: if we've gone through all people twice, break
-                if (personIndex >= numPeople * 2 && slokaIndex <= totalSlokas) {
-                    // Assign remaining to current person
-                    const person = participantList[personIndex % numPeople];
-                    if (slokaIndex <= totalSlokas) {
-                        segmentAllocations.push({
-                            segment: segmentName,
-                            from: slokaIndex,
-                            to: totalSlokas,
-                            name: person
-                        });
-                        break;
-                    }
-                }
+                globalPersonIndex++;  // Continue to next person globally
             }
             
             return segmentAllocations;
@@ -446,7 +417,7 @@ let currentMetadata = {
 
 function runAllocateFull() {
     try {
-        const rawNames = document.getElementById("namesInput").value
+        const rawNames = document.getElementById("vsn-namesInput").value
             .split(/\r?\n/)
             .map(x => x.trim())
             .filter(x => x);
@@ -458,11 +429,11 @@ function runAllocateFull() {
             return;
         }
 
-        const batchNumber = document.getElementById("batchNumber").value.trim();
-        const satsangNo = document.getElementById("satsangNo").value.trim() || "1";
-        const satsangDate = document.getElementById("satsangDate").value.trim();
-        const satsangTime = document.getElementById("satsangTime").value.trim();
-        const historyText = document.getElementById("historyInput").value;
+        const batchNumber = document.getElementById("vsn-batchNumber").value.trim();
+        const satsangNo = document.getElementById("vsn-satsangNo").value.trim() || "1";
+        const satsangDate = document.getElementById("vsn-satsangDate").value.trim();
+        const satsangTime = document.getElementById("vsn-satsangTime").value.trim();
+        const historyText = document.getElementById("vsn-historyInput").value;
 
         // Store metadata for export functions
         currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime };
@@ -491,7 +462,7 @@ function runAllocateFull() {
 
 function runAllocateSlokam() {
     try {
-        const rawNames = document.getElementById("namesInput").value
+        const rawNames = document.getElementById("vsn-namesInput").value
             .split(/\r?\n/)
             .map(x => x.trim())
             .filter(x => x);
@@ -501,11 +472,11 @@ function runAllocateSlokam() {
             return;
         }
 
-        const batchNumber = document.getElementById("batchNumber").value.trim();
-        const satsangNo = document.getElementById("satsangNo").value.trim() || "1";
-        const satsangDate = document.getElementById("satsangDate").value.trim();
-        const satsangTime = document.getElementById("satsangTime").value.trim();
-        const historyText = document.getElementById("historyInput").value;
+        const batchNumber = document.getElementById("vsn-batchNumber").value.trim();
+        const satsangNo = document.getElementById("vsn-satsangNo").value.trim() || "1";
+        const satsangDate = document.getElementById("vsn-satsangDate").value.trim();
+        const satsangTime = document.getElementById("vsn-satsangTime").value.trim();
+        const historyText = document.getElementById("vsn-historyInput").value;
 
         // Store metadata for export functions
         currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime };
@@ -550,7 +521,7 @@ function renderVSNOutput(list, metadata = {}) {
         
         if (!list || list.length === 0) {
             console.warn("Warning: List is empty or null");
-            document.getElementById("output").innerText = "No allocations generated. Please check input names.";
+            document.getElementById("vsn-output").innerText = "No allocations generated. Please check input names.";
             return;
         }
         
@@ -611,8 +582,10 @@ function renderVSNOutput(list, metadata = {}) {
                     // For multi-item segments, show segment header then each allocation
                     for (const alloc of allocsInSegment) {
                         let rangeStr;
-                        if (alloc.from === alloc.to) {
+                        if (alloc.segment === "Nyāsa" && alloc.from === alloc.to) {
                             rangeStr = "Full";
+                        } else if (alloc.from === alloc.to) {
+                            rangeStr = `${alloc.from}`;
                         } else {
                             rangeStr = `${alloc.from}–${alloc.to}`;
                         }
@@ -627,33 +600,33 @@ function renderVSNOutput(list, metadata = {}) {
             }
         }
         
-        document.getElementById("output").innerText = lines.join("\n");
+        document.getElementById("vsn-output").innerText = lines.join("\n");
     } catch (err) {
         console.error("Error in renderVSNOutput:", err);
-        document.getElementById("output").innerText = "Error rendering output: " + err.message;
+        document.getElementById("vsn-output").innerText = "Error rendering output: " + err.message;
     }
 }
 
 function clearNames() {
-    document.getElementById("namesInput").value = "";
+    document.getElementById("vsn-namesInput").value = "";
 }
 
 function clearHistory() {
-    document.getElementById("historyInput").value = "";
-    document.getElementById("fileInput").value = "";
-    document.getElementById("fileName").innerText = "No file chosen";
+    document.getElementById("vsn-historyInput").value = "";
+    document.getElementById("vsn-fileInput").value = "";
+    document.getElementById("vsn-fileName").innerText = "No file chosen";
 }
 
 function clearAllFields() {
-    document.getElementById("batchNumber").value = "";
-    document.getElementById("satsangNo").value = "";
-    document.getElementById("satsangDate").value = "";
-    document.getElementById("satsangTime").value = "";
-    document.getElementById("namesInput").value = "";
-    document.getElementById("historyInput").value = "";
-    document.getElementById("fileInput").value = "";
-    document.getElementById("fileName").innerText = "No file chosen";
-    document.getElementById("output").innerText = "";
+    document.getElementById("vsn-batchNumber").value = "";
+    document.getElementById("vsn-satsangNo").value = "";
+    document.getElementById("vsn-satsangDate").value = "";
+    document.getElementById("vsn-satsangTime").value = "";
+    document.getElementById("vsn-namesInput").value = "";
+    document.getElementById("vsn-historyInput").value = "";
+    document.getElementById("vsn-fileInput").value = "";
+    document.getElementById("vsn-fileName").innerText = "No file chosen";
+    document.getElementById("vsn-output").innerText = "";
     currentAllocations = [];
 }
 
@@ -661,34 +634,64 @@ function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    document.getElementById("fileName").innerText = file.name;
+    document.getElementById("vsn-fileName").innerText = file.name;
 
     const reader = new FileReader();
     reader.onload = function(e) {
         const content = e.target.result;
-        document.getElementById("historyInput").value = content;
+        document.getElementById("vsn-historyInput").value = content;
     };
     reader.readAsText(file);
 }
 
 function exportVSNExcel() {
-    if (currentAllocations.length === 0) {
+    console.log("exportVSNExcel called");
+    console.log("currentAllocations:", currentAllocations);
+    console.log("currentMetadata:", currentMetadata);
+    console.log("typeof exportToExcel:", typeof exportToExcel);
+    
+    if (!currentAllocations || currentAllocations.length === 0) {
         alert("Please run an allocation first.");
         return;
     }
-    exportToExcel(currentAllocations, currentMetadata);
+    
+    if (typeof exportToExcel !== 'function') {
+        console.error("exportToExcel function not found!");
+        alert("Error: Excel export function not loaded. Please refresh the page.");
+        return;
+    }
+    
+    try {
+        console.log("Calling exportToExcel...");
+        exportToExcel(currentAllocations, currentMetadata);
+        console.log("Excel export completed");
+    } catch (err) {
+        console.error("Error calling exportToExcel:", err);
+        alert("Error: " + err.message);
+    }
 }
 
 function exportVSNPDF() {
+    console.log("exportVSNPDF called");
+    console.log("currentAllocations:", currentAllocations);
+    console.log("currentMetadata:", currentMetadata);
+    
     if (currentAllocations.length === 0) {
         alert("Please run an allocation first.");
         return;
     }
-    exportToPDF(currentAllocations, currentMetadata);
+    
+    try {
+        exportToPDF(currentAllocations, currentMetadata);
+        console.log("PDF export completed");
+    } catch (err) {
+        console.error("Error calling exportToPDF:", err);
+        alert("Error: " + err.message);
+    }
 }
 
 function copyOutput(button) {
-    const outputElement = document.getElementById("output");
+    const outputElement = document.getElementById("vsn-output");
     const outputText = outputElement.innerText;
     
     if (!outputText || outputText.trim() === "") {

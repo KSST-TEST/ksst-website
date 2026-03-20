@@ -90,6 +90,24 @@ a {
     flex: 1;
 }
 
+.site-title {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    font-family: "Georgia", serif;
+}
+
+.tagline {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff9e6;
+    letter-spacing: 0.5px;
+}
+
 .ksst-logo {
     width: 80px;
     height: auto;
@@ -198,6 +216,124 @@ a {
     color: red;
     margin-top: 8px;
     font-size: 14px;
+}
+
+/* ============================================================
+   EVENTS PAGE TABLE
+   ============================================================ */
+
+.events-section {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.events-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.events-table thead {
+    background: #1F4E78;
+    color: white;
+}
+
+.events-table th {
+    padding: 15px;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-weight: bold;
+    border: 1px solid #1F4E78;
+}
+
+.events-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    font-family: Calibri, sans-serif;
+    color: #4a2c2a;
+}
+
+.events-table tbody tr:nth-child(odd) {
+    background: #f9f9f9;
+}
+
+.events-table tbody tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+.events-table tbody tr:hover {
+    background: #e8f4f8;
+}
+
+/* ============================================================
+   MATERIALS PAGE TABLE
+   ============================================================ */
+
+.materials-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    overflow: auto;
+}
+
+.materials-left {
+    width: 50%;
+    float: left;
+    padding-right: 20px;
+}
+
+.materials-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.materials-table thead {
+    background: #1F4E78;
+    color: white;
+}
+
+.materials-table th {
+    padding: 15px;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-weight: bold;
+    border: 1px solid #1F4E78;
+}
+
+.materials-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    font-family: Calibri, sans-serif;
+    color: #4a2c2a;
+}
+
+.materials-table tbody tr:nth-child(odd) {
+    background: #f9f9f9;
+}
+
+.materials-table tbody tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+.materials-table tbody tr:hover {
+    background: #e8f4f8;
+}
+
+.materials-table th:first-child,
+.materials-table td:first-child {
+    width: 35%;
+}
+
+.materials-table th:not(:first-child),
+.materials-table td:not(:first-child) {
+    width: 21.67%;
+    text-align: center;
 }
 
 /* ============================================================
@@ -704,4 +840,198 @@ textarea {
     .welcome-image {
         width: 90%;
     }
+}
+
+/* ============================================================
+   LAKSHMI-SPECIFIC LAYOUT (Same as VSN styling)
+   ============================================================ */
+
+.lakshmi-panel {
+    padding: 20px;
+}
+
+.lakshmi-top-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.lakshmi-small-input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    box-sizing: border-box;
+    font-family: "Calibri", sans-serif;
+}
+
+.lakshmi-main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.lakshmi-left-column,
+.lakshmi-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.lakshmi-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lakshmi-section-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #4a2c2a;
+    margin: 0;
+}
+
+.lakshmi-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: "Calibri", sans-serif;
+}
+
+.lakshmi-file-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.lakshmi-btn-file {
+    padding: 8px 12px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lakshmi-btn-file:hover {
+    background: #e39a4a;
+}
+
+.lakshmi-file-name {
+    font-size: 12px;
+    color: #666;
+}
+
+.lakshmi-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.lakshmi-action-row {
+    display: flex;
+    gap: 3px;
+}
+
+.lakshmi-action-row .lakshmi-btn-primary {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+}
+
+.lakshmi-btn-primary {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #e67e22;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lakshmi-btn-primary:hover {
+    background: #d35400;
+}
+
+.lakshmi-output-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lakshmi-output-box {
+    background: #fffaf0;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    padding: 12px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.lakshmi-download-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.lakshmi-btn-download {
+    padding: 10px 14px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    flex: 1;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lakshmi-btn-download:hover {
+    background: #e39a4a;
+}
+
+.lakshmi-btn-small {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lakshmi-btn-small:hover {
+    background: #e39a4a;
 }

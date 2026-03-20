@@ -16,6 +16,102 @@
 <script src="vsn/vsn-excel.js"></script>
 <script src="vsn/vsn-pdf.js"></script>
 
+<script src="lalitha/lalitha.js"></script>
+<script src="lalitha/lalitha-excel.js"></script>
+<script src="lalitha/lalitha-pdf.js"></script>
+
+<script src="lakshmi/lakshmi.js"></script>
+<script src="lakshmi/lakshmi-excel.js"></script>
+<script src="lakshmi/lakshmi-pdf.js"></script>
+
+<script>
+/* ============================================================
+   COORDINATOR AUTHENTICATION
+   ============================================================ */
+const COORDINATOR_PASSWORD = "Vaikuntha"; // Change this to your desired password
+
+function checkAuthentication() {
+    const isAuthenticated = sessionStorage.getItem("ksst_authenticated");
+    if (!isAuthenticated) {
+        showLoginPage();
+    } else {
+        showAllocationPage();
+    }
+}
+
+function showLoginPage() {
+    document.body.innerHTML = `
+        <div style="background: #fff8e6; min-height: 100vh; display: flex; flex-direction: column;">
+            <header class="header" style="position: relative;">
+                <a href="index.html" style="position: absolute; right: 90px; top: 15px; font-size: 32px; text-decoration: none; color: #333; cursor: pointer;" title="Home">🏠</a>
+                <img src="images/ksst-logo.jpeg" class="ksst-logo">
+                <div class="header-text">
+                    <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
+                    <div class="tagline">Coordinator Access</div>
+                </div>
+                <img src="images/om.png" class="om-image">
+            </header>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                <div class="login-container">
+                    <h2 style="color: #4a2c2a; font-size: 28px; margin-bottom: 10px;">Coordinator Login</h2>
+                    <p style="color: #666; font-size: 16px;">Please enter your coordinator password to access the allocation tool.</p>
+                    <div class="login-box">
+                        <div>
+                            <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #4a2c2a;">Password:</label>
+                            <input type="password" id="passwordInput" class="login-input" placeholder="Enter password">
+                            <button onclick="handleLogin()" style="padding: 10px 25px; margin-top: 15px; background: #e67e22; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px;">Access Allocation Tool</button>
+                        </div>
+                        <div id="errorMsg" class="error-msg"></div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer">
+                © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
+            </footer>
+        </div>
+    `;
+    
+    // Focus on password input and allow Enter key
+    setTimeout(() => {
+        document.getElementById("passwordInput").focus();
+        document.getElementById("passwordInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleLogin();
+        });
+    }, 100);
+}
+
+function handleLogin() {
+    const password = document.getElementById("passwordInput").value;
+    if (password === COORDINATOR_PASSWORD) {
+        sessionStorage.setItem("ksst_authenticated", "true");
+        showAllocationPage();
+    } else {
+        document.getElementById("errorMsg").textContent = "❌ Invalid password. Please try again.";
+        document.getElementById("passwordInput").value = "";
+        document.getElementById("passwordInput").focus();
+    }
+}
+
+function showAllocationPage() {
+    // Reload page to show the allocation tool
+    window.location.reload();
+}
+
+// Check authentication on page load
+window.addEventListener("DOMContentLoaded", () => {
+    if (sessionStorage.getItem("ksst_authenticated") !== "true") {
+        checkAuthentication();
+    }
+});
+
+function logout() {
+    if (confirm("Are you sure you want to logout?")) {
+        sessionStorage.removeItem("ksst_authenticated");
+        window.location.reload();
+    }
+}
+</script>
+
 <script>
 /* ============================================================
    DYNAMIC STOTHRAM LOADER
@@ -26,14 +122,28 @@ function onStothramClick(stothram) {
     const panel = document.getElementById("tool-panel");
 
     panel.innerHTML = "<div class='tool-title'>Loading...</div>";
+    console.log("Loading stothram:", stothram);
 
     fetch(stothram + "/" + stothram + ".html")
-        .then(response => response.text())
+        .then(response => {
+            console.log("Fetch response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: Failed to load ${stothram}.html`);
+            }
+            return response.text();
+        })
         .then(html => {
+            console.log("HTML loaded, length:", html.length);
+            if (!html || html.trim().length === 0) {
+                panel.innerHTML = "<div class='tool-title'>Error: Empty or missing tool file</div>";
+                return;
+            }
             panel.innerHTML = html;
+            console.log("Stothram loaded successfully");
         })
         .catch(err => {
-            panel.innerHTML = "<div class='tool-title'>Unable to load stothram.</div>";
+            console.error("Error loading stothram:", err);
+            panel.innerHTML = "<div class='tool-title'>Error: " + err.message + "</div>";
         });
 }
 </script>
@@ -43,7 +153,8 @@ function onStothramClick(stothram) {
 <body>
 
 <!-- HEADER -->
-<header class="header">
+<header class="header" style="position: relative;">
+    <a href="index.html" style="position: absolute; right: 90px; top: 15px; font-size: 32px; text-decoration: none; color: #333; cursor: pointer;" title="Home">🏠</a>
     <img src="images/ksst-logo.jpeg" class="ksst-logo">
 
     <div class="header-text">
@@ -76,9 +187,9 @@ function onStothramClick(stothram) {
 		<button class="nav-item disabled">Śrī Lakṣmī Nesiṃha Sahasranāma</button>
         <button class="nav-item disabled">Devī Māhātmyam</button>
 
+        <button class="nav-item" onclick="logout()" style="background: #c0392b; margin-top: auto;">Logout</button>
     </div>
 
-    <!-- TOOL PANEL (Dynamic Content Loads Here) -->
     <div id="tool-panel" class="tool-panel">
         <div class="tool-title">
             Please select a stothram from the left panel.
