@@ -193,8 +193,10 @@ function allocateLakshmi(params) {
                 });
             }
             
-            // 2. POORVĀṄGA (10 slokas - NOT 22!) - distribute to main participants
-            const poorvangaAllocations = distributeSegment("Poorvāṅga", 10, main, 1, 3);
+            // 2. POORVĀṄGA (10 slokas - NOT 22!) - distribute to main participants (starting from main[1], not main[0])
+            // main[0] already has Starting Prayer, so Poorvanga should start from main[1] onwards
+            const poorvangaParticipants = main.length > 1 ? main.slice(1) : main;
+            const poorvangaAllocations = distributeSegment("Poorvāṅga", 10, poorvangaParticipants, 1, 3);
             allocations.push(...poorvangaAllocations);
             
             // 3. NYĀSA (1 portion) - one person

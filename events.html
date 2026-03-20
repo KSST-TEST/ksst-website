@@ -10,7 +10,7 @@
 
 <!-- HEADER -->
 <header class="header" style="position: relative;">
-    <a href="index.html" style="position: absolute; right: 90px; top: 15px; font-size: 32px; text-decoration: none; color: #333; cursor: pointer;" title="Home">🏠</a>
+    <a href="index.html" class="home-icon" style="right: 90px; top: 15px;">🏠</a>
     <img src="images/ksst-logo.jpeg" class="ksst-logo">
 
     <div class="header-text">
@@ -22,8 +22,15 @@
 </header>
 
 <!-- EVENTS SECTION -->
-<section class="events-section">
-    <h2 style="text-align: center; color: #4a2c2a; font-family: Georgia, serif; margin-top: 30px; margin-bottom: 20px;">Upcoming Classes and Registration Details - April 2026</h2>
+<div class="events-container">
+    <!-- LEFT SIDE - SHIVA IMAGE -->
+    <aside class="events-sidebar">
+        <img src="images/KSST image Shiva.png" alt="Lord Shiva" class="events-sidebar-img">
+    </aside>
+    
+    <!-- RIGHT SIDE - EVENTS CONTENT -->
+    <section class="events-section">
+    <h2 class="section-heading">Upcoming Classes and Registration Details - April 2026</h2>
     
     <table class="events-table">
         <thead>
@@ -43,8 +50,8 @@
                     ⏰ Time: 3:00 - 4:00 PM IST
                 </td>
                 <td>
-                    <a href="https://forms.gle/BAVwkw9sE83Eq7N18" target="_blank" style="color: #e67e22; font-weight: bold;">Register</a><br>
-                    <span style="color: #c0392b; font-weight: bold; font-size: 12px;">Open Now - Registration to be closed very soon</span>
+                    <a href="https://forms.gle/BAVwkw9sE83Eq7N18" target="_blank" class="table-link">Register</a><br>
+                    <span class="error-link">Open Now - Registration to be closed very soon</span>
                 </td>
             </tr>
             <tr>
@@ -68,7 +75,7 @@
         </tbody>
     </table>
 
-    <h2 style="text-align: center; color: #4a2c2a; font-family: Georgia, serif; margin-top: 50px; margin-bottom: 20px;">Special Events & Samarpans</h2>
+    <h2 class="section-heading" style="margin-top: 50px;">Special Events & Samarpans</h2>
 
     <table class="events-table">
         <thead>
@@ -88,12 +95,13 @@
                 </td>
                 <td>Ulagalantha Perumal Temple at Gandhimaa Nagar, Coimbatore</td>
                 <td>🗓 5th April 2026<br>⏰ 8:30 AM TO 12:30 PM IST</td>
-                <td><a href="https://forms.gle/tHwkn8LH6yDxG68B7" target="_blank" style="color: #e67e22; font-weight: bold;">Register</a></td>
-                <td>To be Provided soon</td>
+                <td><a href="https://forms.gle/tHwkn8LH6yDxG68B7" target="_blank" class="table-link">Register</a></td>
+                <td class="table-link-small">To be Provided soon</td>
             </tr>
         </tbody>
     </table>
-</section>
+    </section>
+</div>
 
 <footer class="footer">
     © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma

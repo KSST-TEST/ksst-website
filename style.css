@@ -160,7 +160,7 @@ a {
 }
 
 .welcome-image {
-    width: 70%;
+    width: 40%;
     border-radius: 10px;
     box-shadow: 0 0 12px #d4a017;
     margin-top: 15px;
@@ -223,9 +223,8 @@ a {
    ============================================================ */
 
 .events-section {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 0 20px;
+    width: 100%;
+    overflow: auto;
 }
 
 .events-table {
@@ -267,6 +266,36 @@ a {
 
 .events-table tbody tr:hover {
     background: #e8f4f8;
+}
+
+/* ============================================================
+   EVENTS PAGE LAYOUT WITH SIDEBAR IMAGE
+   ============================================================ */
+
+.events-container {
+    display: flex;
+    gap: 30px;
+    margin: 40px 20px;
+    align-items: flex-start;
+}
+
+.events-sidebar {
+    flex: 0 0 280px;
+    text-align: center;
+}
+
+.events-sidebar-img {
+    width: 100%;
+    max-width: 280px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+}
+
+.events-section {
+    flex: 1;
+    max-width: 900px;
+    padding: 0;
 }
 
 /* ============================================================
@@ -799,15 +828,306 @@ textarea {
 }
 
 /* ============================================================
+   LALITHA-SPECIFIC LAYOUT
+   ============================================================ */
+
+.lalitha-panel {
+    padding: 20px;
+}
+
+/* Top inputs in single row */
+.lalitha-top-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.lalitha-small-input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    box-sizing: border-box;
+    font-family: "Calibri", sans-serif;
+}
+
+/* Main container with two columns */
+.lalitha-main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.lalitha-left-column,
+.lalitha-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Input sections */
+.lalitha-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lalitha-section-title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #4a2c2a;
+    margin: 0;
+}
+
+.lalitha-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    background: #fffaf0;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: "Calibri", sans-serif;
+}
+
+/* File upload row */
+.lalitha-file-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.lalitha-btn-file {
+    padding: 8px 12px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-file:hover {
+    background: #e39a4a;
+}
+
+.lalitha-file-name {
+    font-size: 12px;
+    color: #666;
+}
+
+.lalitha-btn-clear-history {
+    padding: 8px 12px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-clear-history:hover {
+    background: #e39a4a;
+}
+
+/* Action buttons */
+.lalitha-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.lalitha-action-row {
+    display: flex;
+    gap: 3px;
+}
+
+.lalitha-action-row .lalitha-btn-primary {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+}
+
+.lalitha-btn-primary {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #e67e22;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-primary:hover {
+    background: #d35400;
+}
+
+.lalitha-btn-secondary {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-secondary:hover {
+    background: #e39a4a;
+}
+
+/* Output section */
+.lalitha-output-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lalitha-output-box {
+    background: #fffaf0;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    padding: 12px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Download buttons */
+.lalitha-download-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.lalitha-btn-download {
+    padding: 10px 14px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    flex: 1;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-download:hover {
+    background: #e39a4a;
+}
+
+.lalitha-btn-small {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #f0b16b;
+    color: #4a2c2a;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Georgia", serif;
+    letter-spacing: 0.3px;
+    margin: 2px 0;
+}
+
+.lalitha-btn-small:hover {
+    background: #e39a4a;
+}
+
+/* ============================================================
+   MOBILE-FRIENDLY CSS CLASSES (replace inline styles)
+   ============================================================ */
+
+.home-icon {
+    position: absolute;
+    font-size: 32px;
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+    title: "Home";
+}
+
+.pdf-link {
+    font-size: 20px;
+    text-decoration: none;
+    title: "Open PDF";
+    color: #4a2c2a;
+}
+
+.section-heading {
+    text-align: center;
+    color: #4a2c2a;
+    font-family: Georgia, serif;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.table-link {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.table-link-small {
+    font-size: 12px;
+    color: #666;
+}
+
+.error-link {
+    color: #c0392b;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* ============================================================
    MOBILE RESPONSIVE
    ============================================================ */
 
+/* Tablet and smaller desktops (max 1100px) */
 @media (max-width: 1100px) {
     .vsn-main-container {
         grid-template-columns: 1fr;
     }
 
     .lakshmi-main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .lalitha-main-container {
         grid-template-columns: 1fr;
     }
 
@@ -821,12 +1141,62 @@ textarea {
         gap: 10px;
     }
 
+    .lalitha-top-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .input-group {
         min-width: unset;
     }
+
+    /* Materials section: switch from float to flex */
+    .materials-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .materials-left {
+        width: 100%;
+        float: none;
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
 }
 
+/* Mobile phones and tablets (max 900px) */
 @media (max-width: 900px) {
+    /* Header scaling for mobile */
+    .header {
+        padding: 12px 15px;
+        flex-wrap: wrap;
+    }
+
+    .site-title {
+        font-size: 24px;
+        letter-spacing: 0.5px;
+    }
+
+    .tagline {
+        font-size: 13px;
+    }
+
+    .ksst-logo {
+        width: 60px;
+    }
+
+    .om-image {
+        width: 45px;
+    }
+
+    /* Home icon repositioning for mobile */
+    .home-icon {
+        right: 15px !important;
+        top: 8px !important;
+        font-size: 24px;
+    }
+
+    /* Main layout */
     .main-layout {
         flex-direction: column;
     }
@@ -835,29 +1205,272 @@ textarea {
         width: 100%;
         border-right: none;
         border-bottom: 2px solid #e67e22;
+        padding: 10px;
     }
 
+    .tool-panel {
+        padding: 10px 12px 20px 12px;
+    }
+
+    .nav-item {
+        font-size: 13px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+    }
+
+    /* Allocation containers */
     .allocation-container {
         flex-direction: column;
+        gap: 15px;
     }
 
     .allocation-container3col {
         grid-template-columns: 1fr;
+        gap: 15px;
     }
 
+    /* Home page layout */
     .home-layout {
         flex-direction: column;
+        padding: 12px;
+        gap: 12px;
     }
 
     .left-column,
     .center-column,
     .right-column {
         width: 100%;
+        padding: 12px;
     }
 
     .welcome-image {
-        width: 90%;
+        width: 100%;
+        max-width: 300px;
     }
+
+    /* Buttons and inputs */
+    .btn, .side-btn, .vsn-btn-primary {
+        font-size: 13px;
+        padding: 9px 12px;
+    }
+
+    .vsn-small-input, .small-input, textarea {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    input, textarea {
+        font-size: 13px;
+    }
+
+    /* Tool title */
+    .tool-title {
+        font-size: 22px;
+        margin-bottom: 12px;
+    }
+
+    /* Section headings */
+    .section-heading {
+        margin-top: 20px;
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    /* Tables: make responsive */
+    .events-table,
+    .materials-table {
+        font-size: 13px;
+    }
+
+    .events-table th,
+    .materials-table th {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .events-table td,
+    .materials-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .materials-table th:first-child {
+        width: 45%;
+    }
+
+    .materials-table th:not(:first-child) {
+        width: 18.33%;
+    }
+
+    .materials-table td:first-child {
+        width: 45%;
+    }
+
+    .materials-table td:not(:first-child) {
+        width: 18.33%;
+    }
+
+    /* Events table 4 column adjustment */
+    .events-table th:nth-child(1) {
+        width: 20%;
+    }
+
+    .events-table th:nth-child(2) {
+        width: 20%;
+    }
+
+    .events-table th:nth-child(3) {
+        width: 30%;
+    }
+
+    .events-table th:nth-child(4) {
+        width: 30%;
+    }
+
+    .events-table td:nth-child(1) {
+        width: 20%;
+    }
+
+    .events-table td:nth-child(2) {
+        width: 20%;
+    }
+
+    .events-table td:nth-child(3) {
+        width: 30%;
+    }
+
+    .events-table td:nth-child(4) {
+        width: 30%;
+    }
+
+    /* PDF icon sizing for mobile */
+    .pdf-link {
+        font-size: 16px;
+    }
+
+    /* Footer adjustment */
+    .footer {
+        padding: 10px;
+        font-size: 12px;
+        margin-top: 20px;
+    }
+
+    /* VSN/Lakshmi specific */
+    .vsn-action-buttons,
+    .lakshmi-action-buttons {
+        gap: 3px;
+    }
+
+    .vsn-download-buttons {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .vsn-btn-download {
+        flex: 0 1 calc(50% - 2px);
+    }
+
+    .vsn-panel, .lakshmi-panel, .lalitha-panel {
+        padding: 10px;
+    }
+
+    .vsn-output-box, .lakshmi-output-box, .lalitha-output-box {
+        min-height: 250px;
+        max-height: 350px;
+        font-size: 12px;
+    }
+
+    /* Lalitha buttons for mobile */
+    .lalitha-action-buttons {
+        gap: 3px;
+    }
+
+    .lalitha-download-buttons {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .lalitha-btn-download {
+        flex: 0 1 calc(50% - 2px);
+    }
+}
+
+/* Very small phones (max 600px) */
+@media (max-width: 600px) {
+    .header {
+        padding: 10px 10px;
+    }
+
+    .site-title {
+        font-size: 18px;
+    }
+
+    .tagline {
+        font-size: 11px;
+    }
+
+    .ksst-logo {
+        width: 50px;
+    }
+
+    .om-image {
+        width: 38px;
+    }
+
+    .home-icon {
+        right: 8px !important;
+        top: 5px !important;
+        font-size: 20px;
+    }
+
+    .home-layout {
+        flex-direction: column;
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .left-column,
+    .center-column,
+    .right-column {
+        padding: 8px;
+    }
+
+    .btn, .side-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    .tool-title {
+        font-size: 18px;
+    }
+
+    .section-heading {
+        font-size: 16px;
+        margin-top: 15px;
+        margin-bottom: 12px;
+    }
+
+    .events-table,
+    .materials-table {
+        font-size: 11px;
+    }
+
+    .events-table th,
+    .materials-table th {
+        padding: 6px 4px;
+        font-size: 10px;
+    }
+
+    .events-table td,
+    .materials-table td {
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+
+    .pdf-link {
+        font-size: 14px;
+    }
+}
 }
 
 /* ============================================================

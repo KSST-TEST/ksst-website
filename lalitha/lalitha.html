@@ -1,0 +1,87 @@
+<div class="tool-panel lalitha-panel">
+
+    <h2 class="tool-title">Sri Lalita Sahasra Nama Stotram — Allocation Tool</h2>
+
+    <!-- TOP ROW - SMALL INPUT FIELDS -->
+    <div class="lalitha-top-inputs">
+        <div class="input-group">
+            <label>Batch Number</label>
+            <input type="text" id="lalitha-batchNumber" class="lalitha-small-input" placeholder="">
+        </div>
+        <div class="input-group">
+            <label>Satsang No#</label>
+            <input type="text" id="lalitha-satsangNo" class="lalitha-small-input" placeholder="1">
+        </div>
+        <div class="input-group">
+            <label>Satsang Date</label>
+            <input type="date" id="lalitha-satsangDate" class="lalitha-small-input">
+        </div>
+        <div class="input-group">
+            <label>Satsang Time (IST)</label>
+            <input type="time" id="lalitha-satsangTime" class="lalitha-small-input" placeholder="e.g., 6:00 PM">
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT - TWO COLUMNS -->
+    <div class="lalitha-main-container">
+
+        <!-- LEFT COLUMN -->
+        <div class="lalitha-left-column">
+
+            <!-- DEVOTEE NAMES INPUT -->
+            <div class="lalitha-input-section">
+                <label class="lalitha-section-title">Enter Devotee Names (one name per line)</label>
+                <textarea id="lalitha-namesInput" class="lalitha-textarea" rows="10" placeholder="Enter one name per line"></textarea>
+            </div>
+
+            <!-- HISTORY INPUT -->
+            <div class="lalitha-input-section">
+                <label class="lalitha-section-title">Provide History Allocation(s) here (Optional)</label>
+                <p style="font-size: 12px; color: #666; margin: 5px 0;">
+                    📝 Paste previous allocation output (supports multiple formats and files)
+                </p>
+                <textarea id="lalitha-historyInput" class="lalitha-textarea" rows="6" placeholder="Paste previous allocations here. Supported formats:&#10;• Poorvāṅga 1-4 -> Name&#10;• Main Ślokam 5-8: Name&#10;• Phalaśruti 1-3 Name&#10;&#10;Tool will auto-detect format and prevent unfair repeats!"></textarea>
+                
+                <div class="lalitha-file-row">
+                    <button class="lalitha-btn-file" onclick="document.getElementById('lalitha-fileInput').click()">Choose File</button>
+                    <span id="lalitha-fileName" class="lalitha-file-name">No file chosen</span>
+                </div>
+                <input type="file" id="lalitha-fileInput" style="display:none;" accept=".txt,.csv,.xlsx" onchange="handleLalithaFileUpload(event)">
+
+                <button class="lalitha-btn-small" onclick="clearLalithaHistory()">Clear History</button>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="lalitha-action-buttons">
+                <div class="lalitha-action-row">
+                    <button class="lalitha-btn-primary" onclick="runLalithaAllocateFull()">Allocate</button>
+                    <button class="lalitha-btn-primary" onclick="reLalithaAllocate()">ReAllocate</button>
+                </div>
+                <button class="lalitha-btn-small" onclick="clearLalithaAllFields()">Clear All Fields</button>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="lalitha-right-column">
+
+            <!-- OUTPUT SECTION -->
+            <div class="lalitha-output-section">
+                <label class="lalitha-section-title">Here is your Allocation:</label>
+                <div class="lalitha-output-box">
+                    <div id="lalitha-output"></div>
+                </div>
+            </div>
+
+            <!-- DOWNLOAD BUTTONS -->
+            <div class="lalitha-download-buttons">
+                <button class="lalitha-btn-download" onclick="copyLalithaOutput(this)">Copy Output</button>
+                <button class="lalitha-btn-download" onclick="onLalithaExportExcel()">Download Excel</button>
+                <button class="lalitha-btn-download" onclick="onLalithaExportPDF()">Download PDF</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
