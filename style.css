@@ -223,8 +223,9 @@ a {
    ============================================================ */
 
 .events-section {
-    width: 100%;
-    overflow: auto;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
 
 .events-table {
@@ -266,36 +267,6 @@ a {
 
 .events-table tbody tr:hover {
     background: #e8f4f8;
-}
-
-/* ============================================================
-   EVENTS PAGE LAYOUT WITH SIDEBAR IMAGE
-   ============================================================ */
-
-.events-container {
-    display: flex;
-    gap: 30px;
-    margin: 40px 20px;
-    align-items: flex-start;
-}
-
-.events-sidebar {
-    flex: 0 0 280px;
-    text-align: center;
-}
-
-.events-sidebar-img {
-    width: 100%;
-    max-width: 280px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    object-fit: cover;
-}
-
-.events-section {
-    flex: 1;
-    max-width: 900px;
-    padding: 0;
 }
 
 /* ============================================================
