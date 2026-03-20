@@ -234,6 +234,7 @@ a {
     margin-top: 20px;
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
 }
 
 .events-table thead {
@@ -291,6 +292,7 @@ a {
     margin-top: 20px;
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
 }
 
 .materials-table thead {
@@ -306,11 +308,29 @@ a {
     border: 1px solid #1F4E78;
 }
 
+.materials-table th:first-child {
+    width: 40%;
+}
+
+.materials-table th:not(:first-child) {
+    width: 20%;
+    text-align: center;
+}
+
 .materials-table td {
     padding: 12px 15px;
     border: 1px solid #ddd;
     font-family: Calibri, sans-serif;
     color: #4a2c2a;
+}
+
+.materials-table td:first-child {
+    width: 40%;
+}
+
+.materials-table td:not(:first-child) {
+    width: 20%;
+    text-align: center;
 }
 
 .materials-table tbody tr:nth-child(odd) {
@@ -323,17 +343,6 @@ a {
 
 .materials-table tbody tr:hover {
     background: #e8f4f8;
-}
-
-.materials-table th:first-child,
-.materials-table td:first-child {
-    width: 35%;
-}
-
-.materials-table th:not(:first-child),
-.materials-table td:not(:first-child) {
-    width: 21.67%;
-    text-align: center;
 }
 
 /* ============================================================
@@ -798,7 +807,16 @@ textarea {
         grid-template-columns: 1fr;
     }
 
+    .lakshmi-main-container {
+        grid-template-columns: 1fr;
+    }
+
     .vsn-top-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .lakshmi-top-inputs {
         flex-direction: column;
         gap: 10px;
     }
