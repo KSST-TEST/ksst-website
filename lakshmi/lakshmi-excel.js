@@ -41,7 +41,6 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
-            "Poorvāṅga",
             "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
@@ -71,7 +70,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         wsData1.push(["Devotee Name", "Segment", "Allocated Slokas"]);
 
         // Add remaining allocations in detail - skip opening/closing ceremonies and intermediate segments
-        const skipSegmentsInDetail = ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
+        const skipSegmentsInDetail = ["Starting Prayer", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
         for (const segment of segmentOrder) {
             if (!skipSegmentsInDetail.includes(segment) && bySegment[segment]) {
                 for (const alloc of bySegment[segment]) {
@@ -108,7 +107,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         wsData2.push([]);
 
         // Header: Single assignments
-        for (const segment of ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"]) {
+        for (const segment of ["Starting Prayer", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"]) {
             if (bySegment[segment] && bySegment[segment].length > 0) {
                 const alloc = bySegment[segment][0];
                 wsData2.push([segment, alloc.name]);
@@ -140,8 +139,9 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
 
         // Add devotee rows with segment columns
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
+            // Sort allocations by starting sloka (from) to sequence slokas
+            allocs.sort((a, b) => a.from - b.from);
             const row = [devotee];
-            for (let i = 0; i < maxSegmentsDisplayed; i++) {
                 if (i < allocs.length) {
                     const alloc = allocs[i];
                     row.push(alloc.segment);
@@ -166,7 +166,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         wsData2.push([]);
         wsData2.push(["Back-Up"]);
         wsData2.push(["Segment", "Devotee Name"]);
-        for (const segment of ["Poorvāṅga", "Main Ślokam", "Phalaśruti"]) {
+        for (const segment of ["Nyāsa", "Main Ślokam", "Phalaśruti"]) {
             wsData2.push([segment, ""]);
         }
 

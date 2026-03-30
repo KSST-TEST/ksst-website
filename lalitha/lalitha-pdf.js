@@ -6,6 +6,7 @@
 // Mapping for segment names to English transliterations - Lalitha specific
 const lalithaSegmentNameMapping = {
     "Starting Prayer": "Starting Prayer",
+    "Nyāsa": "Nyasyaha",
     "Dhyānam": "Dhyaanam",
     "Main Ślokam": "Main Shlokam",
     "Kṣamā Prārthanā & Ending Prayer": "KSHAMA PRARTHANA & ENDING PRAYER"
@@ -63,6 +64,7 @@ function exportToPDFLalitha(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
+            "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
             "Kṣamā Prārthanā & Ending Prayer"

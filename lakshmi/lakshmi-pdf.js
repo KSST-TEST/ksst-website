@@ -6,7 +6,6 @@
 // Mapping for segment names to English transliterations - Lakshmi specific
 const lakshmiSegmentNameMapping = {
     "Starting Prayer": "Starting Prayer",
-    "Poorvāṅga": "Poorvangam",
     "Nyāsa": "Nyasyaha",
     "Dhyānam": "Dhyaanam",
     "Main Ślokam": "Main Shlokam",
@@ -66,7 +65,6 @@ function exportToPDFLakshmi(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
-            "Poorvāṅga",
             "Nyāsa",
             "Dhyānam",
             "Main Ślokam",

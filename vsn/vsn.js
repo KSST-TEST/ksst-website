@@ -351,8 +351,34 @@ function allocateVSN(params) {
                 }
             }
             
-            // 6. POORVĀṄGA (22 slokas) - distribute to ALL main participants (1-3 per assignment)
+            // 6. POORVĀṄGA (22 slokas) - with KSST priority
+            // KSST always gets Poorvanga 1-4 (or 1-6 if specified)
+            let poorvangaStart = 1;
+            if (ksst.length > 0) {
+                // Assign KSST Poorvanga 1-4
+                allocations.push({
+                    segment: "Poorvāṅga",
+                    from: 1,
+                    to: 4,
+                    name: ksst[0]
+                });
+                poorvangaStart = 5;  // Rest starts from sloka 5
+            }
+            
+            // Distribute remaining Poorvanga slokas to main participants
+            // (slokas 5-22 if KSST exists, else 1-22)
             const poorvangaAllocations = distributeSegment("Poorvāṅga", 22, main, 1, 3);
+            
+            // Adjust allocation ranges if KSST took 1-4
+            if (ksst.length > 0 && poorvangaAllocations.length > 0) {
+                // Shift all allocations: if they start at 1, shift to 5; scale remaining
+                const shiftAmount = poorvangaStart - 1;
+                for (const alloc of poorvangaAllocations) {
+                    alloc.from += shiftAmount;
+                    alloc.to += shiftAmount;
+                }
+            }
+            
             allocations.push(...poorvangaAllocations);
             
             // 7. MAIN ŚLOKAM (108 slokas) - distribute to ALL main participants (3-4 per assignment)

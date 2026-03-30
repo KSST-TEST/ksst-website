@@ -41,6 +41,7 @@ function exportToExcelLalitha(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
+            "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
             "Kṣamā Prārthanā & Ending Prayer"
@@ -67,7 +68,7 @@ function exportToExcelLalitha(allocations, metadata = {}) {
         wsData1.push([]);
         wsData1.push(["Devotee Name", "Segment", "Allocated Slokas", "Round"]);
 
-        // Add remaining allocations in detail - show Dhyānam and Main Ślokam ranges with names
+        // Add remaining allocations in detail - show Nyāsa, Dhyānam and Main Ślokam ranges with names
         const skipSegmentsInDetail = ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"];
         for (const segment of segmentOrder) {
             if (!skipSegmentsInDetail.includes(segment) && bySegment[segment]) {
@@ -169,6 +170,8 @@ function exportToExcelLalitha(allocations, metadata = {}) {
 
         // Add devotee rows with segment columns
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
+            // Sort allocations by starting sloka (from) to sequence slokas
+            allocs.sort((a, b) => a.from - b.from);
             const row = [devotee];
             for (let i = 0; i < maxSegmentsDisplayed; i++) {
                 if (i < allocs.length) {

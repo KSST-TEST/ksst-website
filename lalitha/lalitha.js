@@ -130,9 +130,6 @@ function allocateLalitha(params) {
         
         const { guruji, ksst, main } = classifyParticipants(rawNames);
         
-        // SORT ALPHABETICALLY
-        main.sort();
-        
         const allocations = [];
         
         // Helper: Create ranges for fair distribution (similar to VSN)
@@ -183,39 +180,50 @@ function allocateLalitha(params) {
             });
         }
         
+        // 2. NYĀSA (1 portion) - assign to third person (separate from main distribution)
+        const nyasaPerson = main.length > 2 ? main[2] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
+        if (nyasaPerson) {
+            allocations.push({
+                segment: "Nyāsa",
+                from: 1,
+                to: 1,
+                name: nyasaPerson
+            });
+        }
+        
         // 3. DHYĀNAM (4 slokas) - SPLIT BETWEEN 2 PEOPLE
-        if (main.length > 2) {
+        if (main.length > 3) {
             allocations.push({
                 segment: "Dhyānam",
                 from: 1,
                 to: 2,
-                name: main[2]
-            });
-            allocations.push({
-                segment: "Dhyānam",
-                from: 3,
-                to: 4,
                 name: main[3]
             });
-        } else if (main.length > 1) {
-            // Fallback: if less than 4 people, split between available
+            allocations.push({
+                segment: "Dhyānam",
+                from: 3,
+                to: 4,
+                name: main[4]
+            });
+        } else if (main.length > 2) {
+            // Fallback: if less than 5 people, split between available
             allocations.push({
                 segment: "Dhyānam",
                 from: 1,
                 to: 2,
-                name: main[2] || main[0]
+                name: main[3] || main[0]
             });
             allocations.push({
                 segment: "Dhyānam",
                 from: 3,
                 to: 4,
-                name: main[3] || main[1]
+                name: main[4] || main[1] || main[0]
             });
         }
         
         // 4. MAIN ŚLOKAM (183 slokas) - DISTRIBUTE IN MULTIPLE ROUNDS
-        // People 0-3 already have assignments, so distribute among people 4 onwards
-        const numMainSlokamParticipants = Math.max(1, numParticipants - 4);
+        // People 0-4 already have assignments, so distribute among people 5 onwards
+        const numMainSlokamParticipants = Math.max(1, numParticipants - 5);
         
         // Determine chunk size per round based on number of participants
         // Goal: reasonable chunks (3-5 slokas per person per round)
@@ -240,7 +248,7 @@ function allocateLalitha(params) {
             
             // Assign ranges to each person in this round
             for (let idx = 0; idx < roundRanges.length && idx < numMainSlokamParticipants; idx++) {
-                const personIdx = 4 + idx;
+                const personIdx = 5 + idx;
                 const range = roundRanges[idx];
                 
                 allocations.push({
@@ -285,6 +293,7 @@ function renderLalithaOutput(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
+            "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
             "Kṣamā Prārthanā & Ending Prayer"
@@ -301,6 +310,7 @@ function renderLalithaOutput(allocations, metadata = {}) {
         // Segment display info
         const segmentInfo = {
             "Starting Prayer": { key: "Starting Prayer", display: "Starting Prayer" },
+            "Nyāsa": { key: "Nyāsa", display: "Nyāsa" },
             "Dhyānam": { key: "Dhyānam", display: "Dhyānam" },
             "Main Ślokam": { key: "Main Ślokam", display: "Main Ślokam" },
             "Kṣamā Prārthanā & Ending Prayer": { key: "Kṣamā Prārthanā & Ending Prayer", display: "Kṣamā Prārthanā & Ending Prayer" }
@@ -316,6 +326,23 @@ function renderLalithaOutput(allocations, metadata = {}) {
         if (bySegment["Kṣamā Prārthanā & Ending Prayer"]) {
             const alloc = bySegment["Kṣamā Prārthanā & Ending Prayer"][0];
             lines.push(`Kṣamā Prārthanā & Ending Prayer:   ${alloc.name}`);
+        }
+        
+        lines.push("");
+        
+        // Show Nyāsa - one person
+        if (bySegment["Nyāsa"]) {
+            const alloc = bySegment["Nyāsa"][0];
+            let rangeStr;
+            if (alloc.from === alloc.to) {
+                rangeStr = "Full";
+            } else {
+                rangeStr = `${alloc.from}–${alloc.to}`;
+            }
+            const info = segmentInfo["Nyāsa"];
+            const segmentPart = info.display.padEnd(16);
+            const rangePart = `– ${rangeStr.padEnd(8)}`;
+            lines.push(`${segmentPart} ${rangePart} -> ${alloc.name}`);
         }
         
         lines.push("");

@@ -193,30 +193,35 @@ function allocateLakshmi(params) {
                 });
             }
             
-            // 2. POORVĀṄGA (10 slokas - NOT 22!) - distribute to main participants (starting from main[1], not main[0])
-            // main[0] already has Starting Prayer, so Poorvanga should start from main[1] onwards
-            const poorvangaParticipants = main.length > 1 ? main.slice(1) : main;
-            const poorvangaAllocations = distributeSegment("Poorvāṅga", 10, poorvangaParticipants, 1, 3);
-            allocations.push(...poorvangaAllocations);
+            // 2. NYĀSA (11 slokas) - KSST always gets 1-6, rest distributed to main
+            // Always assign first 6 to KSST, even if KSST not in input
+            allocations.push({
+                segment: "Nyāsa",
+                from: 1,
+                to: 6,
+                name: ksst.length > 0 ? ksst[0] : "KSST"
+            });
             
-            // 3. NYĀSA (1 portion) - one person
-            const nyasaPerson = main.length > 1 ? main[1] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
-            if (nyasaPerson) {
-                allocations.push({
-                    segment: "Nyāsa",
-                    from: 1,
-                    to: 1,
-                    name: nyasaPerson
-                });
+            // Distribute remaining Nyāsa slokas (7-11) to main participants
+            const nyasaAllocations = distributeSegment("Nyāsa", 11, main, 1, 3);
+            
+            // Adjust allocation ranges to start from sloka 7 (skip 1-6 assigned to KSST)
+            if (nyasaAllocations.length > 0) {
+                const shiftAmount = 6;  // KSST took 1-6
+                for (const alloc of nyasaAllocations) {
+                    alloc.from += shiftAmount;
+                    alloc.to += shiftAmount;
+                }
             }
+            allocations.push(...nyasaAllocations);
             
-            // 4. DHYĀNAM (3 slokas ONLY 1-3, NOT 5-8!) - one person
-            const dhyaanamPerson = main.length > 2 ? main[2] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
+            // 3. DHYĀNAM (4 slokas 1-4) - one person
+            const dhyaanamPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
             if (dhyaanamPerson) {
                 allocations.push({
                     segment: "Dhyānam",
                     from: 1,
-                    to: 3,
+                    to: 4,
                     name: dhyaanamPerson
                 });
             }
@@ -302,7 +307,6 @@ function renderLakshmiOutput(allocations, metadata = {}) {
         // Group allocations by segment
         const segmentOrder = [
             "Starting Prayer",
-            "Poorvāṅga",
             "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
@@ -321,7 +325,6 @@ function renderLakshmiOutput(allocations, metadata = {}) {
         // Segment display info
         const segmentInfo = {
             "Starting Prayer": { key: "Starting Prayer", display: "Starting Prayer" },
-            "Poorvāṅga": { key: "Poorvāṅga", display: "Poorvāṅga" },
             "Nyāsa": { key: "Nyāsa", display: "Nyāsa" },
             "Dhyānam": { key: "Dhyānam", display: "Dhyānam" },
             "Main Ślokam": { key: "Main Ślokam", display: "Main Ślokam" },
@@ -342,18 +345,18 @@ function renderLakshmiOutput(allocations, metadata = {}) {
         
         lines.push("");
         
-        // Render remaining allocations (Poorvāṅga, Nyāsa, Dhyānam, Main Ślokam, Phalaśruti)
-        for (const segment of ["Poorvāṅga", "Nyāsa", "Dhyānam", "Main Ślokam", "Phalaśruti"]) {
+        // Render remaining allocations (Nyāsa, Dhyānam, Main Ślokam, Phalaśruti)
+        for (const segment of ["Nyāsa", "Dhyānam", "Main Ślokam", "Phalaśruti"]) {
             if (!bySegment[segment]) continue;
             
             const allocsInSegment = bySegment[segment];
             const info = segmentInfo[segment];
             
             // Single-item segments
-            if (allocsInSegment.length === 1 && ["Nyāsa", "Dhyānam"].includes(segment)) {
+            if (allocsInSegment.length === 1 && segment === "Dhyānam") {
                 const alloc = allocsInSegment[0];
                 let rangeStr;
-                if (alloc.segment === "Nyāsa" && alloc.from === alloc.to) {
+                if (alloc.segment === "Dhyānam" && alloc.from === alloc.to) {
                     rangeStr = "Full";
                 } else {
                     rangeStr = `${alloc.from}–${alloc.to}`;

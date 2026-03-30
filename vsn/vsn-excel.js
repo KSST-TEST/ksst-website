@@ -157,6 +157,9 @@ function exportToExcel(allocations, metadata = {}) {
 
         // Add devotee rows with segment columns
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
+            // Sort allocations by starting sloka (from) to sequence slokas
+            allocs.sort((a, b) => a.from - b.from);
+            
             const row = [devotee];
             for (let i = 0; i < maxSegmentsDisplayed; i++) {
                 if (i < allocs.length) {
