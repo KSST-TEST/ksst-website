@@ -165,6 +165,17 @@ function analyzeHistoryFairness(historyText, currentAllocations) {
     };
 }
 
+// ---------- SHUFFLE ARRAY ----------
+function shuffleArray(array) {
+    // Fisher-Yates shuffle algorithm
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // ---------- NAME CLEANUP ----------
 function cleanName(name) {
     // Replace dots with spaces
@@ -222,8 +233,12 @@ function allocateVSN(params) {
         const historyMap = buildHistoryMap(historyAllocations);
         const totalSatsangs = Math.max(1, historyAllocations.length / 8);
         
-        const { guruji, ksst, main } = classifyParticipants(rawNames);
+        const { guruji, ksst, main: mainOriginal } = classifyParticipants(rawNames);
+        
+        // SHUFFLE main list for randomized sequence, but keep it fixed for entire allocation
+        const main = shuffleArray(mainOriginal);
         console.log("Classified participants:", { guruji, ksst, main });
+        console.log("Shuffled participant order for round-robin:", main);
         
         const allocations = [];
         let globalPersonIndex = 0;  // Track across ALL segments - continuous round-robin
@@ -282,8 +297,23 @@ function allocateVSN(params) {
         // ==================== ALLOCATE FULL ====================
         if (allocationType === 'full') {
             
-            // 1. STARTING PRAYER (4 slokas) - one person
-            const startingPrayerPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
+            // Helper: random selection from main list
+            function getRandomPerson() {
+                if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
+                const randomIndex = Math.floor(Math.random() * main.length);
+                return main[randomIndex];
+            }
+            
+            // Helper: get next person in round-robin from main list
+            function getNextPerson() {
+                if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
+                const person = main[globalPersonIndex % main.length];
+                globalPersonIndex++;
+                return person;
+            }
+            
+            // 1. STARTING PRAYER (4 slokas) - RANDOM person (not round-robin)
+            const startingPrayerPerson = getRandomPerson();
             if (startingPrayerPerson) {
                 allocations.push({
                     segment: "Starting Prayer",
@@ -293,8 +323,8 @@ function allocateVSN(params) {
                 });
             }
             
-            // 2. ŚRĪ MAHĀLAKṢMĪ AṢṬAKAM (11 slokas) - one person (HEAVY)
-            const heavyPerson = main.length > 1 ? main[1] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
+            // 2. ŚRĪ MAHĀLAKṢMĪ AṢṬAKAM (11 slokas) - RANDOM person (not round-robin, HEAVY)
+            const heavyPerson = getRandomPerson();
             if (heavyPerson) {
                 allocations.push({
                     segment: "Śrī Mahālakṣmī Aṣṭakam",
@@ -304,8 +334,8 @@ function allocateVSN(params) {
                 });
             }
             
-            // 3. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - one person
-            const endingPrayerPerson = main.length > 2 ? main[2] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
+            // 3. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - RANDOM person (not round-robin)
+            const endingPrayerPerson = getRandomPerson();
             if (endingPrayerPerson) {
                 allocations.push({
                     segment: "Kṣamā Prārthanā & Ending Prayer",
@@ -315,8 +345,36 @@ function allocateVSN(params) {
                 });
             }
             
-            // 4. NYĀSA (1 portion) - one person
-            const nyasaPerson = main.length > 3 ? main[3] : main[0];
+            // RESET globalPersonIndex for round-robin sequence starting from Poorvanga
+            globalPersonIndex = 0;
+            
+            // 4. POORVĀṄGA (22 slokas) - with KSST priority
+            // KSST ALWAYS gets Poorvanga 1-4, even if not in input list
+            const ksst_for_poorvanga = ksst.length > 0 ? ksst[0] : "KSST";
+            allocations.push({
+                segment: "Poorvāṅga",
+                from: 1,
+                to: 4,
+                name: ksst_for_poorvanga
+            });
+            
+            // Distribute remaining Poorvanga slokas (5-22) to main participants
+            // Call with 18 (not 22) because KSST already took 1-4
+            const poorvangaAllocations = distributeSegment("Poorvāṅga", 18, main, 1, 3);
+            
+            // Shift all allocations to start from sloka 5 (since KSST took 1-4)
+            if (poorvangaAllocations.length > 0) {
+                const shiftAmount = 4;  // KSST took 1-4, so shift by 4
+                for (const alloc of poorvangaAllocations) {
+                    alloc.from += shiftAmount;
+                    alloc.to += shiftAmount;
+                }
+            }
+            
+            allocations.push(...poorvangaAllocations);
+            
+            // 5. NYĀSA (1 portion) - one person from round-robin
+            const nyasaPerson = getNextPerson();
             if (nyasaPerson) {
                 allocations.push({
                     segment: "Nyāsa",
@@ -326,60 +384,26 @@ function allocateVSN(params) {
                 });
             }
             
-            // 5. DHYĀNAM (1-3 slokas and 5-8 slokas) - two people
-            if (main.length > 0) {
+            // 6. DHYĀNAM (1-3 slokas and 4-8 slokas) - two people from round-robin
+            const dhyanamPerson1 = getNextPerson();
+            if (dhyanamPerson1) {
                 allocations.push({
                     segment: "Dhyānam",
                     from: 1,
                     to: 3,
-                    name: main[0]
+                    name: dhyanamPerson1
                 });
-                if (main.length > 1) {
-                    allocations.push({
-                        segment: "Dhyānam",
-                        from: 5,
-                        to: 8,
-                        name: main[1]
-                    });
-                } else {
-                    allocations.push({
-                        segment: "Dhyānam",
-                        from: 5,
-                        to: 8,
-                        name: main[0]
-                    });
-                }
             }
             
-            // 6. POORVĀṄGA (22 slokas) - with KSST priority
-            // KSST always gets Poorvanga 1-4 (or 1-6 if specified)
-            let poorvangaStart = 1;
-            if (ksst.length > 0) {
-                // Assign KSST Poorvanga 1-4
+            const dhyanamPerson2 = getNextPerson();
+            if (dhyanamPerson2) {
                 allocations.push({
-                    segment: "Poorvāṅga",
-                    from: 1,
-                    to: 4,
-                    name: ksst[0]
+                    segment: "Dhyānam",
+                    from: 4,
+                    to: 8,
+                    name: dhyanamPerson2
                 });
-                poorvangaStart = 5;  // Rest starts from sloka 5
             }
-            
-            // Distribute remaining Poorvanga slokas to main participants
-            // (slokas 5-22 if KSST exists, else 1-22)
-            const poorvangaAllocations = distributeSegment("Poorvāṅga", 22, main, 1, 3);
-            
-            // Adjust allocation ranges if KSST took 1-4
-            if (ksst.length > 0 && poorvangaAllocations.length > 0) {
-                // Shift all allocations: if they start at 1, shift to 5; scale remaining
-                const shiftAmount = poorvangaStart - 1;
-                for (const alloc of poorvangaAllocations) {
-                    alloc.from += shiftAmount;
-                    alloc.to += shiftAmount;
-                }
-            }
-            
-            allocations.push(...poorvangaAllocations);
             
             // 7. MAIN ŚLOKAM (108 slokas) - distribute to ALL main participants (3-4 per assignment)
             const mainSlokamAllocations = distributeSegment("Main Ślokam", 108, main, 3, 4);
