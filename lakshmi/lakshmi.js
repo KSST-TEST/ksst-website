@@ -5,6 +5,13 @@
 let currentLakshmiAllocations = [];
 let currentLakshmiNames = [];
 let currentLakshmiHistoryText = "";
+let currentLakshmiMetadata = {
+    batchNumber: '',
+    satsangNo: '1',
+    satsangDate: '',
+    satsangTime: '',
+    allocationType: 'full'
+};
 
 // ---------- HELPER: FORMAT DATE AND TIME ----------
 function formatDateinDDMMYYYY(dateString) {
@@ -216,172 +223,283 @@ function allocateLakshmi(params) {
         const historyAllocations = parseHistory(historyText);
         const historyMap = buildHistoryMap(historyAllocations);
         
-        const { guruji, ksst, main: mainOriginal } = classifyParticipants(rawNames);
-        
-        // SHUFFLE main list for randomized sequence, but keep it fixed for entire allocation
-        const main = shuffleArray(mainOriginal);
-        console.log("Shuffled participant order for round-robin:", main);
+        const { guruji, ksst, main: mainParticipants } = classifyParticipants(rawNames);
         
         const allocations = [];
-        let globalPersonIndex = 0;  // Track across ALL segments - continuous round-robin
-    
-        // Helper: random selection from main list
-        function getRandomPerson() {
-            if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
-            const randomIndex = Math.floor(Math.random() * main.length);
-            return main[randomIndex];
+        if (mainParticipants.length === 0) return allocations;
+        
+        // Keep round-robin sequence in original order (no shuffling)
+        // KSST is NOT part of round-robin
+        const roundRobinSequence = [...mainParticipants];
+        const numPeople = roundRobinSequence.length;
+        
+        // Helper: Random selection from array
+        function randomSelect(arr) {
+            if (arr.length === 0) return null;
+            return arr[Math.floor(Math.random() * arr.length)];
         }
         
-        // Helper: get next person in round-robin from main list
-        function getNextPerson() {
-            if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
-            const person = main[globalPersonIndex % main.length];
-            globalPersonIndex++;
-            return person;
-        }
-    
-        // Helper: distribute segment fairly with global person tracking
-        function distributeSegment(segmentName, totalSlokas, participantList, minChunk = 1, maxChunk = 3) {
-            const segmentAllocations = [];
-            
-            if (!participantList || participantList.length === 0) return segmentAllocations;
-
-            const numPeople = participantList.length;
-            let slokaIndex = 1;
-            
-            while (slokaIndex <= totalSlokas) {
-                const person = participantList[globalPersonIndex % numPeople];
-                const remaining = totalSlokas - slokaIndex + 1;
-                const peopleRemaining = numPeople - (globalPersonIndex % numPeople);
-                
-                let chunkSize;
-                if (remaining <= minChunk) {
-                    chunkSize = remaining;
-                } else if (remaining < peopleRemaining * minChunk) {
-                    chunkSize = Math.max(1, Math.min(maxChunk, Math.ceil(remaining / peopleRemaining)));
-                } else {
-                    chunkSize = Math.min(
-                        maxChunk,
-                        Math.max(minChunk, Math.ceil(remaining / peopleRemaining))
-                    );
-                }
-                
-                chunkSize = Math.min(chunkSize, remaining);
-                
-                if (chunkSize > 0) {
-                    const endSloka = Math.min(slokaIndex + chunkSize - 1, totalSlokas);
-                    segmentAllocations.push({
-                        segment: segmentName,
-                        from: slokaIndex,
-                        to: endSloka,
-                        name: person
-                    });
-                    
-                    slokaIndex = endSloka + 1;
-                }
-                
-                globalPersonIndex++;  // Continue to next person globally
-            }
-            
-            return segmentAllocations;
-        }
-    
+        // Randomly decide: KSST gets Nyāsa 1-6 or Main Ślokam 1-5
+        const ksst_gets_nyasa = Math.random() < 0.5;
+        
         // ==================== ALLOCATE FULL ====================
         if (allocationType === 'full') {
             
-            // 1. STARTING PRAYER (4 slokas) - RANDOM person (not round-robin)
-            const startingPrayerPerson = getRandomPerson();
-            if (startingPrayerPerson) {
-                allocations.push({
-                    segment: "Starting Prayer",
-                    from: 1,
-                    to: 4,
-                    name: startingPrayerPerson
-                });
+            // Build fairness tracking map for main participants only (KSST excluded)
+            const fairnessMap = {};
+            for (const person of roundRobinSequence) {
+                fairnessMap[person] = 0;
             }
             
-            // RESET globalPersonIndex for round-robin sequence starting from Nyāsa
-            globalPersonIndex = 0;
-            
-            // 2. NYĀSA (11 slokas) - KSST always gets 1-6, rest distributed to main
-            // Always assign first 6 to KSST, even if KSST not in input
+            // 1. STARTING PRAYER (4 slokas) - Random person, NOT counted in fairness
+            let startingPrayerPerson = randomSelect(roundRobinSequence);
             allocations.push({
-                segment: "Nyāsa",
+                segment: "Starting Prayer",
                 from: 1,
-                to: 6,
-                name: ksst.length > 0 ? ksst[0] : "KSST"
+                to: 4,
+                name: startingPrayerPerson
             });
             
-            // Distribute remaining Nyāsa slokas (7-11) to main participants
-            const nyasaAllocations = distributeSegment("Nyāsa", 5, main, 1, 3);
+            // 2. ENDING PRAYER (4 slokas) - Different random person, NOT counted in fairness
+            let endingPrayerPerson = null;
+            let attempts = 0;
+            if (numPeople > 1) {
+                do {
+                    endingPrayerPerson = randomSelect(roundRobinSequence);
+                    attempts++;
+                } while (endingPrayerPerson === startingPrayerPerson && attempts < 100);
+            } else {
+                endingPrayerPerson = roundRobinSequence[0];
+            }
             
-            // Adjust allocation ranges to start from sloka 7 (skip 1-6 assigned to KSST)
-            if (nyasaAllocations.length > 0) {
-                const shiftAmount = 6;  // KSST took 1-6
-                for (const alloc of nyasaAllocations) {
-                    alloc.from += shiftAmount;
-                    alloc.to += shiftAmount;
+            allocations.push({
+                segment: "Kṣamā Prārthanā & Ending Prayer",
+                from: 1,
+                to: 4,
+                name: endingPrayerPerson
+            });
+            
+            // 3. KSST ALLOCATION - Either Nyāsa 1-6 or Main Ślokam 1-5 (randomly chosen)
+            if (ksst_gets_nyasa) {
+                // KSST gets Nyāsa 1-6
+                allocations.push({
+                    segment: "Nyāsa",
+                    from: 1,
+                    to: 6,
+                    name: "KSST"
+                });
+            } else {
+                // KSST gets Main Ślokam 1-5
+                allocations.push({
+                    segment: "Main Ślokam",
+                    from: 1,
+                    to: 5,
+                    name: "KSST"
+                });
+            }
+            
+            // 4-7. NYĀSA, DHYĀNAM, MAIN ŚLOKAM, PHALAŚRUTI - Fairness-aware round-robin
+            // Determine what segments and ranges need to be allocated to main participants
+            
+            let currentPersonIdx = 0;
+            
+            if (ksst_gets_nyasa) {
+                // KSST has Nyāsa 1-6, so main participants get 7-11
+                const segmentsToAllocate = [
+                    { segment: "Nyāsa", from: 7, to: 11, totalCount: 5 },
+                    { segment: "Dhyānam", from: 1, to: 4, totalCount: 4 },
+                    { segment: "Main Ślokam", from: 1, to: 154, totalCount: 154 },
+                    { segment: "Phalaśruti", from: 1, to: 15, totalCount: 15 }
+                ];
+                
+                for (const segConfig of segmentsToAllocate) {
+                    let currentSloka = segConfig.from;
+                    const endSloka = segConfig.to;
+                    
+                    while (currentSloka <= endSloka) {
+                        const person = roundRobinSequence[currentPersonIdx % numPeople];
+                        const remaining = endSloka - currentSloka + 1;
+                        
+                        // Fairness-based chunk sizing
+                        const targetPerPerson = segConfig.totalCount / numPeople;
+                        const fairnessDeficit = targetPerPerson - fairnessMap[person];
+                        
+                        let chunkSize;
+                        if (fairnessDeficit > 3) {
+                            chunkSize = Math.min(6, remaining);
+                        } else if (fairnessDeficit > 0) {
+                            chunkSize = Math.min(5, remaining);
+                        } else if (fairnessDeficit > -2) {
+                            chunkSize = Math.min(4, remaining);
+                        } else {
+                            chunkSize = Math.min(Math.max(1, Math.floor(remaining / numPeople)), 3);
+                        }
+                        
+                        // Avoid odd remnants
+                        if (remaining - chunkSize === 1 && chunkSize > 1) chunkSize--;
+                        if (remaining - chunkSize === 2 && chunkSize > 2) chunkSize--;
+                        
+                        chunkSize = Math.min(chunkSize, remaining);
+                        
+                        if (chunkSize > 0) {
+                            const rangeEnd = Math.min(currentSloka + chunkSize - 1, endSloka);
+                            allocations.push({
+                                segment: segConfig.segment,
+                                from: currentSloka,
+                                to: rangeEnd,
+                                name: person
+                            });
+                            
+                            fairnessMap[person] += chunkSize;
+                            currentSloka = rangeEnd + 1;
+                        }
+                        
+                        currentPersonIdx++;
+                    }
                 }
-            }
-            allocations.push(...nyasaAllocations);
-            
-            // 3. DHYĀNAM (4 slokas 1-4) - one person from round-robin
-            const dhyaanamPerson = getNextPerson();
-            if (dhyaanamPerson) {
-                allocations.push({
-                    segment: "Dhyānam",
-                    from: 1,
-                    to: 4,
-                    name: dhyaanamPerson
-                });
-            }
-            
-            // 4. MAIN ŚLOKAM (154 slokas - NOT 108!) - distribute to main participants with round-robin
-            const mainSlokamAllocations = distributeSegment("Main Ślokam", 154, main, 2, 4);
-            allocations.push(...mainSlokamAllocations);
-            
-            // 5. PHALAŚRUTI (15 slokas - NOT 33!) - distribute to main participants with round-robin
-            const phalaśrutiAllocations = distributeSegment("Phalaśruti", 15, main, 1, 3);
-            allocations.push(...phalaśrutiAllocations);
-            
-            // 6. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - RANDOM person (not hardcoded)
-            const endingPrayerPerson = getRandomPerson();
-            if (endingPrayerPerson) {
-                allocations.push({
-                    segment: "Kṣamā Prārthanā & Ending Prayer",
-                    from: 1,
-                    to: 4,
-                    name: endingPrayerPerson
-                });
+            } else {
+                // KSST has Main Ślokam 1-5, so main participants get from 6-154
+                const segmentsToAllocate = [
+                    { segment: "Nyāsa", from: 1, to: 11, totalCount: 11 },
+                    { segment: "Dhyānam", from: 1, to: 4, totalCount: 4 },
+                    { segment: "Main Ślokam", from: 6, to: 154, totalCount: 149 },
+                    { segment: "Phalaśruti", from: 1, to: 15, totalCount: 15 }
+                ];
+                
+                for (const segConfig of segmentsToAllocate) {
+                    let currentSloka = segConfig.from;
+                    const endSloka = segConfig.to;
+                    
+                    while (currentSloka <= endSloka) {
+                        const person = roundRobinSequence[currentPersonIdx % numPeople];
+                        const remaining = endSloka - currentSloka + 1;
+                        
+                        // Fairness-based chunk sizing
+                        const targetPerPerson = segConfig.totalCount / numPeople;
+                        const fairnessDeficit = targetPerPerson - fairnessMap[person];
+                        
+                        let chunkSize;
+                        if (fairnessDeficit > 3) {
+                            chunkSize = Math.min(6, remaining);
+                        } else if (fairnessDeficit > 0) {
+                            chunkSize = Math.min(5, remaining);
+                        } else if (fairnessDeficit > -2) {
+                            chunkSize = Math.min(4, remaining);
+                        } else {
+                            chunkSize = Math.min(Math.max(1, Math.floor(remaining / numPeople)), 3);
+                        }
+                        
+                        // Avoid odd remnants
+                        if (remaining - chunkSize === 1 && chunkSize > 1) chunkSize--;
+                        if (remaining - chunkSize === 2 && chunkSize > 2) chunkSize--;
+                        
+                        chunkSize = Math.min(chunkSize, remaining);
+                        
+                        if (chunkSize > 0) {
+                            const rangeEnd = Math.min(currentSloka + chunkSize - 1, endSloka);
+                            allocations.push({
+                                segment: segConfig.segment,
+                                from: currentSloka,
+                                to: rangeEnd,
+                                name: person
+                            });
+                            
+                            fairnessMap[person] += chunkSize;
+                            currentSloka = rangeEnd + 1;
+                        }
+                        
+                        currentPersonIdx++;
+                    }
+                }
             }
         } 
         // ==================== ALLOCATE ONLY SLOKAM ====================
         else if (allocationType === 'slokam') {
             
-            // Starting Prayer
-            const startingPrayerPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
-            if (startingPrayerPerson) {
-                allocations.push({
-                    segment: "Starting Prayer",
-                    from: 1,
-                    to: 4,
-                    name: startingPrayerPerson
-                });
+            // Start Prayer
+            let startingPrayerPerson = randomSelect(roundRobinSequence);
+            allocations.push({
+                segment: "Starting Prayer",
+                from: 1,
+                to: 4,
+                name: startingPrayerPerson
+            });
+            
+            // Ending Prayer (different person)
+            let endingPrayerPerson = null;
+            let attempts = 0;
+            if (numPeople > 1) {
+                do {
+                    endingPrayerPerson = randomSelect(roundRobinSequence);
+                    attempts++;
+                } while (endingPrayerPerson === startingPrayerPerson && attempts < 100);
+            } else {
+                endingPrayerPerson = roundRobinSequence[0];
             }
             
-            // Main Ślokam (154 slokas - NOT 108!)
-            const mainSlokamAllocations = distributeSegment("Main Ślokam", 154, main, 2, 4);
-            allocations.push(...mainSlokamAllocations);
+            allocations.push({
+                segment: "Kṣamā Prārthanā & Ending Prayer",
+                from: 1,
+                to: 4,
+                name: endingPrayerPerson
+            });
             
-            // Ending Prayer
-            const endingPrayerPerson = main.length > 1 ? main[1] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
-            if (endingPrayerPerson) {
-                allocations.push({
-                    segment: "Kṣamā Prārthanā & Ending Prayer",
-                    from: 1,
-                    to: 4,
-                    name: endingPrayerPerson
-                });
+            // KSST ALWAYS gets Main Ślokam 1-5 in slokam mode
+            allocations.push({
+                segment: "Main Ślokam",
+                from: 1,
+                to: 5,
+                name: "KSST"
+            });
+            
+            // Main Ślokam 6-154 - Fairness-aware round-robin
+            const fairnessMap = {};
+            for (const person of roundRobinSequence) {
+                fairnessMap[person] = 0;
+            }
+            
+            const mainSlokamTotal = 149; // 154 - 5 (KSST allocation)
+            const targetPerPerson = mainSlokamTotal / numPeople;
+            
+            let currentSloka = 6;
+            let currentPersonIdx = 0;
+            
+            while (currentSloka <= 154) {
+                const person = roundRobinSequence[currentPersonIdx % numPeople];
+                const remaining = 154 - currentSloka + 1;
+                const fairnessDeficit = targetPerPerson - fairnessMap[person];
+                
+                let chunkSize;
+                if (fairnessDeficit > 3) {
+                    chunkSize = Math.min(6, remaining);
+                } else if (fairnessDeficit > 0) {
+                    chunkSize = Math.min(5, remaining);
+                } else if (fairnessDeficit > -2) {
+                    chunkSize = Math.min(4, remaining);
+                } else {
+                    chunkSize = Math.min(Math.max(1, Math.floor(remaining / numPeople)), 3);
+                }
+                
+                // Avoid odd remnants
+                if (remaining - chunkSize === 1 && chunkSize > 1) chunkSize--;
+                if (remaining - chunkSize === 2 && chunkSize > 2) chunkSize--;
+                
+                chunkSize = Math.min(chunkSize, remaining);
+                
+                if (chunkSize > 0) {
+                    const rangeEnd = Math.min(currentSloka + chunkSize - 1, 154);
+                    allocations.push({
+                        segment: "Main Ślokam",
+                        from: currentSloka,
+                        to: rangeEnd,
+                        name: person
+                    });
+                    
+                    fairnessMap[person] += chunkSize;
+                    currentSloka = rangeEnd + 1;
+                }
+                
+                currentPersonIdx++;
             }
         }
         
@@ -396,7 +514,6 @@ function allocateLakshmi(params) {
 function renderLakshmiOutput(allocations, metadata = {}) {
     try {
         console.log("renderLakshmiOutput called with allocations:", allocations);
-        console.log("Output element:", document.getElementById("lakshmi-output"));
         
         const lines = [];
         
@@ -406,24 +523,21 @@ function renderLakshmiOutput(allocations, metadata = {}) {
         lines.push("Sri Lakshmi Sahasra Nama Stotram");
         lines.push("-".repeat(90));
         
-        // Metadata
+        // Metadata - aligned format
         const formattedDate = formatDateinDDMMYYYY(metadata.satsangDate);
         const formattedTime = metadata.satsangTime ? convertTo12Hour(metadata.satsangTime) + " IST" : '';
-        const batchInfo = `Batch Name: ${metadata.batchNumber || ''}              Satsang No#: ${metadata.satsangNo || '1'}     Date: ${formattedDate}     Time: ${formattedTime}`;
-        lines.push(batchInfo);
+        const batchStr = (metadata.batchNumber || '').padEnd(18);
+        const satsangStr = `Satsang No#: ${metadata.satsangNo || '1'}`.padEnd(18);
+        const dateStr = `Date: ${formattedDate}`.padEnd(20);
+        const timeStr = `Time: ${formattedTime}`;
+        lines.push(`Batch Name: ${batchStr} ${satsangStr} ${dateStr} ${timeStr}`);
         lines.push("-".repeat(90));
         lines.push("");
         
-        // Group allocations by segment
-        const segmentOrder = [
-            "Starting Prayer",
-            "Nyāsa",
-            "Dhyānam",
-            "Main Ślokam",
-            "Phalaśruti",
-            "Kṣamā Prārthanā & Ending Prayer"
-        ];
+        // Get allocation type from metadata
+        const allocationType = metadata.allocationType || 'full';
         
+        // Group allocations by segment
         const bySegment = {};
         for (const alloc of allocations) {
             if (!bySegment[alloc.segment]) {
@@ -432,22 +546,13 @@ function renderLakshmiOutput(allocations, metadata = {}) {
             bySegment[alloc.segment].push(alloc);
         }
         
-        // Segment display info
-        const segmentInfo = {
-            "Starting Prayer": { key: "Starting Prayer", display: "Starting Prayer" },
-            "Nyāsa": { key: "Nyāsa", display: "Nyāsa" },
-            "Dhyānam": { key: "Dhyānam", display: "Dhyānam" },
-            "Main Ślokam": { key: "Main Ślokam", display: "Main Ślokam" },
-            "Phalaśruti": { key: "Phalaśruti", display: "Phalaśruti" },
-            "Kṣamā Prārthanā & Ending Prayer": { key: "Kṣamā Prārthanā & Ending Prayer", display: "Kṣamā Prārthanā & Ending Prayer" }
-        };
-        
-        // First, show Starting Prayer and Ending Prayer on separate lines
+        // 1. STARTING PRAYER - show on single line with colon
         if (bySegment["Starting Prayer"]) {
             const alloc = bySegment["Starting Prayer"][0];
             lines.push(`Starting Prayer:   ${alloc.name}`);
         }
         
+        // 2. ENDING PRAYER - show on single line
         if (bySegment["Kṣamā Prārthanā & Ending Prayer"]) {
             const alloc = bySegment["Kṣamā Prārthanā & Ending Prayer"][0];
             lines.push(`Kṣamā Prārthanā & Ending Prayer:   ${alloc.name}`);
@@ -455,53 +560,103 @@ function renderLakshmiOutput(allocations, metadata = {}) {
         
         lines.push("");
         
-        // Render remaining allocations (Nyāsa, Dhyānam, Main Ślokam, Phalaśruti)
-        for (const segment of ["Nyāsa", "Dhyānam", "Main Ślokam", "Phalaśruti"]) {
-            if (!bySegment[segment]) continue;
+        // ALLOCATE FULL - show all segments
+        if (allocationType === 'full') {
             
-            const allocsInSegment = bySegment[segment];
-            const info = segmentInfo[segment];
-            
-            // Single-item segments
-            if (allocsInSegment.length === 1 && segment === "Dhyānam") {
-                const alloc = allocsInSegment[0];
-                let rangeStr;
-                if (alloc.from === alloc.to) {
-                    rangeStr = `${alloc.from}`;
-                } else {
-                    rangeStr = `${alloc.from}–${alloc.to}`;
-                }
-                lines.push(`${info.display.padEnd(16)} - ${rangeStr.padEnd(8)} ->  ${alloc.name}`);
-            } else {
-                // Multi-item segments
-                for (const alloc of allocsInSegment) {
+            // 3. NYĀSA
+            if (bySegment["Nyāsa"]) {
+                for (const alloc of bySegment["Nyāsa"]) {
                     let rangeStr;
                     if (alloc.from === alloc.to) {
                         rangeStr = `${alloc.from}`;
                     } else {
                         rangeStr = `${alloc.from}–${alloc.to}`;
                     }
-                    
-                    const segmentPart = info.display.padEnd(16);
-                    const rangePart = `– ${rangeStr.padEnd(8)}`;
-                    lines.push(`${segmentPart} ${rangePart} -> ${alloc.name}`);
+                    lines.push(`Nyāsa – ${rangeStr} -> ${alloc.name}`);
                 }
+                lines.push("");
             }
             
-            lines.push("");
+            // 4. DHYĀNAM
+            if (bySegment["Dhyānam"]) {
+                for (const alloc of bySegment["Dhyānam"]) {
+                    let rangeStr;
+                    if (alloc.from === alloc.to) {
+                        rangeStr = `${alloc.from}`;
+                    } else {
+                        rangeStr = `${alloc.from}–${alloc.to}`;
+                    }
+                    lines.push(`Dhyānam – ${rangeStr} -> ${alloc.name}`);
+                }
+                lines.push("");
+            }
         }
         
-        document.getElementById("lakshmi-output").innerText = lines.join("\n");
+        // 5. MAIN ŚLOKAM - separate KSST from others
+        if (bySegment["Main Ślokam"]) {
+            const mainSlokamAllocs = bySegment["Main Ślokam"];
+            
+            // Separate KSST from the rest
+            const ksst_alloc = mainSlokamAllocs.find(a => a.name === "KSST");
+            const round_allocs = mainSlokamAllocs.filter(a => a.name !== "KSST");
+            
+            // Show KSST first if present
+            if (ksst_alloc) {
+                let rangeStr;
+                if (ksst_alloc.from === ksst_alloc.to) {
+                    rangeStr = `${ksst_alloc.from}`;
+                } else {
+                    rangeStr = `${ksst_alloc.from}–${ksst_alloc.to}`;
+                }
+                lines.push(`Main Ślokam – ${rangeStr} -> ${ksst_alloc.name}`);
+            }
+            
+            // Show all other allocations WITHOUT round headers
+            for (const alloc of round_allocs) {
+                let rangeStr;
+                if (alloc.from === alloc.to) {
+                    rangeStr = `${alloc.from}`;
+                } else {
+                    rangeStr = `${alloc.from}–${alloc.to}`;
+                }
+                lines.push(`Main Ślokam – ${rangeStr} -> ${alloc.name}`);
+            }
+        }
+        
+        lines.push("");
+        
+        // PHALAŚRUTI - only show in FULL allocation mode
+        if (allocationType === 'full' && bySegment["Phalaśruti"]) {
+            for (const alloc of bySegment["Phalaśruti"]) {
+                let rangeStr;
+                if (alloc.from === alloc.to) {
+                    rangeStr = `${alloc.from}`;
+                } else {
+                    rangeStr = `${alloc.from}–${alloc.to}`;
+                }
+                lines.push(`Phalaśruti – ${rangeStr} -> ${alloc.name}`);
+            }
+        }
+        
+        // Display output
+        const outputDiv = document.getElementById("lakshmi-output");
+        if (outputDiv) {
+            outputDiv.textContent = lines.join("\n");
+        }
+        
+        console.log("Rendered output lines:", lines.length);
+        
+        return lines.join("\n");
     } catch (err) {
         console.error("Error in renderLakshmiOutput:", err);
-        document.getElementById("lakshmi-output").innerText = "Error rendering output: " + err.message;
+        return "Error rendering output.";
     }
 }
 
 // ---------- RUN ALLOCATION ----------
 function runLakshmiAllocateFull() {
     console.log("runLakshmiAllocateFull called!");
-    const rawNames = document.getElementById("lakshmi-namesInput").value.split('\n').filter(n => n.trim());
+    const rawNames = [...new Set(document.getElementById("lakshmi-namesInput").value.split('\n').filter(n => n.trim()))];
     console.log("Raw names:", rawNames);
     
     const historyText = document.getElementById("lakshmi-historyInput").value;
@@ -515,6 +670,7 @@ function runLakshmiAllocateFull() {
     
     currentLakshmiNames = rawNames;
     currentLakshmiHistoryText = historyText;
+    currentLakshmiMetadata = metadata;
     
     console.log("Calling allocateLakshmi...");
     currentLakshmiAllocations = allocateLakshmi({
@@ -531,7 +687,7 @@ function runLakshmiAllocateFull() {
 
 function runLakshmiAllocateSlokam() {
     console.log("runLakshmiAllocateSlokam called!");
-    const rawNames = document.getElementById("lakshmi-namesInput").value.split('\n').filter(n => n.trim());
+    const rawNames = [...new Set(document.getElementById("lakshmi-namesInput").value.split('\n').filter(n => n.trim()))];
     console.log("Raw names:", rawNames);
     
     const historyText = document.getElementById("lakshmi-historyInput").value;
@@ -545,6 +701,7 @@ function runLakshmiAllocateSlokam() {
     
     currentLakshmiNames = rawNames;
     currentLakshmiHistoryText = historyText;
+    currentLakshmiMetadata = metadata;
     
     console.log("Calling allocateLakshmi...");
     currentLakshmiAllocations = allocateLakshmi({
@@ -570,15 +727,9 @@ function reLakshmiAllocate() {
     }
 
     try {
-        const metadata = {
-            batchNumber: document.getElementById("lakshmi-batchNumber").value,
-            satsangNo: document.getElementById("lakshmi-satsangNo").value,
-            satsangDate: document.getElementById("lakshmi-satsangDate").value,
-            satsangTime: document.getElementById("lakshmi-satsangTime").value,
-            allocationType: document.getElementById("lakshmi-batchNumber").dataset.allocationType || 'full'
-        };
+        const metadata = currentLakshmiMetadata;
 
-        console.log("Re-allocating with stored names...");
+        console.log("Re-allocating with stored names and allocationType:", metadata.allocationType);
         currentLakshmiAllocations = allocateLakshmi({
             rawNames: currentLakshmiNames,
             satsangNo: metadata.satsangNo,
@@ -609,12 +760,7 @@ function onLakshmiExportExcel() {
     console.log("onLakshmiExportExcel called");
     console.log("currentLakshmiAllocations:", currentLakshmiAllocations);
     
-    const metadata = {
-        batchNumber: document.getElementById("lakshmi-batchNumber").value,
-        satsangNo: document.getElementById("lakshmi-satsangNo").value,
-        satsangDate: document.getElementById("lakshmi-satsangDate").value,
-        satsangTime: document.getElementById("lakshmi-satsangTime").value
-    };
+    const metadata = currentLakshmiMetadata;
     console.log("metadata:", metadata);
     
     if (!currentLakshmiAllocations || currentLakshmiAllocations.length === 0) {
@@ -640,12 +786,7 @@ function onLakshmiExportExcel() {
 }
 
 function onLakshmiExportPDF() {
-    const metadata = {
-        batchNumber: document.getElementById("lakshmi-batchNumber").value,
-        satsangNo: document.getElementById("lakshmi-satsangNo").value,
-        satsangDate: document.getElementById("lakshmi-satsangDate").value,
-        satsangTime: document.getElementById("lakshmi-satsangTime").value
-    };
+    const metadata = currentLakshmiMetadata;
     exportToPDFLakshmi(currentLakshmiAllocations, metadata);
 }
 

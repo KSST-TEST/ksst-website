@@ -5,12 +5,185 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KSST – Class Materials</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .materials-section {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1F4E78;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #e67e22;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .material-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .material-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .material-card-header {
+            background: #1a5a6b;
+            color: white;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-left: 5px solid #e67e22;
+            line-height: 1.4;
+        }
+
+        .material-card-body {
+            padding: 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .language-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .language-option {
+            display: block;
+        }
+
+        .language-label {
+            display: none;
+        }
+
+        .download-link {
+            display: inline;
+            background: none;
+            color: #1F4E78;
+            padding: 0;
+            border-radius: 0;
+            text-decoration: underline;
+            font-size: 13px;
+            font-weight: normal;
+            cursor: pointer;
+            transition: color 0.2s;
+            text-align: left;
+        }
+
+        .download-link:hover {
+            background: none;
+            color: #e67e22;
+        }
+
+        .download-link.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Desktop view */
+        @media (min-width: 1200px) {
+            .materials-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .material-card-header {
+                font-size: 16px;
+                padding: 16px;
+            }
+
+            .download-link {
+                font-size: 13px;
+            }
+        }
+
+        /* Tablet view */
+        @media (max-width: 1199px) and (min-width: 768px) {
+            .materials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .material-card-header {
+                font-size: 15px;
+                padding: 14px;
+            }
+
+            .material-card-body {
+                padding: 14px;
+            }
+
+            .language-option {
+                font-size: 12px;
+            }
+        }
+
+        /* Mobile view */
+        @media (max-width: 767px) {
+            .materials-section {
+                padding: 12px;
+            }
+
+            .section-heading {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+
+            .materials-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .material-card-header {
+                font-size: 15px;
+                padding: 14px;
+            }
+
+            .material-card-body {
+                padding: 12px;
+            }
+
+            .language-option {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .language-label {
+                min-width: 65px;
+            }
+
+            .download-link {
+                padding: 0;
+                font-size: 12px;
+                width: auto;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header class="header" style="position: relative;">
-    <a href="index.html" class="home-icon" style="right: 90px; top: 15px;">🏠</a>
+    <a href="index.html" class="home-icon">🏠</a>
     <img src="images/ksst-logo.jpeg" class="ksst-logo">
 
     <div class="header-text">
@@ -23,111 +196,42 @@
 
 <!-- MATERIALS SECTION -->
 <section class="materials-section">
-    <div class="materials-left">
-        <h2 class="section-heading" style="text-align: left; margin-top: 0;">Stothram Documents</h2>
+    <div class="materials-grid">
+        <!-- Starting & Ending Prayer -->
+        <div class="material-card">
+            <div class="material-card-header">KSST - Starting & Ending Prayer</div>
+            <div class="material-card-body">
+                <div class="language-options">
+                    <div class="language-option">
+                        <a href="materials/KSST-Starting-Ending-Prayer-Tamil.pdf.pdf" download class="download-link">KSST-Starting-Ending-Prayer-Tamil.pdf</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <table class="materials-table">
-            <thead>
-                <tr>
-                    <th>Stothram</th>
-                    <th>Document (Tamil)</th>
-                    <th>Document (Sanskrit)</th>
-                    <th>Document (English)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>KSST - Starting Prayer</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>KSST - Ending Prayer</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>KSST Format - Kṣamā Prārthanā</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Śrī Viṣṇu Sahasranāma</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Śrī Lakṣmī Sahasranāma</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Śrī Lalitā Sahasranāma</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Ganesha Stavam</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Kanakadhara Stotram</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Śrī Lakṣmī Narasimha Sahasranāma</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>Devī Māhātmyam</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>—</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>—</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>—</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>—</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-                <tr>
-                    <td>—</td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                    <td><a href="#" target="_blank" style="font-size: 20px; text-decoration: none;" title="Open PDF">📄</a></td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Kṣamā Prārthanā -->
+        <div class="material-card">
+            <div class="material-card-header">KSST Format - Kṣamā Prārthanā</div>
+            <div class="material-card-body">
+                <div class="language-options">
+                    <div class="language-option">
+                        <a href="materials/KSST-Ksama-Prarthana-Tamil.pdf" download class="download-link">KSST-Ksama-Prarthana-Tamil.pdf</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mahalakshmi Ashtakam -->
+        <div class="material-card">
+            <div class="material-card-header">Mahalakshmi Ashtakam</div>
+            <div class="material-card-body">
+                <div class="language-options">
+                    <div class="language-option">
+                        <a href="materials/Mahalakshmi-Ashtakam-Tamil.pdf.pdf" download class="download-link">Mahalakshmi-Ashtakam-Tamil.pdf</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 

@@ -363,7 +363,7 @@ function formatAllocationOutput(allocation) {
 
     lines.push("*Om Namo Narayana*");
     lines.push("-----------------------------------------------------------------------");
-    lines.push(`Batch Number: ${batch}   Satsang Date: ${date}   Satsang Time: ${time} IST`);
+    lines.push(`Batch Name: ${batch}   Satsang Date: ${date}   Satsang Time: ${time} IST`);
     lines.push("-----------------------------------------------------------------------");
     lines.push("");
 

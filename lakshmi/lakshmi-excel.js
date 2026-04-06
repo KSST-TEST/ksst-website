@@ -14,13 +14,13 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
             return;
         }
 
-        if (!XLSX || !XLSX.utils) {
+        if (!window.XLSX || !window.XLSX.utils) {
             console.error("XLSX library not loaded");
             alert("Error: XLSX library not loaded. Please refresh the page and try again.");
             return;
         }
 
-        const wb = XLSX.utils.book_new();
+        const wb = window.XLSX.utils.book_new();
     
         // Format date and time
         const formattedDate = formatDateinDDMMYYYY(metadata.satsangDate);
@@ -56,12 +56,10 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
             bySegment[alloc.segment].push(alloc);
         }
 
-        // Add fixed single assignments at top - with random selection (only Starting Prayer and Kṣamā)
+        // Add fixed single assignments at top
         for (const segment of ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"]) {
             if (bySegment[segment] && bySegment[segment].length > 0) {
-                // Randomly select from available allocations for this segment
-                const randomIndex = Math.floor(Math.random() * bySegment[segment].length);
-                const alloc = bySegment[segment][randomIndex];
+                const alloc = bySegment[segment][0];
                 wsData1.push([segment, alloc.name]);
             }
         }
@@ -69,8 +67,8 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         wsData1.push([]);
         wsData1.push(["Devotee Name", "Segment", "Allocated Slokas"]);
 
-        // Add remaining allocations in detail - skip opening/closing ceremonies and intermediate segments
-        const skipSegmentsInDetail = ["Starting Prayer", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
+        // Add remaining allocations in detail - skip fixed segments
+        const skipSegmentsInDetail = ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"];
         for (const segment of segmentOrder) {
             if (!skipSegmentsInDetail.includes(segment) && bySegment[segment]) {
                 for (const alloc of bySegment[segment]) {
@@ -89,10 +87,10 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
             }
         }
 
-        const ws1 = XLSX.utils.aoa_to_sheet(wsData1);
+        const ws1 = window.XLSX.utils.aoa_to_sheet(wsData1);
         ws1["!cols"] = [{ wch: 25 }, { wch: 28 }, { wch: 18 }];
         applyExcelStyles1(ws1);
-        XLSX.utils.book_append_sheet(wb, ws1, "Format#1");
+        window.XLSX.utils.book_append_sheet(wb, ws1, "Format#1");
 
         // ===== TAB 2: DETAILED MULTI-COLUMN FORMAT =====
         const wsData2 = [];
@@ -107,7 +105,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         wsData2.push([]);
 
         // Header: Single assignments
-        for (const segment of ["Starting Prayer", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"]) {
+        for (const segment of ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"]) {
             if (bySegment[segment] && bySegment[segment].length > 0) {
                 const alloc = bySegment[segment][0];
                 wsData2.push([segment, alloc.name]);
@@ -121,16 +119,14 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         // Determine max segments needed by checking all devotees' allocation counts
         let maxSegmentsNeeded = 1;
         const devoteeAllocations = {};
-        const fixedSegments = ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
+        const fixedSegments = ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"];
         
         // Define segment order for proper sequencing
-        const segmentOrder = [
-            "Starting Prayer",
+        const segmentOrder2 = [
             "Nyāsa",
             "Dhyānam",
             "Main Ślokam",
-            "Phalaśruti",
-            "Kṣamā Prārthanā & Ending Prayer"
+            "Phalaśruti"
         ];
         
         for (const alloc of allocations) {
@@ -156,7 +152,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         // Add devotee rows with segment columns
         // Helper: get segment index based on segmentOrder for sorting
         const segmentIndexMap = {};
-        segmentOrder.forEach((seg, idx) => { segmentIndexMap[seg] = idx; });
+        segmentOrder2.forEach((seg, idx) => { segmentIndexMap[seg] = idx; });
         
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
             // Sort allocations by segment order first, then by starting sloka within segment
@@ -194,7 +190,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
             wsData2.push([segment, ""]);
         }
 
-        const ws2 = XLSX.utils.aoa_to_sheet(wsData2);
+        const ws2 = window.XLSX.utils.aoa_to_sheet(wsData2);
         // Dynamic column widths based on maxSegmentsNeeded
         const cols = [{ wch: 25 }];  // Devotee name column
         for (let i = 0; i < maxSegmentsNeeded; i++) {
@@ -202,7 +198,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         }
         ws2["!cols"] = cols;
         applyExcelStyles2(ws2);
-        XLSX.utils.book_append_sheet(wb, ws2, "Format#2");
+        window.XLSX.utils.book_append_sheet(wb, ws2, "Format#2");
 
         // Generate filename with Batch Name and Satsang Date in mm-dd-yyyy format
         const batchName = metadata.batchNumber || 'LSN';
@@ -215,7 +211,7 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         
         console.log("Generated filename:", filename);
         console.log("Workbook sheets:", wb.SheetNames);
-        XLSX.writeFile(wb, filename);
+        window.XLSX.writeFile(wb, filename);
         console.log("Excel file downloaded successfully");
     } catch (err) {
         console.error("Error in exportToExcelLakshmi:", err);
@@ -231,11 +227,11 @@ function applyExcelStyles1(ws) {
             return;
         }
         
-        const range = XLSX.utils.decode_range(ref);
+        const range = window.XLSX.utils.decode_range(ref);
         
         for (let R = range.s.r; R <= range.e.r; R++) {
             for (let C = range.s.c; C <= range.e.c; C++) {
-                const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                const cellRef = window.XLSX.utils.encode_cell({ r: R, c: C });
                 
                 if (!ws[cellRef]) {
                     ws[cellRef] = { t: "s", v: "" };
@@ -305,10 +301,10 @@ function applyExcelStyles1(ws) {
 
 function applyExcelStyles2(ws) {
     try {
-        const range = XLSX.utils.decode_range(ws["!ref"] || "A1");
+        const range = window.XLSX.utils.decode_range(ws["!ref"] || "A1");
         for (let R = range.s.r; R <= range.e.r; R++) {
             for (let C = range.s.c; C <= range.e.c; C++) {
-                const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+                const cellRef = window.XLSX.utils.encode_cell({ r: R, c: C });
                 
                 if (!ws[cellRef]) {
                     ws[cellRef] = { v: "", t: "s" };

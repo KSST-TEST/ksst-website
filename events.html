@@ -28,100 +28,365 @@
             display: inline-block;
             margin-bottom: 8px;
         }
+
+        /* Card-based layout for events */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: #1a5a6b;
+            color: white;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.4;
+            border-left: 5px solid #e67e22;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .card-date {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .card-date-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .card-date-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .card-timings {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .card-timings-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .card-timings-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .card-registration {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .card-registration a {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #1F4E78;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .card-registration a:hover {
+            background: #0d2346;
+        }
+
+        .card-registration .register-btn {
+            animation: blink 1s infinite;
+            background: #d32f2f;
+        }
+
+        .card-registration .register-btn:hover {
+            background: #b71c1c;
+        }
+
+        .card-status {
+            display: inline-block;
+            padding: 6px 10px;
+            background: #ffeb3b;
+            color: #333;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .card-status.closed {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        /* Desktop view - 3 columns */
+        @media (min-width: 1100px) {
+            .events-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
+            }
+
+            .section-heading {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+            .card-header {
+                font-size: 18px;
+                padding: 16px;
+            }
+
+            .card-body {
+                padding: 16px;
+            }
+
+            .card-date-content {
+                font-size: 13px;
+            }
+
+            .card-timings-content {
+                font-size: 12px;
+            }
+        }
+
+        /* Tablet view - 2 columns */
+        @media (max-width: 1099px) and (min-width: 768px) {
+            .events-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .section-heading {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .card-header {
+                font-size: 17px;
+                padding: 15px;
+            }
+
+            .card-body {
+                padding: 14px;
+            }
+
+            .card-date-content {
+                font-size: 13px;
+            }
+
+            .card-timings-content {
+                font-size: 12px;
+            }
+        }
+
+        /* Mobile view - 1 column */
+        @media (max-width: 767px) {
+            .events-section {
+                padding: 0 12px;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 16px;
+            }
+
+            .section-heading {
+                font-size: 16px;
+                font-weight: bold;
+                margin-top: 15px;
+                margin-bottom: 12px;
+                color: #1F4E78;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #e67e22;
+            }
+
+            .card-header {
+                font-size: 16px;
+                padding: 14px;
+                line-height: 1.4;
+            }
+
+            .card-body {
+                padding: 14px;
+            }
+
+            .card-date-content {
+                font-size: 13px;
+            }
+
+            .card-timings-content {
+                font-size: 12px;
+            }
+
+            .card-registration a {
+                font-size: 12px;
+                padding: 8px 12px;
+                flex: 1;
+                text-align: center;
+                min-width: 120px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header class="header" style="position: relative;">
-    <a href="index.html" class="home-icon" style="right: 90px; top: 15px;">🏠</a>
-    <img src="images/ksst-logo.jpeg" class="ksst-logo">
+    <a href="index.html" class="home-icon">🏠</a>
+    <img src="images/ksst-logo.jpeg" class="ksst-logo" alt="KSST Logo">
 
     <div class="header-text">
         <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
         <div class="tagline">Events & Classes</div>
     </div>
 
-    <img src="images/om.png" class="om-image">
+    <img src="images/om.png" class="om-image" alt="Om">
 </header>
 
 <!-- EVENTS SECTION -->
 <section class="events-section">
-    <h2 class="section-heading">Upcoming Classes and Registration Details - April 2026</h2>
+    <h2 class="section-heading">Upcoming Classes and Registration Details</h2>
     
-    <table class="events-table">
-        <thead>
-            <tr>
-                <th>Class Name</th>
-                <th>Start Date</th>
-                <th>Class Days and Timings</th>
-                <th>Google Form Registration Link</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Bhagavad Gītā</td>
-                <td>Mar 25, 2026</td>
-                <td>
-                    🗓 Days: Every Monday, Tuesday & Thursday<br>
-                    ⏰ Time: 3:00 - 4:00 PM IST
-                </td>
-                <td>
-                    <span style="color: #d32f2f; font-weight: bold;">Registration Closed</span>
-                </td>
-            </tr>
-            <tr>
-                <td>Śrī Viṣṇu Sahasranāma</td>
-                <td>Next Batch Starting Apr 12th</td>
-                <td>🗓 Weekdays - 7 AM, 11 AM, 4 PM, 7 PM IST<br>🗓 Weekends - Sat & Sun @ 5:30 PM IST</td>
-                <td><div class="registration-open">📢 Registration Open</div><a href="https://forms.gle/37DDigMjcxVieEYX7" target="_blank" class="blinking-register">Register</a></td>
-            </tr>
-            <tr>
-                <td>Soundarya Laharī</td>
-                <td>Classes Starting in April - To be announced soon</td>
-                <td>🗓 Days: To be provided Soon<br>⏰ Time: To be provided Soon</td>
-                <td><a href="#" style="color: #e67e22; font-weight: bold;">Register</a><br><span style="font-size: 12px; color: #666;">(To be updated Soon)</span></td>
-            </tr>
-            <tr>
-                <td>Śrī Lakṣmī Narasimha Sahasranāma</td>
-                <td>Classes Starting in April - To be announced soon</td>
-                <td>🗓 Days: To be provided Soon<br>⏰ Time: To be provided Soon</td>
-                <td><a href="#" style="color: #e67e22; font-weight: bold;">Register</a><br><span style="font-size: 12px; color: #666;">(To be updated Soon)</span></td>
-            </tr>
-            <tr>
-                <td>Devī Māhātmyam</td>
-                <td>Classes Starting in April - To be announced soon</td>
-                <td>🗓 Days: To be provided Soon<br>⏰ Time: To be provided Soon</td>
-                <td><a href="#" style="color: #e67e22; font-weight: bold;">Register</a><br><span style="font-size: 12px; color: #666;">(To be updated Soon)</span></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="events-grid">
+        <!-- Bhagavad Gītā Card -->
+        <div class="event-card">
+            <div class="card-header">Bhagavad Gītā</div>
+            <div class="card-body">
+                <div class="card-date">
+                    <div class="card-date-icon">📅</div>
+                    <div class="card-date-content">Starting Mar 25, 2026</div>
+                </div>
+                <div class="card-timings">
+                    <div class="card-timings-icon">🗓</div>
+                    <div class="card-timings-content">
+                        Days: Every Monday, Tuesday & Thursday<br>
+                        Time: 3:00 - 4:00 PM IST
+                    </div>
+                </div>
+                <div class="card-registration">
+                    <span class="card-status closed">Registration Closed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Śrī Viṣṇu Sahasranāma Card -->
+        <div class="event-card">
+            <div class="card-header">Śrī Viṣṇu Sahasranāma</div>
+            <div class="card-body">
+                <div class="card-date">
+                    <div class="card-date-icon">📅</div>
+                    <div class="card-date-content">Starting Apr 12, 2026</div>
+                </div>
+                <div class="card-timings">
+                    <div class="card-timings-icon">🗓</div>
+                    <div class="card-timings-content">
+                        Weekdays - 7 AM, 11 AM, 4 PM, 7 PM IST<br>
+                        Weekends - Sat & Sun @ 5:30 PM IST
+                    </div>
+                </div>
+                <div class="card-registration">
+                    <span class="card-status">📢 Registration Open</span>
+                    <a href="https://forms.gle/37DDigMjcxVieEYX7" target="_blank" class="register-btn">Register</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Soundarya Laharī Card -->
+        <div class="event-card">
+            <div class="card-header">Soundarya Laharī</div>
+            <div class="card-body">
+                <div class="card-date">
+                    <div class="card-date-icon">📅</div>
+                    <div class="card-date-content">Starting April - TBA</div>
+                </div>
+                <div class="card-timings">
+                    <div class="card-timings-icon">🗓</div>
+                    <div class="card-timings-content">
+                        Days: To be provided soon<br>
+                        Time: To be provided soon
+                    </div>
+                </div>
+                <div class="card-registration">
+                    <span style="font-size: 12px; color: #999;">(Details coming soon)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Śrī Lakṣmī Narasimha Sahasranāma Card -->
+        <div class="event-card">
+            <div class="card-header">Śrī Lakṣmī Narasimha Sahasranāma</div>
+            <div class="card-body">
+                <div class="card-date">
+                    <div class="card-date-icon">📅</div>
+                    <div class="card-date-content">Starting April - TBA</div>
+                </div>
+                <div class="card-timings">
+                    <div class="card-timings-icon">🗓</div>
+                    <div class="card-timings-content">
+                        Days: To be provided soon<br>
+                        Time: To be provided soon
+                    </div>
+                </div>
+                <div class="card-registration">
+                    <span style="font-size: 12px; color: #999;">(Details coming soon)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devī Māhātmyam Card -->
+        <div class="event-card">
+            <div class="card-header">Devī Māhātmyam</div>
+            <div class="card-body">
+                <div class="card-date">
+                    <div class="card-date-icon">📅</div>
+                    <div class="card-date-content">Starting April - TBA</div>
+                </div>
+                <div class="card-timings">
+                    <div class="card-timings-icon">🗓</div>
+                    <div class="card-timings-content">
+                        Days: To be provided soon<br>
+                        Time: To be provided soon
+                    </div>
+                </div>
+                <div class="card-registration">
+                    <span style="font-size: 12px; color: #999;">(Details coming soon)</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <h2 class="section-heading" style="margin-top: 50px;">Special Events & Samarpans</h2>
-
-    <table class="events-table">
-        <thead>
-            <tr>
-                <th>Event Name</th>
-                <th>Place</th>
-                <th>Date & Time</th>
-                <th>Google Form Registration Link</th>
-                <th>Google Meet Link (for Virtual Devotees)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    'Samarpan' of Śrī Viṣṇu Sahasranāma<br>
-                    <span style="font-size: 13px; color: #666;">Chanting 5 to 7 Aavarthis</span>
-                </td>
-                <td>Ulagalantha Perumal Temple at Gandhimaa Nagar, Coimbatore</td>
-                <td>🗓 5th April 2026<br>⏰ 8:30 AM TO 12:30 PM IST</td>
-                <td><div class="registration-open">📢 Registration Open</div><a href="https://forms.gle/tHwkn8LH6yDxG68B7" target="_blank" class="blinking-register">Register</a></td>
-                <td class="table-link-small">To be Provided soon</td>
-            </tr>
-        </tbody>
-    </table>
+    <p style="color: #666; font-size: 14px;">No events scheduled at this time.</p>
 </section>
 
 <footer class="footer">

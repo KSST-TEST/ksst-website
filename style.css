@@ -61,9 +61,16 @@ input, textarea {
    GLOBAL BASE
    ============================================================ */
 
+html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
 body {
     background: #fff8e6;
     margin: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 a {
@@ -179,6 +186,25 @@ a {
     border-radius: 10px;
     box-shadow: 0 0 12px #d4a017;
     margin-top: 15px;
+}
+
+.devotional-line {
+    font-size: 18px;
+    font-weight: normal;
+    color: #1F4E78;
+    margin: 20px 0 10px 0;
+    font-style: italic;
+}
+
+.motto-line {
+    font-size: 32px;
+    font-weight: bold;
+    color: #e67e22;
+    margin: 10px 0 20px 0;
+    font-style: italic;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    font-family: Georgia, serif;
 }
 
 .right-column {
@@ -698,6 +724,11 @@ a {
     max-height: 400px;
     overflow-y: auto;
     flex: 1;
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 #output {
@@ -1006,6 +1037,11 @@ textarea {
     max-height: 400px;
     overflow-y: auto;
     flex: 1;
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 /* Download buttons */
@@ -1059,11 +1095,14 @@ textarea {
 
 .home-icon {
     position: absolute;
-    font-size: 32px;
+    font-size: 40px;
     text-decoration: none;
-    color: #333;
+    color: white;
     cursor: pointer;
-    title: "Home";
+    top: 12px;
+        right: 80px;
+    border-radius: 8px;
+    transition: all 0.2s;
 }
 
 .pdf-link {
@@ -1177,9 +1216,12 @@ textarea {
 
     /* Home icon repositioning for mobile */
     .home-icon {
-        right: 15px !important;
-        top: 8px !important;
-        font-size: 24px;
+        right: 15px;
+        left: auto;
+        top: 8px;
+        font-size: 36px;
+        width: 45px;
+        height: 45px;
     }
 
     /* Main layout */
@@ -1384,79 +1426,191 @@ textarea {
 /* Very small phones (max 600px) */
 @media (max-width: 600px) {
     .header {
-        padding: 10px 10px;
+        padding: 12px 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        width: 100%;
     }
 
     .site-title {
-        font-size: 18px;
+        font-size: 22px;
+        margin: 0;
     }
 
     .tagline {
-        font-size: 11px;
+        font-size: 13px;
     }
 
     .ksst-logo {
-        width: 50px;
+        width: 55px;
     }
 
     .om-image {
-        width: 38px;
+        width: 45px;
     }
 
     .home-icon {
-        right: 8px !important;
-        top: 5px !important;
-        font-size: 20px;
+        right: 10px !important;
+        top: 8px !important;
+        font-size: 28px;
+        width: 50px;
+        height: 50px;
     }
 
+    /* MOBILE HOME PAGE REDESIGN */
     .home-layout {
         flex-direction: column;
-        padding: 8px;
-        gap: 8px;
+        padding: 0;
+        gap: 0;
+        width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
 
-    .left-column,
-    .center-column,
+    .left-column {
+        display: none;
+    }
+
+    .center-column {
+        width: 100%;
+        text-align: center;
+        padding: 20px 16px;
+        order: 1;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    .marquee-wrapper {
+        margin: 0 -16px 15px -16px;
+        background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        padding: 12px 16px;
+        border-radius: 0;
+        overflow: hidden;
+    }
+
+    .welcome-marquee {
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .image-container {
+        margin: 15px 0;
+    }
+
+    .welcome-image {
+        width: 50%;
+        max-width: 200px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+    }
+
+    .devotional-line {
+        font-size: 16px;
+        margin: 12px 0 8px 0;
+        color: #1F4E78;
+    }
+
+    .motto-line {
+        font-size: 24px;
+        margin: 8px 0 20px 0;
+        color: #e67e22;
+        letter-spacing: 0.5px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+    }
+
     .right-column {
-        padding: 8px;
+        width: 100%;
+        background: #f5f5f5;
+        padding: 20px 16px;
+        gap: 12px;
+        order: 2;
+        border-top: 3px solid #e67e22;
+        box-sizing: border-box;
+    }
+
+    .side-btn {
+        display: block;
+        padding: 16px 12px;
+        background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        color: white;
+        text-align: center;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .side-btn:active {
+        background: linear-gradient(135deg, #d35400 0%, #ba4a00 100%);
+        transform: scale(0.98);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .side-btn:hover {
+        background: linear-gradient(135deg, #d35400 0%, #ba4a00 100%);
+        box-shadow: 0 4px 12px rgba(230, 126, 34, 0.4);
     }
 
     .btn, .side-btn {
-        font-size: 12px;
-        padding: 8px 10px;
+        font-size: 15px;
+        padding: 12px 16px;
     }
 
     .tool-title {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .section-heading {
-        font-size: 16px;
+        font-size: 18px;
         margin-top: 15px;
         margin-bottom: 12px;
     }
 
+    .section-title {
+        font-size: 18px;
+        color: #1F4E78;
+    }
+
+    .section-text {
+        font-size: 14px;
+    }
+
     .events-table,
     .materials-table {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .events-table th,
     .materials-table th {
-        padding: 6px 4px;
-        font-size: 10px;
+        padding: 8px 4px;
+        font-size: 11px;
     }
 
     .events-table td,
     .materials-table td {
-        padding: 6px 4px;
-        font-size: 11px;
+        padding: 8px 4px;
+        font-size: 12px;
     }
 
     .pdf-link {
         font-size: 14px;
     }
-}
 }
 
 /* ============================================================
@@ -1607,6 +1761,11 @@ textarea {
     max-height: 400px;
     overflow-y: auto;
     flex: 1;
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 .lakshmi-download-buttons {

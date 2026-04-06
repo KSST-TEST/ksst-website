@@ -563,7 +563,7 @@ function renderLalithaOutput(allocations, metadata = {}) {
 // ---------- RUN ALLOCATION ----------
 function runLalithaAllocateFull() {
     console.log("runLalithaAllocateFull called!");
-    const rawNames = document.getElementById("lalitha-namesInput").value.split('\n').filter(n => n.trim());
+    const rawNames = [...new Set(document.getElementById("lalitha-namesInput").value.split('\n').filter(n => n.trim()))];
     console.log("Raw names:", rawNames);
     
     const historyText = document.getElementById("lalitha-historyInput").value;
@@ -593,7 +593,7 @@ function runLalithaAllocateFull() {
 
 function runLalithaAllocateSlokam() {
     console.log("runLalithaAllocateSlokam called!");
-    const rawNames = document.getElementById("lalitha-namesInput").value.split('\n').filter(n => n.trim());
+    const rawNames = [...new Set(document.getElementById("lalitha-namesInput").value.split('\n').filter(n => n.trim()))];
     console.log("Raw names:", rawNames);
     
     const historyText = document.getElementById("lalitha-historyInput").value;

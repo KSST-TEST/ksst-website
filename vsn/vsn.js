@@ -540,10 +540,10 @@ let currentMetadata = {
 
 function runAllocateFull() {
     try {
-        const rawNames = document.getElementById("vsn-namesInput").value
+        const rawNames = [...new Set(document.getElementById("vsn-namesInput").value
             .split(/\r?\n/)
             .map(x => x.trim())
-            .filter(x => x);
+            .filter(x => x))];
 
         console.log("Raw names:", rawNames);
 
@@ -587,10 +587,10 @@ function runAllocateFull() {
 
 function runAllocateSlokam() {
     try {
-        const rawNames = document.getElementById("vsn-namesInput").value
+        const rawNames = [...new Set(document.getElementById("vsn-namesInput").value
             .split(/\r?\n/)
             .map(x => x.trim())
-            .filter(x => x);
+            .filter(x => x))];
 
         if (rawNames.length === 0) {
             alert("Please enter at least one devotee name.");
