@@ -117,16 +117,21 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
 
         // Column headers for multi-segment view
         const colHeaders = ["Devotee Name"];
-        const maxSegmentsDisplayed = 4;
-        for (let i = 0; i < maxSegmentsDisplayed; i++) {
-            colHeaders.push("Segment");
-            colHeaders.push("Allocated Slokas");
-        }
-        wsData2.push(colHeaders);
-
-        // Collect devotees and their allocations (excluding fixed segments)
+        
+        // Determine max segments needed by checking all devotees' allocation counts
+        let maxSegmentsNeeded = 1;
         const devoteeAllocations = {};
         const fixedSegments = ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
+        
+        // Define segment order for proper sequencing
+        const segmentOrder = [
+            "Starting Prayer",
+            "Nyāsa",
+            "Dhyānam",
+            "Main Ślokam",
+            "Phalaśruti",
+            "Kṣamā Prārthanā & Ending Prayer"
+        ];
         
         for (const alloc of allocations) {
             if (!fixedSegments.includes(alloc.segment)) {
@@ -136,19 +141,38 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
                 devoteeAllocations[alloc.name].push(alloc);
             }
         }
+        
+        // Find the maximum number of segments any devotee has
+        for (const allocs of Object.values(devoteeAllocations)) {
+            maxSegmentsNeeded = Math.max(maxSegmentsNeeded, allocs.length);
+        }
+        
+        for (let i = 0; i < maxSegmentsNeeded; i++) {
+            colHeaders.push("Segment");
+            colHeaders.push("Allocated Slokas");
+        }
+        wsData2.push(colHeaders);
 
         // Add devotee rows with segment columns
+        // Helper: get segment index based on segmentOrder for sorting
+        const segmentIndexMap = {};
+        segmentOrder.forEach((seg, idx) => { segmentIndexMap[seg] = idx; });
+        
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
-            // Sort allocations by starting sloka (from) to sequence slokas
-            allocs.sort((a, b) => a.from - b.from);
+            // Sort allocations by segment order first, then by starting sloka within segment
+            allocs.sort((a, b) => {
+                const segA = segmentIndexMap[a.segment] ?? 999;
+                const segB = segmentIndexMap[b.segment] ?? 999;
+                if (segA !== segB) return segA - segB;  // Primary: segment order
+                return a.from - b.from;  // Secondary: sloka number
+            });
             const row = [devotee];
+            for (let i = 0; i < maxSegmentsNeeded; i++) {
                 if (i < allocs.length) {
                     const alloc = allocs[i];
                     row.push(alloc.segment);
                     let rangeStr;
-                    if (alloc.segment === "Nyāsa" && alloc.from === alloc.to) {
-                        rangeStr = "Full";
-                    } else if (alloc.from === alloc.to) {
+                    if (alloc.from === alloc.to) {
                         rangeStr = `${alloc.from}`;
                     } else {
                         rangeStr = `${alloc.from} - ${alloc.to}`;
@@ -171,10 +195,12 @@ function exportToExcelLakshmi(allocations, metadata = {}) {
         }
 
         const ws2 = XLSX.utils.aoa_to_sheet(wsData2);
-        ws2["!cols"] = [
-            { wch: 25 }, { wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 14 }, 
-            { wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 14 }
-        ];
+        // Dynamic column widths based on maxSegmentsNeeded
+        const cols = [{ wch: 25 }];  // Devotee name column
+        for (let i = 0; i < maxSegmentsNeeded; i++) {
+            cols.push({ wch: 20 }, { wch: 14 });  // Segment and Slokas columns
+        }
+        ws2["!cols"] = cols;
         applyExcelStyles2(ws2);
         XLSX.utils.book_append_sheet(wb, ws2, "Format#2");
 

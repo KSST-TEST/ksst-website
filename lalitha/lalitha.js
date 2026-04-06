@@ -3,6 +3,8 @@
 // ============================================================
 
 let currentLalithaAllocations = [];
+let currentLalithaNames = [];
+let currentLalithaHistoryText = "";
 
 // ---------- HELPER: FORMAT DATE AND TIME ----------
 function formatDateinDDMMYYYY(dateString) {
@@ -32,6 +34,45 @@ function parseHistory(historyText) {
     const lines = historyText.split(/\r?\n/);
 
     for (const line of lines) {
+        if (!line.trim()) continue;
+        
+        let segment = "";
+        let from = 1, to = 1, name = "";
+        
+        // Try tab-separated (Excel copy-paste)
+        if (line.includes('\t') && !segment) {
+            const parts = line.split('\t').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
+        // Try comma-separated (CSV)
+        if (line.includes(',') && !segment) {
+            const parts = line.split(',').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
         let match = line.match(/^([^:→→\->\(\)]+?)\s+(\d+)\s*[–\-]\s*(\d+)\s*[→→:->]+\s*(.+)$/);
         
         if (!match) {
@@ -42,19 +83,18 @@ function parseHistory(historyText) {
             match = line.match(/^([^0-9]+?)\s+(\d+)\s*[–\-]\s*(\d+)\s+(.+)$/);
         }
 
-        if (match) {
-            const segment = match[1].trim();
-            const from = parseInt(match[2]);
-            const to = parseInt(match[3]);
-            const name = cleanName(match[4].trim());
-
-            if (segment && !isNaN(from) && !isNaN(to) && name) {
-                allocations.push({
-                    segment,
-                    from,
-                    to,
-                    name
-                });
+        if (match && !segment) {
+            segment = match[1].trim();
+            from = parseInt(match[2]);
+            to = parseInt(match[3]);
+            name = match[4].trim();
+        }
+        
+        // Push if valid
+        if (segment && !isNaN(from) && !isNaN(to) && name) {
+            name = cleanName(name);
+            if (name) {
+                allocations.push({ segment, from, to, name });
             }
         }
     }
@@ -83,20 +123,57 @@ function buildHistoryMap(allocationHistory) {
 
 // ---------- NAME CLEANUP ----------
 function cleanName(name) {
+    // Remove numericals from start (1., 1), 1)B, etc.)
+    name = name.replace(/^[\d\.\)\s]+/, "").trim();
+    
+    // Replace dots with spaces
     name = name.replace(/\./g, " ");
+    
+    // Collapse multiple spaces and trim
     name = name.replace(/\s+/g, " ").trim();
     
     let parts = name.split(" ");
     
-    if (parts.length === 2 && parts[1].length === 1) {
-        parts = [parts[1], parts[0]];
-    }
-    else if (parts.length >= 3 && parts[parts.length - 1].length === 1) {
-        const lastPart = parts.pop();
-        parts.unshift(lastPart);
+    // Identify titles, initials, and actual names
+    const titleList = ["dr", "mr", "mrs", "ms", "prof"];
+    const initials = [];
+    const actualNames = [];
+    const titles = [];
+    
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        
+        if (!part) continue;
+        
+        const lowerPart = part.toLowerCase();
+        
+        // Check if it's a title
+        if (titleList.includes(lowerPart)) {
+            titles.push(lowerPart.toUpperCase());
+            continue;
+        }
+        
+        // Check if it's an initial (single letter)
+        if (part.length === 1) {
+            initials.push(part.toUpperCase());
+        } else {
+            // It's an actual name - apply title case
+            actualNames.push(part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+        }
     }
     
-    return parts.join(" ");
+    // Combine: actual names + initials (without spaces between initials) + titles
+    let result = actualNames.join(" ");
+    
+    if (initials.length > 0) {
+        result += (result ? " " : "") + initials.join("");
+    }
+    
+    if (titles.length > 0) {
+        result += (result ? " " : "") + titles.join(" ");
+    }
+    
+    return result.trim();
 }
 
 // ---------- CLASSIFY PARTICIPANTS ----------
@@ -132,132 +209,196 @@ function allocateLalitha(params) {
         
         const allocations = [];
         
-        // Helper: Create ranges for fair distribution (similar to VSN)
-        function createRanges(start, end, count) {
-            const total = end - start + 1;
-            if (count <= 0 || total <= 0) return [];
-
-            const base = Math.floor(total / count);
-            let remainder = total % count;
-
-            const ranges = [];
-            let current = start;
-
-            for (let i = 0; i < count; i++) {
-                let size = base + (remainder > 0 ? 1 : 0);
-                if (remainder > 0) remainder--;
-
-                const rStart = current;
-                const rEnd = current + size - 1;
-                ranges.push({ start: rStart, end: rEnd });
-                current = rEnd + 1;
-            }
-
-            return ranges;
+        // **FAIRNESS-AWARE ROUND-ROBIN ALLOCATION WITH MULTIPLE ROUNDS**
+        // Keep sequence in original order (Person 1, Person 2, ..., Person N)
+        const roundRobinSequence = [...main]; // Keep in original input order
+        
+        if (roundRobinSequence.length === 0) {
+            return allocations; // No allocations if no main participants
         }
         
-        const numParticipants = main.length;
+        // Helper: Random selection from array
+        function randomSelect(arr) {
+            if (arr.length === 0) return null;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
         
-        // 1. STARTING PRAYER (4 slokas) - assign to first person (separate from main distribution)
-        const startingPrayerPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
-        if (startingPrayerPerson) {
+        // Build fairness tracking map: only for core segments (Nyāsa, Dhyānam, Main Ślokam)
+        // Starting Prayer and Ending Prayer are NOT counted in fairness
+        const fairnessMap = {};
+        for (const person of roundRobinSequence) {
+            fairnessMap[person] = 0;
+        }
+
+        // 1. STARTING PRAYER - Random from main participants
+        let startingPrayerPerson = null;
+        if (roundRobinSequence.length > 0) {
+            startingPrayerPerson = randomSelect(roundRobinSequence);
             allocations.push({
                 segment: "Starting Prayer",
                 from: 1,
                 to: 4,
                 name: startingPrayerPerson
             });
+            // DO NOT add to fairnessMap - Starting Prayer doesn't count
         }
         
-        // 2. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - assign to second person (separate from main distribution)
-        const endingPrayerPerson = main.length > 1 ? main[1] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
-        if (endingPrayerPerson) {
+        // 2. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER - Random from DIFFERENT person
+        if (roundRobinSequence.length > 1) {
+            let endingPrayerPerson = null;
+            let attempts = 0;
+            
+            // Keep selecting until we get someone different from Starting Prayer person
+            do {
+                endingPrayerPerson = randomSelect(roundRobinSequence);
+                attempts++;
+            } while (endingPrayerPerson === startingPrayerPerson && attempts < 100);
+            
             allocations.push({
                 segment: "Kṣamā Prārthanā & Ending Prayer",
                 from: 1,
                 to: 4,
                 name: endingPrayerPerson
             });
-        }
-        
-        // 2. NYĀSA (1 portion) - assign to third person (separate from main distribution)
-        const nyasaPerson = main.length > 2 ? main[2] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
-        if (nyasaPerson) {
+            // DO NOT add to fairnessMap - Ending Prayer doesn't count
+        } else if (roundRobinSequence.length > 0) {
+            // Only one person: assign to someone different if possible
             allocations.push({
-                segment: "Nyāsa",
+                segment: "Kṣamā Prārthanā & Ending Prayer",
                 from: 1,
-                to: 1,
-                name: nyasaPerson
+                to: 4,
+                name: roundRobinSequence[0]
             });
         }
         
-        // 3. DHYĀNAM (4 slokas) - SPLIT BETWEEN 2 PEOPLE
-        if (main.length > 3) {
+        // 3. NYĀSA - Person 1 (first in round-robin)
+        const nyasaPerson = roundRobinSequence[0];
+        allocations.push({
+            segment: "Nyāsa",
+            from: 1,
+            to: 1,
+            name: nyasaPerson
+        });
+        fairnessMap[nyasaPerson] += 1;
+        
+        // 4. DHYĀNAM - Person 2 and 3 (second and third in round-robin)
+        if (roundRobinSequence.length > 1) {
+            const person = roundRobinSequence[1];
             allocations.push({
                 segment: "Dhyānam",
                 from: 1,
                 to: 2,
-                name: main[3]
+                name: person
             });
-            allocations.push({
-                segment: "Dhyānam",
-                from: 3,
-                to: 4,
-                name: main[4]
-            });
-        } else if (main.length > 2) {
-            // Fallback: if less than 5 people, split between available
-            allocations.push({
-                segment: "Dhyānam",
-                from: 1,
-                to: 2,
-                name: main[3] || main[0]
-            });
-            allocations.push({
-                segment: "Dhyānam",
-                from: 3,
-                to: 4,
-                name: main[4] || main[1] || main[0]
-            });
+            fairnessMap[person] += 2;
         }
         
-        // 4. MAIN ŚLOKAM (183 slokas) - DISTRIBUTE IN MULTIPLE ROUNDS
-        // People 0-4 already have assignments, so distribute among people 5 onwards
-        const numMainSlokamParticipants = Math.max(1, numParticipants - 5);
+        if (roundRobinSequence.length > 2) {
+            const person = roundRobinSequence[2];
+            allocations.push({
+                segment: "Dhyānam",
+                from: 3,
+                to: 4,
+                name: person
+            });
+            fairnessMap[person] += 2;
+        }
         
-        // Determine chunk size per round based on number of participants
-        // Goal: reasonable chunks (3-5 slokas per person per round)
-        let chunkSizePerRound = 4;
-        if (numMainSlokamParticipants <= 15) chunkSizePerRound = 5;
-        if (numMainSlokamParticipants <= 10) chunkSizePerRound = 6;
-        if (numMainSlokamParticipants <= 5) chunkSizePerRound = 10;
+        // 5. MAIN ŚLOKAM 1-5 - Always KSST (if KSST is in input names)
+        const ksst_name = ksst.length > 0 ? ksst[0] : "KSST";
+        allocations.push({
+            segment: "Main Ślokam",
+            from: 1,
+            to: 5,
+            name: ksst_name,
+            round: 0  // Special round for KSST
+        });
         
-        // Calculate number of rounds needed to keep allocations reasonable per person
-        const numRounds = Math.ceil(183 / (numMainSlokamParticipants * chunkSizePerRound));
+        // 6. MAIN ŚLOKAM 6-182 - Fairness-aware allocation with multiple rounds
+        const startSloka = 6;
+        const endSloka = 182;
+        const totalSlokas = endSloka - startSloka + 1; // 177 slokas
+        const numPeople = roundRobinSequence.length;
         
-        // Distribute slokas across multiple rounds
-        // Each round will have roughly equal number of slokas
-        for (let round = 1; round <= numRounds; round++) {
-            // Calculate which slokas belong to this round
-            const roundStartSloka = Math.floor((round - 1) * 183 / numRounds) + 1;
-            const roundEndSloka = Math.floor(round * 183 / numRounds);
+        // Calculate target slokas per person for fair distribution
+        const targetPerPerson = totalSlokas / numPeople; // 177/13 ≈ 13.6
+        
+        // Use a fairness-based approach: track cumulative and distribute evenly
+        let currentSloka = startSloka;
+        let currentRound = 1;
+        
+        while (currentSloka <= endSloka) {
+            // Find person with lowest current fairness score
+            let minFairness = Infinity;
+            let nextPersonIdx = 0;
             
-            // Distribute this round's slokas to all participants
-            const roundSlokas = roundEndSloka - roundStartSloka + 1;
-            const roundRanges = createRanges(roundStartSloka, roundEndSloka, numMainSlokamParticipants);
-            
-            // Assign ranges to each person in this round
-            for (let idx = 0; idx < roundRanges.length && idx < numMainSlokamParticipants; idx++) {
-                const personIdx = 5 + idx;
-                const range = roundRanges[idx];
+            for (let i = 0; i < numPeople; i++) {
+                const person = roundRobinSequence[i];
+                const fairness = fairnessMap[person];
                 
+                // Prefer people with lower total allocations (more fair)
+                if (fairness < minFairness) {
+                    minFairness = fairness;
+                    nextPersonIdx = i;
+                }
+            }
+            
+            const person = roundRobinSequence[nextPersonIdx];
+            const remaining = endSloka - currentSloka + 1;
+            
+            // Calculate optimal chunk size
+            const peopleRemaining = numPeople; // Always consider all people
+            const fairnessDeficit = targetPerPerson - fairnessMap[person];
+            
+            // Give more to people who are below target, less to those above
+            let chunkSize;
+            if (fairnessDeficit > 2) {
+                // Well below target: give them 6
+                chunkSize = Math.min(6, remaining);
+            } else if (fairnessDeficit > 0) {
+                // Below target: give them 5-6
+                chunkSize = Math.min(5, remaining);
+            } else if (fairnessDeficit > -1) {
+                // Near target: give them 5
+                chunkSize = Math.min(5, remaining);
+            } else {
+                // Above target: give them less, but not too little
+                chunkSize = Math.min(Math.max(1, Math.floor(remaining / peopleRemaining)), 4);
+            }
+            
+            // Ensure we don't leave odd remnants (avoid 1-2 remaining at end)
+            if (remaining - chunkSize === 1 && chunkSize > 1) {
+                chunkSize--; // Save 1 extra for next person
+            }
+            if (remaining - chunkSize === 2 && chunkSize > 2) {
+                chunkSize--; // Save 2 extra for next people
+            }
+            
+            chunkSize = Math.min(chunkSize, remaining);
+            
+            if (chunkSize > 0) {
+                const rangeEnd = Math.min(currentSloka + chunkSize - 1, endSloka);
                 allocations.push({
                     segment: "Main Ślokam",
-                    from: range.start,
-                    to: range.end,
-                    name: main[personIdx],
-                    round: round
+                    from: currentSloka,
+                    to: rangeEnd,
+                    name: person,
+                    round: currentRound
                 });
+                
+                currentSloka = rangeEnd + 1;
+                fairnessMap[person] += chunkSize;
+            }
+            
+            // Check if we've gone through all people (completed a round)
+            const timesAllocated = {};
+            for (const alloc of allocations) {
+                if (alloc.segment === "Main Ślokam" && alloc.round === currentRound) {
+                    timesAllocated[alloc.name] = (timesAllocated[alloc.name] || 0) + 1;
+                }
+            }
+            if (Object.keys(timesAllocated).length === numPeople) {
+                currentRound++;
             }
         }
         
@@ -365,52 +506,50 @@ function renderLalithaOutput(allocations, metadata = {}) {
         
         lines.push("");
         
-        // Show Main Ślokam - distributed across multiple rounds
+        // Show Main Ślokam - KSST first, then distributed across multiple rounds
         if (bySegment["Main Ślokam"]) {
             const mainSlokamAllocs = bySegment["Main Ślokam"];
             
-            // Find all unique rounds
+            // Separate KSST from the rest
+            const ksst_alloc = mainSlokamAllocs.find(a => a.name === "KSST");
+            const round_allocs = mainSlokamAllocs.filter(a => a.name !== "KSST");
+            
+            // Show KSST first
+            if (ksst_alloc) {
+                let rangeStr;
+                if (ksst_alloc.from === ksst_alloc.to) {
+                    rangeStr = `${ksst_alloc.from}`;
+                } else {
+                    rangeStr = `${ksst_alloc.from}–${ksst_alloc.to}`;
+                }
+                const info = segmentInfo["Main Ślokam"];
+                const segmentPart = info.display.padEnd(16);
+                const rangePart = `– ${rangeStr.padEnd(8)}`;
+                lines.push(`${segmentPart} ${rangePart} -> ${ksst_alloc.name}`);
+            }
+            
+            lines.push("");
+            
+            // Find all unique rounds from the remaining allocations
             const rounds = new Set();
-            for (const alloc of mainSlokamAllocs) {
+            for (const alloc of round_allocs) {
                 if (alloc.round) {
                     rounds.add(alloc.round);
                 }
             }
             
-            // If we have round info, render by rounds; otherwise render all together
-            if (rounds.size > 1) {
-                for (let round = 1; round <= Math.max(...rounds); round++) {
-                    lines.push(`--- ROUND ${round} ---`);
-                    for (const alloc of mainSlokamAllocs) {
-                        if (alloc.round === round) {
-                            let rangeStr;
-                            if (alloc.from === alloc.to) {
-                                rangeStr = `${alloc.from}`;
-                            } else {
-                                rangeStr = `${alloc.from}–${alloc.to}`;
-                            }
-                            const info = segmentInfo["Main Ślokam"];
-                            const segmentPart = info.display.padEnd(16);
-                            const rangePart = `– ${rangeStr.padEnd(8)}`;
-                            lines.push(`${segmentPart} ${rangePart} -> ${alloc.name}`);
-                        }
-                    }
-                    lines.push("");  // Blank line between rounds
+            // Show all allocations WITHOUT round headers (cleaner output)
+            for (const alloc of round_allocs) {
+                let rangeStr;
+                if (alloc.from === alloc.to) {
+                    rangeStr = `${alloc.from}`;
+                } else {
+                    rangeStr = `${alloc.from}–${alloc.to}`;
                 }
-            } else {
-                // No round info, just show normally
-                for (const alloc of mainSlokamAllocs) {
-                    let rangeStr;
-                    if (alloc.from === alloc.to) {
-                        rangeStr = `${alloc.from}`;
-                    } else {
-                        rangeStr = `${alloc.from}–${alloc.to}`;
-                    }
-                    const info = segmentInfo["Main Ślokam"];
-                    const segmentPart = info.display.padEnd(16);
-                    const rangePart = `– ${rangeStr.padEnd(8)}`;
-                    lines.push(`${segmentPart} ${rangePart} -> ${alloc.name}`);
-                }
+                const info = segmentInfo["Main Ślokam"];
+                const segmentPart = info.display.padEnd(16);
+                const rangePart = `– ${rangeStr.padEnd(8)}`;
+                lines.push(`${segmentPart} ${rangePart} -> ${alloc.name}`);
             }
         }
         
@@ -432,8 +571,12 @@ function runLalithaAllocateFull() {
         batchNumber: document.getElementById("lalitha-batchNumber").value,
         satsangNo: document.getElementById("lalitha-satsangNo").value,
         satsangDate: document.getElementById("lalitha-satsangDate").value,
-        satsangTime: document.getElementById("lalitha-satsangTime").value
+        satsangTime: document.getElementById("lalitha-satsangTime").value,
+        allocationType: 'full'
     };
+    
+    currentLalithaNames = rawNames;
+    currentLalithaHistoryText = historyText;
     
     console.log("Calling allocateLalitha...");
     currentLalithaAllocations = allocateLalitha({
@@ -458,8 +601,12 @@ function runLalithaAllocateSlokam() {
         batchNumber: document.getElementById("lalitha-batchNumber").value,
         satsangNo: document.getElementById("lalitha-satsangNo").value,
         satsangDate: document.getElementById("lalitha-satsangDate").value,
-        satsangTime: document.getElementById("lalitha-satsangTime").value
+        satsangTime: document.getElementById("lalitha-satsangTime").value,
+        allocationType: 'slokam'
     };
+    
+    currentLalithaNames = rawNames;
+    currentLalithaHistoryText = historyText;
     
     console.log("Calling allocateLalitha...");
     currentLalithaAllocations = allocateLalitha({
@@ -475,7 +622,38 @@ function runLalithaAllocateSlokam() {
 }
 
 function reLalithaAllocate() {
-    runLalithaAllocateFull();
+    if (currentLalithaAllocations.length === 0) {
+        alert("Please run an allocation first.");
+        return;
+    }
+    if (currentLalithaNames.length === 0) {
+        alert("No names stored for re-allocation.");
+        return;
+    }
+
+    try {
+        const metadata = {
+            batchNumber: document.getElementById("lalitha-batchNumber").value,
+            satsangNo: document.getElementById("lalitha-satsangNo").value,
+            satsangDate: document.getElementById("lalitha-satsangDate").value,
+            satsangTime: document.getElementById("lalitha-satsangTime").value,
+            allocationType: document.getElementById("lalitha-batchNumber").dataset.allocationType || 'full'
+        };
+
+        console.log("Re-allocating with stored names...");
+        currentLalithaAllocations = allocateLalitha({
+            rawNames: currentLalithaNames,
+            satsangNo: metadata.satsangNo,
+            historyText: currentLalithaHistoryText,
+            allocationType: metadata.allocationType
+        });
+
+        console.log("Re-allocations returned:", currentLalithaAllocations);
+        renderLalithaOutput(currentLalithaAllocations, metadata);
+    } catch (err) {
+        console.error("Error in reLalithaAllocate:", err);
+        alert("Error: " + err.message);
+    }
 }
 
 // ---------- COPY OUTPUT ----------
@@ -555,6 +733,8 @@ function clearLalithaAllFields() {
     document.getElementById("lalitha-fileName").innerText = "No file chosen";
     document.getElementById("lalitha-output").innerText = "";
     currentLalithaAllocations = [];
+    currentLalithaNames = [];
+    currentLalithaHistoryText = "";
 }
 
 // ---------- FILE UPLOAD ----------
@@ -567,7 +747,99 @@ function handleLalithaFileUpload(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const content = e.target.result;
-        document.getElementById("lalitha-historyInput").value = content;
+        
+        // Check if it's an Excel file
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            try {
+                // Parse Excel file
+                const workbook = XLSX.read(content, { type: 'array' });
+                const historyText = extractHistoryFromExcelLalitha(workbook);
+                document.getElementById("lalitha-historyInput").value = historyText;
+            } catch (err) {
+                console.error("Error parsing Excel file:", err);
+                alert("Error parsing Excel file: " + err.message);
+            }
+        } else {
+            // Text file - use as is
+            document.getElementById("lalitha-historyInput").value = content;
+        }
     };
-    reader.readAsText(file);
+    
+    // For Excel files, read as ArrayBuffer; for text files, read as Text
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsText(file);
+    }
+}
+
+// Helper: Extract history from Excel workbook (all sheets)
+function extractHistoryFromExcelLalitha(workbook) {
+    const lines = [];
+    
+    // Iterate through all sheets
+    for (const sheetName of workbook.SheetNames) {
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        console.log(`Processing sheet: ${sheetName}, rows: ${data.length}`);
+        
+        // Parse each row looking for allocation patterns
+        for (const row of data) {
+            if (!row || row.length < 2) continue;
+            
+            // Try to extract: Segment, From-To, Name
+            // Expected formats: [Segment, Range, Name] or similar variations
+            let segment = "";
+            let rangeStr = "";
+            let name = "";
+            
+            // Try common column orders
+            if (row.length >= 3) {
+                // Format: [Segment, Range, Name]
+                if (typeof row[0] === 'string' && typeof row[1] === 'string' && typeof row[2] === 'string') {
+                    segment = row[0].trim();
+                    rangeStr = row[1].trim();
+                    name = row[2].trim();
+                }
+                // Format: [Segment, Range, Name] with numbers
+                else if (typeof row[0] === 'string' && (typeof row[1] === 'number' || typeof row[1] === 'string')) {
+                    segment = row[0].trim();
+                    rangeStr = String(row[1]).trim();
+                    name = typeof row[2] !== 'undefined' ? String(row[2]).trim() : "";
+                }
+            } else if (row.length === 2) {
+                // Format: ["Segment 1-5", Name]
+                const firstCol = String(row[0]).trim();
+                name = String(row[1]).trim();
+                
+                // Try to extract segment and range from first column
+                const match = firstCol.match(/^(.+?)\s+(\d+)\s*[–\-]\s*(\d+)$/);
+                if (match) {
+                    segment = match[1];
+                    rangeStr = `${match[2]}-${match[3]}`;
+                } else {
+                    segment = firstCol;
+                }
+            }
+            
+            // Parse range (e.g., "1-5" or "1")
+            let from = 1, to = 1;
+            if (rangeStr) {
+                const rangeParts = rangeStr.split(/[–\-]/);
+                from = parseInt(rangeParts[0]) || 1;
+                to = parseInt(rangeParts[rangeParts.length - 1]) || from;
+            }
+            
+            // Clean name
+            name = cleanName(name);
+            
+            // Add to output if valid
+            if (segment && name && !isNaN(from) && !isNaN(to)) {
+                lines.push(`${segment} ${from}-${to} → ${name}`);
+            }
+        }
+    }
+    
+    return lines.join('\n');
 }

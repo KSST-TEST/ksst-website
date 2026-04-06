@@ -3,6 +3,8 @@
 // ============================================================
 
 let currentLakshmiAllocations = [];
+let currentLakshmiNames = [];
+let currentLakshmiHistoryText = "";
 
 // ---------- HELPER: FORMAT DATE AND TIME ----------
 function formatDateinDDMMYYYY(dateString) {
@@ -32,6 +34,45 @@ function parseHistory(historyText) {
     const lines = historyText.split(/\r?\n/);
 
     for (const line of lines) {
+        if (!line.trim()) continue;
+        
+        let segment = "";
+        let from = 1, to = 1, name = "";
+        
+        // Try tab-separated (Excel copy-paste)
+        if (line.includes('\t') && !segment) {
+            const parts = line.split('\t').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
+        // Try comma-separated (CSV)
+        if (line.includes(',') && !segment) {
+            const parts = line.split(',').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
         let match = line.match(/^([^:→→\->\(\)]+?)\s+(\d+)\s*[–\-]\s*(\d+)\s*[→→:->]+\s*(.+)$/);
         
         if (!match) {
@@ -42,19 +83,18 @@ function parseHistory(historyText) {
             match = line.match(/^([^0-9]+?)\s+(\d+)\s*[–\-]\s*(\d+)\s+(.+)$/);
         }
 
-        if (match) {
-            const segment = match[1].trim();
-            const from = parseInt(match[2]);
-            const to = parseInt(match[3]);
-            const name = cleanName(match[4].trim());
-
-            if (segment && !isNaN(from) && !isNaN(to) && name) {
-                allocations.push({
-                    segment,
-                    from,
-                    to,
-                    name
-                });
+        if (match && !segment) {
+            segment = match[1].trim();
+            from = parseInt(match[2]);
+            to = parseInt(match[3]);
+            name = match[4].trim();
+        }
+        
+        // Push if valid
+        if (segment && !isNaN(from) && !isNaN(to) && name) {
+            name = cleanName(name);
+            if (name) {
+                allocations.push({ segment, from, to, name });
             }
         }
     }
@@ -81,22 +121,70 @@ function buildHistoryMap(allocationHistory) {
     return historyMap;
 }
 
+// ---------- SHUFFLE ARRAY ----------
+function shuffleArray(array) {
+    // Fisher-Yates shuffle algorithm
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // ---------- NAME CLEANUP ----------
 function cleanName(name) {
+    // Remove numericals from start (1., 1), 1)B, etc.)
+    name = name.replace(/^[\d\.\)\s]+/, "").trim();
+    
+    // Replace dots with spaces
     name = name.replace(/\./g, " ");
+    
+    // Collapse multiple spaces and trim
     name = name.replace(/\s+/g, " ").trim();
     
     let parts = name.split(" ");
     
-    if (parts.length === 2 && parts[1].length === 1) {
-        parts = [parts[1], parts[0]];
-    }
-    else if (parts.length >= 3 && parts[parts.length - 1].length === 1) {
-        const lastPart = parts.pop();
-        parts.unshift(lastPart);
+    // Identify titles, initials, and actual names
+    const titleList = ["dr", "mr", "mrs", "ms", "prof"];
+    const initials = [];
+    const actualNames = [];
+    const titles = [];
+    
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        
+        if (!part) continue;
+        
+        const lowerPart = part.toLowerCase();
+        
+        // Check if it's a title
+        if (titleList.includes(lowerPart)) {
+            titles.push(lowerPart.toUpperCase());
+            continue;
+        }
+        
+        // Check if it's an initial (single letter)
+        if (part.length === 1) {
+            initials.push(part.toUpperCase());
+        } else {
+            // It's an actual name - apply title case
+            actualNames.push(part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+        }
     }
     
-    return parts.join(" ");
+    // Combine: actual names + initials (without spaces between initials) + titles
+    let result = actualNames.join(" ");
+    
+    if (initials.length > 0) {
+        result += (result ? " " : "") + initials.join("");
+    }
+    
+    if (titles.length > 0) {
+        result += (result ? " " : "") + titles.join(" ");
+    }
+    
+    return result.trim();
 }
 
 // ---------- CLASSIFY PARTICIPANTS ----------
@@ -128,10 +216,29 @@ function allocateLakshmi(params) {
         const historyAllocations = parseHistory(historyText);
         const historyMap = buildHistoryMap(historyAllocations);
         
-        const { guruji, ksst, main } = classifyParticipants(rawNames);
+        const { guruji, ksst, main: mainOriginal } = classifyParticipants(rawNames);
+        
+        // SHUFFLE main list for randomized sequence, but keep it fixed for entire allocation
+        const main = shuffleArray(mainOriginal);
+        console.log("Shuffled participant order for round-robin:", main);
         
         const allocations = [];
         let globalPersonIndex = 0;  // Track across ALL segments - continuous round-robin
+    
+        // Helper: random selection from main list
+        function getRandomPerson() {
+            if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
+            const randomIndex = Math.floor(Math.random() * main.length);
+            return main[randomIndex];
+        }
+        
+        // Helper: get next person in round-robin from main list
+        function getNextPerson() {
+            if (main.length === 0) return ksst.length > 0 ? ksst[0] : guruji[0];
+            const person = main[globalPersonIndex % main.length];
+            globalPersonIndex++;
+            return person;
+        }
     
         // Helper: distribute segment fairly with global person tracking
         function distributeSegment(segmentName, totalSlokas, participantList, minChunk = 1, maxChunk = 3) {
@@ -182,8 +289,8 @@ function allocateLakshmi(params) {
         // ==================== ALLOCATE FULL ====================
         if (allocationType === 'full') {
             
-            // 1. STARTING PRAYER (4 slokas) - one person
-            const startingPrayerPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
+            // 1. STARTING PRAYER (4 slokas) - RANDOM person (not round-robin)
+            const startingPrayerPerson = getRandomPerson();
             if (startingPrayerPerson) {
                 allocations.push({
                     segment: "Starting Prayer",
@@ -192,6 +299,9 @@ function allocateLakshmi(params) {
                     name: startingPrayerPerson
                 });
             }
+            
+            // RESET globalPersonIndex for round-robin sequence starting from Nyāsa
+            globalPersonIndex = 0;
             
             // 2. NYĀSA (11 slokas) - KSST always gets 1-6, rest distributed to main
             // Always assign first 6 to KSST, even if KSST not in input
@@ -203,7 +313,7 @@ function allocateLakshmi(params) {
             });
             
             // Distribute remaining Nyāsa slokas (7-11) to main participants
-            const nyasaAllocations = distributeSegment("Nyāsa", 11, main, 1, 3);
+            const nyasaAllocations = distributeSegment("Nyāsa", 5, main, 1, 3);
             
             // Adjust allocation ranges to start from sloka 7 (skip 1-6 assigned to KSST)
             if (nyasaAllocations.length > 0) {
@@ -215,8 +325,8 @@ function allocateLakshmi(params) {
             }
             allocations.push(...nyasaAllocations);
             
-            // 3. DHYĀNAM (4 slokas 1-4) - one person
-            const dhyaanamPerson = main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]);
+            // 3. DHYĀNAM (4 slokas 1-4) - one person from round-robin
+            const dhyaanamPerson = getNextPerson();
             if (dhyaanamPerson) {
                 allocations.push({
                     segment: "Dhyānam",
@@ -226,16 +336,16 @@ function allocateLakshmi(params) {
                 });
             }
             
-            // 5. MAIN ŚLOKAM (154 slokas - NOT 108!) - distribute to main participants
+            // 4. MAIN ŚLOKAM (154 slokas - NOT 108!) - distribute to main participants with round-robin
             const mainSlokamAllocations = distributeSegment("Main Ślokam", 154, main, 2, 4);
             allocations.push(...mainSlokamAllocations);
             
-            // 6. PHALAŚRUTI (15 slokas - NOT 33!) - distribute to main participants
+            // 5. PHALAŚRUTI (15 slokas - NOT 33!) - distribute to main participants with round-robin
             const phalaśrutiAllocations = distributeSegment("Phalaśruti", 15, main, 1, 3);
             allocations.push(...phalaśrutiAllocations);
             
-            // 7. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - one person
-            const endingPrayerPerson = main.length > 3 ? main[3] : (main.length > 0 ? main[0] : (ksst.length > 0 ? ksst[0] : guruji[0]));
+            // 6. KṢAMĀ PRĀRTHANĀ & ENDING PRAYER (4 slokas) - RANDOM person (not hardcoded)
+            const endingPrayerPerson = getRandomPerson();
             if (endingPrayerPerson) {
                 allocations.push({
                     segment: "Kṣamā Prārthanā & Ending Prayer",
@@ -356,8 +466,8 @@ function renderLakshmiOutput(allocations, metadata = {}) {
             if (allocsInSegment.length === 1 && segment === "Dhyānam") {
                 const alloc = allocsInSegment[0];
                 let rangeStr;
-                if (alloc.segment === "Dhyānam" && alloc.from === alloc.to) {
-                    rangeStr = "Full";
+                if (alloc.from === alloc.to) {
+                    rangeStr = `${alloc.from}`;
                 } else {
                     rangeStr = `${alloc.from}–${alloc.to}`;
                 }
@@ -366,9 +476,7 @@ function renderLakshmiOutput(allocations, metadata = {}) {
                 // Multi-item segments
                 for (const alloc of allocsInSegment) {
                     let rangeStr;
-                    if (alloc.segment === "Nyāsa" && alloc.from === alloc.to) {
-                        rangeStr = "Full";
-                    } else if (alloc.from === alloc.to) {
+                    if (alloc.from === alloc.to) {
                         rangeStr = `${alloc.from}`;
                     } else {
                         rangeStr = `${alloc.from}–${alloc.to}`;
@@ -401,8 +509,12 @@ function runLakshmiAllocateFull() {
         batchNumber: document.getElementById("lakshmi-batchNumber").value,
         satsangNo: document.getElementById("lakshmi-satsangNo").value,
         satsangDate: document.getElementById("lakshmi-satsangDate").value,
-        satsangTime: document.getElementById("lakshmi-satsangTime").value
+        satsangTime: document.getElementById("lakshmi-satsangTime").value,
+        allocationType: 'full'
     };
+    
+    currentLakshmiNames = rawNames;
+    currentLakshmiHistoryText = historyText;
     
     console.log("Calling allocateLakshmi...");
     currentLakshmiAllocations = allocateLakshmi({
@@ -419,7 +531,7 @@ function runLakshmiAllocateFull() {
 
 function runLakshmiAllocateSlokam() {
     console.log("runLakshmiAllocateSlokam called!");
-    const rawNames = document.getElementById("namesInput").value.split('\n').filter(n => n.trim());
+    const rawNames = document.getElementById("lakshmi-namesInput").value.split('\n').filter(n => n.trim());
     console.log("Raw names:", rawNames);
     
     const historyText = document.getElementById("lakshmi-historyInput").value;
@@ -427,8 +539,12 @@ function runLakshmiAllocateSlokam() {
         batchNumber: document.getElementById("lakshmi-batchNumber").value,
         satsangNo: document.getElementById("lakshmi-satsangNo").value,
         satsangDate: document.getElementById("lakshmi-satsangDate").value,
-        satsangTime: document.getElementById("lakshmi-satsangTime").value
+        satsangTime: document.getElementById("lakshmi-satsangTime").value,
+        allocationType: 'slokam'
     };
+    
+    currentLakshmiNames = rawNames;
+    currentLakshmiHistoryText = historyText;
     
     console.log("Calling allocateLakshmi...");
     currentLakshmiAllocations = allocateLakshmi({
@@ -444,7 +560,38 @@ function runLakshmiAllocateSlokam() {
 }
 
 function reLakshmiAllocate() {
-    runLakshmiAllocateFull();
+    if (currentLakshmiAllocations.length === 0) {
+        alert("Please run an allocation first.");
+        return;
+    }
+    if (currentLakshmiNames.length === 0) {
+        alert("No names stored for re-allocation.");
+        return;
+    }
+
+    try {
+        const metadata = {
+            batchNumber: document.getElementById("lakshmi-batchNumber").value,
+            satsangNo: document.getElementById("lakshmi-satsangNo").value,
+            satsangDate: document.getElementById("lakshmi-satsangDate").value,
+            satsangTime: document.getElementById("lakshmi-satsangTime").value,
+            allocationType: document.getElementById("lakshmi-batchNumber").dataset.allocationType || 'full'
+        };
+
+        console.log("Re-allocating with stored names...");
+        currentLakshmiAllocations = allocateLakshmi({
+            rawNames: currentLakshmiNames,
+            satsangNo: metadata.satsangNo,
+            historyText: currentLakshmiHistoryText,
+            allocationType: metadata.allocationType
+        });
+
+        console.log("Re-allocations returned:", currentLakshmiAllocations);
+        renderLakshmiOutput(currentLakshmiAllocations, metadata);
+    } catch (err) {
+        console.error("Error in reLakshmiAllocate:", err);
+        alert("Error: " + err.message);
+    }
 }
 
 // ---------- COPY OUTPUT ----------
@@ -524,6 +671,8 @@ function clearLakshmiAllFields() {
     document.getElementById("lakshmi-fileName").innerText = "No file chosen";
     document.getElementById("lakshmi-output").innerText = "";
     currentLakshmiAllocations = [];
+    currentLakshmiNames = [];
+    currentLakshmiHistoryText = "";
 }
 
 // ---------- FILE UPLOAD ----------
@@ -536,7 +685,99 @@ function handleLakshmiFileUpload(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const content = e.target.result;
-        document.getElementById("lakshmi-historyInput").value = content;
+        
+        // Check if it's an Excel file
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            try {
+                // Parse Excel file
+                const workbook = XLSX.read(content, { type: 'array' });
+                const historyText = extractHistoryFromExcelLakshmi(workbook);
+                document.getElementById("lakshmi-historyInput").value = historyText;
+            } catch (err) {
+                console.error("Error parsing Excel file:", err);
+                alert("Error parsing Excel file: " + err.message);
+            }
+        } else {
+            // Text file - use as is
+            document.getElementById("lakshmi-historyInput").value = content;
+        }
     };
-    reader.readAsText(file);
+    
+    // For Excel files, read as ArrayBuffer; for text files, read as Text
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsText(file);
+    }
+}
+
+// Helper: Extract history from Excel workbook (all sheets)
+function extractHistoryFromExcelLakshmi(workbook) {
+    const lines = [];
+    
+    // Iterate through all sheets
+    for (const sheetName of workbook.SheetNames) {
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        console.log(`Processing sheet: ${sheetName}, rows: ${data.length}`);
+        
+        // Parse each row looking for allocation patterns
+        for (const row of data) {
+            if (!row || row.length < 2) continue;
+            
+            // Try to extract: Segment, From-To, Name
+            // Expected formats: [Segment, Range, Name] or similar variations
+            let segment = "";
+            let rangeStr = "";
+            let name = "";
+            
+            // Try common column orders
+            if (row.length >= 3) {
+                // Format: [Segment, Range, Name]
+                if (typeof row[0] === 'string' && typeof row[1] === 'string' && typeof row[2] === 'string') {
+                    segment = row[0].trim();
+                    rangeStr = row[1].trim();
+                    name = row[2].trim();
+                }
+                // Format: [Segment, Range, Name] with numbers
+                else if (typeof row[0] === 'string' && (typeof row[1] === 'number' || typeof row[1] === 'string')) {
+                    segment = row[0].trim();
+                    rangeStr = String(row[1]).trim();
+                    name = typeof row[2] !== 'undefined' ? String(row[2]).trim() : "";
+                }
+            } else if (row.length === 2) {
+                // Format: ["Segment 1-5", Name]
+                const firstCol = String(row[0]).trim();
+                name = String(row[1]).trim();
+                
+                // Try to extract segment and range from first column
+                const match = firstCol.match(/^(.+?)\s+(\d+)\s*[–\-]\s*(\d+)$/);
+                if (match) {
+                    segment = match[1];
+                    rangeStr = `${match[2]}-${match[3]}`;
+                } else {
+                    segment = firstCol;
+                }
+            }
+            
+            // Parse range (e.g., "1-5" or "1")
+            let from = 1, to = 1;
+            if (rangeStr) {
+                const rangeParts = rangeStr.split(/[–\-]/);
+                from = parseInt(rangeParts[0]) || 1;
+                to = parseInt(rangeParts[rangeParts.length - 1]) || from;
+            }
+            
+            // Clean name
+            name = cleanName(name);
+            
+            // Add to output if valid
+            if (segment && name && !isNaN(from) && !isNaN(to)) {
+                lines.push(`${segment} ${from}-${to} → ${name}`);
+            }
+        }
+    }
+    
+    return lines.join('\n');
 }

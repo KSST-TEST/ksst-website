@@ -86,9 +86,7 @@ function exportToPDFLakshmi(allocations, metadata = {}) {
             if (bySegment[segment]) {
                 for (const alloc of bySegment[segment]) {
                     let rangeStr;
-                    if (alloc.segment === "Nyāsa" && alloc.from === alloc.to) {
-                        rangeStr = "Full";
-                    } else if (alloc.from === alloc.to) {
+                    if (alloc.from === alloc.to) {
                         rangeStr = `${alloc.from}`;
                     } else {
                         rangeStr = `${alloc.from}-${alloc.to}`;

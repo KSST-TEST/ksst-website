@@ -82,21 +82,42 @@ function exportToPDFLalitha(allocations, metadata = {}) {
         const rows = [];
         for (const segment of segmentOrder) {
             if (bySegment[segment]) {
-                // Special handling for Main Ślokam to group by rounds
+                // Special handling for Main Ślokam to group by rounds and separate KSST
                 if (segment === "Main Ślokam") {
-                    const allocsByRound = {};
+                    const ksst_allocations = [];
+                    const allocs_by_round = {};
+                    
                     for (const alloc of bySegment[segment]) {
-                        const round = alloc.round || 1;
-                        if (!allocsByRound[round]) {
-                            allocsByRound[round] = [];
+                        // Check if name contains "KSST"
+                        if (alloc.name && alloc.name.toLowerCase().includes("ksst")) {
+                            ksst_allocations.push(alloc);
+                        } else {
+                            const round = alloc.round || 1;
+                            if (!allocs_by_round[round]) {
+                                allocs_by_round[round] = [];
+                            }
+                            allocs_by_round[round].push(alloc);
                         }
-                        allocsByRound[round].push(alloc);
                     }
                     
-                    // Add round headers and allocations
-                    for (const round of Object.keys(allocsByRound).sort((a, b) => parseInt(a) - parseInt(b))) {
-                        rows.push([`${getEnglishSegmentName(segment)} - ROUND ${round}`, "", ""]);
-                        for (const alloc of allocsByRound[round]) {
+                    // Add KSST allocations first
+                    for (const alloc of ksst_allocations) {
+                        let rangeStr;
+                        if (alloc.from === alloc.to) {
+                            rangeStr = `${alloc.from}`;
+                        } else {
+                            rangeStr = `${alloc.from}-${alloc.to}`;
+                        }
+                        rows.push([
+                            `${getEnglishSegmentName(segment)} - KSST`,
+                            rangeStr,
+                            alloc.name
+                        ]);
+                    }
+                    
+                    // Add allocations WITHOUT round headers (cleaner output)
+                    for (const round of Object.keys(allocs_by_round).sort((a, b) => parseInt(a) - parseInt(b))) {
+                        for (const alloc of allocs_by_round[round]) {
                             let rangeStr;
                             if (alloc.from === alloc.to) {
                                 rangeStr = `${alloc.from}`;
@@ -104,7 +125,7 @@ function exportToPDFLalitha(allocations, metadata = {}) {
                                 rangeStr = `${alloc.from}-${alloc.to}`;
                             }
                             rows.push([
-                                "",
+                                getEnglishSegmentName(segment),
                                 rangeStr,
                                 alloc.name
                             ]);

@@ -30,6 +30,45 @@ function parseHistory(historyText) {
     const lines = historyText.split(/\r?\n/);
 
     for (const line of lines) {
+        if (!line.trim()) continue;
+        
+        let segment = "";
+        let from = 1, to = 1, name = "";
+        
+        // Try tab-separated (Excel copy-paste)
+        if (line.includes('\t') && !segment) {
+            const parts = line.split('\t').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
+        // Try comma-separated (CSV)
+        if (line.includes(',') && !segment) {
+            const parts = line.split(',').map(p => p.trim()).filter(p => p);
+            if (parts.length >= 3) {
+                segment = parts[0];
+                const rangeStr = parts[1];
+                if (rangeStr.match(/^\d+[-–]\d+$/)) {
+                    const rp = rangeStr.split(/[-–]/);
+                    from = parseInt(rp[0]); to = parseInt(rp[1]); name = parts[2];
+                } else if (!isNaN(parseInt(parts[1])) && !isNaN(parseInt(parts[2]))) {
+                    from = parseInt(parts[1]); to = parseInt(parts[2]); name = parts[3] || "";
+                } else {
+                    from = parseInt(parts[1]) || 1; to = from; name = parts[2];
+                }
+            }
+        }
+        
         // Pattern 1: "Segment: from-to → Name" or "Segment: from-to -> Name"
         // Pattern 2: "Segment from-to: Name"
         // Pattern 3: "Segment (from-to): Name"
@@ -45,19 +84,18 @@ function parseHistory(historyText) {
             match = line.match(/^([^0-9]+?)\s+(\d+)\s*[–\-]\s*(\d+)\s+(.+)$/);
         }
 
-        if (match) {
-            const segment = match[1].trim();
-            const from = parseInt(match[2]);
-            const to = parseInt(match[3]);
-            const name = cleanName(match[4].trim());
-
-            if (segment && !isNaN(from) && !isNaN(to) && name) {
-                allocations.push({
-                    segment,
-                    from,
-                    to,
-                    name
-                });
+        if (match && !segment) {
+            segment = match[1].trim();
+            from = parseInt(match[2]);
+            to = parseInt(match[3]);
+            name = match[4].trim();
+        }
+        
+        // Push if valid (from either tab/CSV or text match)
+        if (segment && !isNaN(from) && !isNaN(to) && name) {
+            name = cleanName(name);
+            if (name) {
+                allocations.push({ segment, from, to, name });
             }
         }
     }
@@ -178,24 +216,57 @@ function shuffleArray(array) {
 
 // ---------- NAME CLEANUP ----------
 function cleanName(name) {
+    // Remove numericals from start (1., 1), 1)B, etc.)
+    name = name.replace(/^[\d\.\)\s]+/, "").trim();
+    
     // Replace dots with spaces
     name = name.replace(/\./g, " ");
-    // Collapse multiple spaces
+    
+    // Collapse multiple spaces and trim
     name = name.replace(/\s+/g, " ").trim();
     
     let parts = name.split(" ");
     
-    // Case 1: Exactly 2 parts, second is single letter → swap
-    if (parts.length === 2 && parts[1].length === 1) {
-        parts = [parts[1], parts[0]];
-    }
-    // Case 2: 3+ parts, last is single letter → move to front
-    else if (parts.length >= 3 && parts[parts.length - 1].length === 1) {
-        const lastPart = parts.pop();
-        parts.unshift(lastPart);
+    // Identify titles, initials, and actual names
+    const titleList = ["dr", "mr", "mrs", "ms", "prof"];
+    const initials = [];
+    const actualNames = [];
+    const titles = [];
+    
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        
+        if (!part) continue;
+        
+        const lowerPart = part.toLowerCase();
+        
+        // Check if it's a title
+        if (titleList.includes(lowerPart)) {
+            titles.push(lowerPart.toUpperCase());
+            continue;
+        }
+        
+        // Check if it's an initial (single letter)
+        if (part.length === 1) {
+            initials.push(part.toUpperCase());
+        } else {
+            // It's an actual name - apply title case
+            actualNames.push(part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+        }
     }
     
-    return parts.join(" ");
+    // Combine: actual names + initials (without spaces between initials) + titles
+    let result = actualNames.join(" ");
+    
+    if (initials.length > 0) {
+        result += (result ? " " : "") + initials.join("");
+    }
+    
+    if (titles.length > 0) {
+        result += (result ? " " : "") + titles.join(" ");
+    }
+    
+    return result.trim();
 }
 
 // ---------- CLASSIFY PARTICIPANTS ----------
@@ -456,6 +527,8 @@ function allocateVSN(params) {
 
 // Global variable to store current allocations
 let currentAllocations = [];
+let currentNames = [];
+let currentHistoryText = "";
 
 // Global variable to store current metadata
 let currentMetadata = {
@@ -485,8 +558,10 @@ function runAllocateFull() {
         const satsangTime = document.getElementById("vsn-satsangTime").value.trim();
         const historyText = document.getElementById("vsn-historyInput").value;
 
-        // Store metadata for export functions
-        currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime };
+        // Store metadata and input for re-allocation
+        currentNames = rawNames;
+        currentHistoryText = historyText;
+        currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime, allocationType: 'full' };
 
         console.log("Calling allocateVSN...");
         currentAllocations = allocateVSN({
@@ -528,8 +603,10 @@ function runAllocateSlokam() {
         const satsangTime = document.getElementById("vsn-satsangTime").value.trim();
         const historyText = document.getElementById("vsn-historyInput").value;
 
-        // Store metadata for export functions
-        currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime };
+        // Store metadata and input for re-allocation
+        currentNames = rawNames;
+        currentHistoryText = historyText;
+        currentMetadata = { batchNumber, satsangNo, satsangDate, satsangTime, allocationType: 'slokam' };
 
         console.log("Calling allocateVSN (slokam mode)...");
         currentAllocations = allocateVSN({
@@ -559,7 +636,30 @@ function reAllocate() {
         alert("Please run an allocation first.");
         return;
     }
-    alert("ReAllocate feature will be implemented next.");
+    if (currentNames.length === 0) {
+        alert("No names stored for re-allocation.");
+        return;
+    }
+
+    try {
+        // Use the stored allocation type from previous allocation
+        const allocationType = currentMetadata.allocationType || 'full';
+
+        console.log("Re-allocating with stored names...");
+        currentAllocations = allocateVSN({
+            rawNames: currentNames,
+            satsangNo: currentMetadata.satsangNo,
+            historyText: currentHistoryText,
+            allocationType: allocationType
+        });
+
+        console.log("Re-allocations returned:", currentAllocations);
+
+        renderVSNOutput(currentAllocations, currentMetadata);
+    } catch (err) {
+        console.error("Error in reAllocate:", err);
+        alert("Error: " + err.message);
+    }
 }
 
 function renderVSNOutput(list, metadata = {}) {
@@ -678,6 +778,8 @@ function clearAllFields() {
     document.getElementById("vsn-fileName").innerText = "No file chosen";
     document.getElementById("vsn-output").innerText = "";
     currentAllocations = [];
+    currentNames = [];
+    currentHistoryText = "";
 }
 
 function handleFileUpload(event) {
@@ -689,9 +791,102 @@ function handleFileUpload(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const content = e.target.result;
-        document.getElementById("vsn-historyInput").value = content;
+        
+        // Check if it's an Excel file
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            try {
+                // Parse Excel file
+                const workbook = XLSX.read(content, { type: 'array' });
+                const historyText = extractHistoryFromExcel(workbook);
+                // Store the history text but don't display it (to avoid confusion)
+                document.getElementById("vsn-historyInput").value = historyText;
+            } catch (err) {
+                console.error("Error parsing Excel file:", err);
+                alert("Error parsing Excel file: " + err.message);
+            }
+        } else {
+            // Text file - store the content
+            document.getElementById("vsn-historyInput").value = content;
+        }
     };
-    reader.readAsText(file);
+    
+    // For Excel files, read as ArrayBuffer; for text files, read as Text
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsText(file);
+    }
+}
+
+// Helper: Extract history from Excel workbook (all sheets)
+function extractHistoryFromExcel(workbook) {
+    const lines = [];
+    
+    // Iterate through all sheets
+    for (const sheetName of workbook.SheetNames) {
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        console.log(`Processing sheet: ${sheetName}, rows: ${data.length}`);
+        
+        // Parse each row looking for allocation patterns
+        for (const row of data) {
+            if (!row || row.length < 2) continue;
+            
+            // Try to extract: Segment, From-To, Name
+            // Expected formats: [Segment, Range, Name] or similar variations
+            let segment = "";
+            let rangeStr = "";
+            let name = "";
+            
+            // Try common column orders
+            if (row.length >= 3) {
+                // Format: [Segment, Range, Name]
+                if (typeof row[0] === 'string' && typeof row[1] === 'string' && typeof row[2] === 'string') {
+                    segment = row[0].trim();
+                    rangeStr = row[1].trim();
+                    name = row[2].trim();
+                }
+                // Format: [Segment, Range, Name] with numbers
+                else if (typeof row[0] === 'string' && (typeof row[1] === 'number' || typeof row[1] === 'string')) {
+                    segment = row[0].trim();
+                    rangeStr = String(row[1]).trim();
+                    name = typeof row[2] !== 'undefined' ? String(row[2]).trim() : "";
+                }
+            } else if (row.length === 2) {
+                // Format: ["Segment 1-5", Name]
+                const firstCol = String(row[0]).trim();
+                name = String(row[1]).trim();
+                
+                // Try to extract segment and range from first column
+                const match = firstCol.match(/^(.+?)\s+(\d+)\s*[–\-]\s*(\d+)$/);
+                if (match) {
+                    segment = match[1];
+                    rangeStr = `${match[2]}-${match[3]}`;
+                } else {
+                    segment = firstCol;
+                }
+            }
+            
+            // Parse range (e.g., "1-5" or "1")
+            let from = 1, to = 1;
+            if (rangeStr) {
+                const rangeParts = rangeStr.split(/[–\-]/);
+                from = parseInt(rangeParts[0]) || 1;
+                to = parseInt(rangeParts[rangeParts.length - 1]) || from;
+            }
+            
+            // Clean name
+            name = cleanName(name);
+            
+            // Add to output if valid
+            if (segment && name && !isNaN(from) && !isNaN(to)) {
+                lines.push(`${segment} ${from}-${to} → ${name}`);
+            }
+        }
+    }
+    
+    return lines.join('\n');
 }
 
 function exportVSNExcel() {

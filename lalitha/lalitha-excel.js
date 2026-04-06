@@ -72,20 +72,43 @@ function exportToExcelLalitha(allocations, metadata = {}) {
         const skipSegmentsInDetail = ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"];
         for (const segment of segmentOrder) {
             if (!skipSegmentsInDetail.includes(segment) && bySegment[segment]) {
-                // For Main Ślokam, group by rounds first
+                // For Main Ślokam, separate KSST from rounds
                 if (segment === "Main Ślokam") {
-                    const allocsByRound = {};
+                    const ksst_allocations = [];
+                    const allocs_by_round = {};
+                    
                     for (const alloc of bySegment[segment]) {
-                        const round = alloc.round || 1;
-                        if (!allocsByRound[round]) {
-                            allocsByRound[round] = [];
+                        // Check if name contains "KSST"
+                        if (alloc.name && alloc.name.toLowerCase().includes("ksst")) {
+                            ksst_allocations.push(alloc);
+                        } else {
+                            const round = alloc.round || 1;
+                            if (!allocs_by_round[round]) {
+                                allocs_by_round[round] = [];
+                            }
+                            allocs_by_round[round].push(alloc);
                         }
-                        allocsByRound[round].push(alloc);
                     }
                     
-                    // Add allocations sorted by round
-                    for (const round of Object.keys(allocsByRound).sort((a, b) => parseInt(a) - parseInt(b))) {
-                        for (const alloc of allocsByRound[round]) {
+                    // Add KSST allocations first
+                    for (const alloc of ksst_allocations) {
+                        let rangeStr;
+                        if (alloc.from === alloc.to) {
+                            rangeStr = `${alloc.from}`;
+                        } else {
+                            rangeStr = `${alloc.from} - ${alloc.to}`;
+                        }
+                        wsData1.push([
+                            alloc.name,
+                            segment,
+                            rangeStr,
+                            "KSST"
+                        ]);
+                    }
+                    
+                    // Add allocations by round
+                    for (const round of Object.keys(allocs_by_round).sort((a, b) => parseInt(a) - parseInt(b))) {
+                        for (const alloc of allocs_by_round[round]) {
                             let rangeStr;
                             if (alloc.from === alloc.to) {
                                 rangeStr = `${alloc.from}`;
@@ -138,7 +161,7 @@ function exportToExcelLalitha(allocations, metadata = {}) {
         wsData2.push([]);
 
         // Header: Single assignments
-        for (const segment of ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"]) {
+        for (const segment of ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"]) {
             if (bySegment[segment] && bySegment[segment].length > 0) {
                 const alloc = bySegment[segment][0];
                 wsData2.push([segment, alloc.name]);
@@ -148,16 +171,10 @@ function exportToExcelLalitha(allocations, metadata = {}) {
 
         // Column headers for multi-segment view
         const colHeaders = ["Devotee Name"];
-        const maxSegmentsDisplayed = 4;
-        for (let i = 0; i < maxSegmentsDisplayed; i++) {
-            colHeaders.push("Segment");
-            colHeaders.push("Allocated Slokas");
-        }
-        wsData2.push(colHeaders);
-
-        // Collect devotees and their allocations (excluding fixed segments)
+        // Determine max segments needed by checking all devotees' allocation counts
+        let maxSegmentsNeeded = 1;
         const devoteeAllocations = {};
-        const fixedSegments = ["Starting Prayer", "Nyāsa", "Dhyānam", "Kṣamā Prārthanā & Ending Prayer"];
+        const fixedSegments = ["Starting Prayer", "Kṣamā Prārthanā & Ending Prayer"];
         
         for (const alloc of allocations) {
             if (!fixedSegments.includes(alloc.segment)) {
@@ -167,13 +184,34 @@ function exportToExcelLalitha(allocations, metadata = {}) {
                 devoteeAllocations[alloc.name].push(alloc);
             }
         }
+        
+        // Find the maximum number of segments any devotee has
+        for (const allocs of Object.values(devoteeAllocations)) {
+            maxSegmentsNeeded = Math.max(maxSegmentsNeeded, allocs.length);
+        }
+        
+        for (let i = 0; i < maxSegmentsNeeded; i++) {
+            colHeaders.push("Segment");
+            colHeaders.push("Allocated Slokas");
+        }
+        wsData2.push(colHeaders);
 
         // Add devotee rows with segment columns
+        // Helper: get segment index based on segmentOrder for sorting
+        const segmentIndexMap = {};
+        segmentOrder.forEach((seg, idx) => { segmentIndexMap[seg] = idx; });
+        
         for (const [devotee, allocs] of Object.entries(devoteeAllocations)) {
-            // Sort allocations by starting sloka (from) to sequence slokas
-            allocs.sort((a, b) => a.from - b.from);
+            // Sort allocations by segment order first, then by starting sloka within segment
+            allocs.sort((a, b) => {
+                const segA = segmentIndexMap[a.segment] ?? 999;
+                const segB = segmentIndexMap[b.segment] ?? 999;
+                if (segA !== segB) return segA - segB;  // Primary: segment order
+                return a.from - b.from;  // Secondary: sloka number
+            });
+            
             const row = [devotee];
-            for (let i = 0; i < maxSegmentsDisplayed; i++) {
+            for (let i = 0; i < maxSegmentsNeeded; i++) {
                 if (i < allocs.length) {
                     const alloc = allocs[i];
                     row.push(alloc.segment);
@@ -193,20 +231,22 @@ function exportToExcelLalitha(allocations, metadata = {}) {
             }
             wsData2.push(row);
         }
-
+        
         // Backup section
         wsData2.push([]);
         wsData2.push(["Back-Up"]);
         wsData2.push(["Segment", "Devotee Name"]);
-        for (const segment of ["Poorvāṅga", "Main Ślokam", "Phalaśruti"]) {
+        for (const segment of ["Nyāsa", "Dhyānam", "Main Ślokam"]) {
             wsData2.push([segment, ""]);
         }
 
         const ws2 = XLSX.utils.aoa_to_sheet(wsData2);
-        ws2["!cols"] = [
-            { wch: 25 }, { wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 14 }, 
-            { wch: 20 }, { wch: 14 }, { wch: 20 }, { wch: 14 }
-        ];
+        // Dynamic column widths based on maxSegmentsNeeded
+        const cols = [{ wch: 25 }];  // Devotee name column
+        for (let i = 0; i < maxSegmentsNeeded; i++) {
+            cols.push({ wch: 20 }, { wch: 14 });  // Segment and Slokas columns
+        }
+        ws2["!cols"] = cols;
         applyExcelStyles2(ws2);
         XLSX.utils.book_append_sheet(wb, ws2, "Format#2");
 
