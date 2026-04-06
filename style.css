@@ -1100,9 +1100,46 @@ textarea {
     color: white;
     cursor: pointer;
     top: 12px;
-        right: 80px;
+    left: 15px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.2);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 8px;
     transition: all 0.2s;
+}
+
+/* Mobile sticky home button - footer */
+.mobile-home-button {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e67e22;
+    color: white;
+    border: none;
+    padding: 15px 24px;
+    font-size: 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 99;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.mobile-home-button:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.mobile-home-button:hover {
+    background: #d35400;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .pdf-link {
@@ -1453,14 +1490,20 @@ textarea {
     }
 
     .home-icon {
-        right: 10px !important;
+        right: auto !important;
+        left: 12px !important;
         top: 8px !important;
-        font-size: 28px;
-        width: 50px;
-        height: 50px;
+        font-size: 32px;
+        width: 48px;
+        height: 48px;
     }
 
-    /* MOBILE HOME PAGE REDESIGN */
+    .mobile-home-button {
+        display: block;
+        bottom: 16px;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
     .home-layout {
         flex-direction: column;
         padding: 0;
