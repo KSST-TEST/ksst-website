@@ -145,25 +145,6 @@
             z-index: 10;
         }
 
-        .autoplay-indicator {
-            position: absolute;
-            bottom: 65px;
-            right: 15px;
-            background: rgba(230, 126, 34, 0.9);
-            color: white;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-family: Calibri, sans-serif;
-            z-index: 10;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 49%, 100% { opacity: 1; }
-            50%, 99% { opacity: 0.6; }
-        }
-
         /* Photo Info */
         .photo-info {
             padding: 20px;
@@ -262,12 +243,6 @@
                 padding: 6px 10px;
             }
 
-            .autoplay-indicator {
-                font-size: 10px;
-                padding: 4px 8px;
-                bottom: 50px;
-            }
-
             .photo-info {
                 padding: 15px;
             }
@@ -302,13 +277,6 @@
                 font-size: 11px;
                 padding: 5px 8px;
                 top: 10px;
-                right: 10px;
-            }
-
-            .autoplay-indicator {
-                font-size: 9px;
-                padding: 3px 6px;
-                bottom: 40px;
                 right: 10px;
             }
 
@@ -364,9 +332,6 @@
         <div class="photo-counter">
             <span id="currentSlide">1</span> / <span id="totalSlides">0</span>
         </div>
-
-        <!-- Auto-play Indicator -->
-        <div class="autoplay-indicator" title="Auto-playing slideshow. Hover to pause.">▶ Auto</div>
 
         <!-- Dots/Indicators -->
         <div class="carousel-dots" id="dotsContainer"></div>
@@ -434,29 +399,6 @@
     ];
 
     let currentSlideIndex = 0;
-    let autoPlayInterval = null;
-    const AUTOPLAY_DELAY = 4000; // 4 seconds between slides
-
-    // Start auto-play
-    function startAutoPlay() {
-        autoPlayInterval = setInterval(() => {
-            nextSlide();
-        }, AUTOPLAY_DELAY);
-    }
-
-    // Stop auto-play
-    function stopAutoPlay() {
-        if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-            autoPlayInterval = null;
-        }
-    }
-
-    // Reset auto-play
-    function resetAutoPlay() {
-        stopAutoPlay();
-        startAutoPlay();
-    }
 
     // Initialize Gallery
     function initGallery() {
@@ -521,7 +463,6 @@
         currentSlideIndex = (index + photos.length) % photos.length;
         updateSlides();
         updatePhotoInfo();
-        resetAutoPlay(); // Reset auto-play when user manually navigates
     }
 
     // Next slide
@@ -572,19 +513,7 @@
     });
 
     // Initialize on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        initGallery();
-        
-        // Get carousel container and add hover listeners
-        const carouselContainer = document.querySelector('.carousel-container');
-        if (carouselContainer) {
-            carouselContainer.addEventListener('mouseenter', stopAutoPlay);
-            carouselContainer.addEventListener('mouseleave', startAutoPlay);
-        }
-        
-        // Start auto-play
-        startAutoPlay();
-    });
+    window.addEventListener('DOMContentLoaded', initGallery);
 </script>
 
 </body>
