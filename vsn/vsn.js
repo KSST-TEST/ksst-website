@@ -510,7 +510,7 @@ function allocateVSN(params) {
             // Main Ślokam ONLY - distribute to ALL main participants (3-4 per assignment)
             const mainSlokamAllocations = distributeSegment("Main Ślokam", 108, main, 3, 4);
             allocations.push(...mainSlokamAllocations);
-        }
+        } 
         
         console.log("allocateVSN finishing, allocations count:", allocations.length);
         console.log("Final allocations:", allocations);

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KSST – Photo Gallery</title>
-    <link rel="stylesheet" href="style.css?v=202604062">
+    <link rel="stylesheet" href="style.css?v=202604064">
     <style>
         .gallery-section {
             max-width: 1000px;
@@ -302,8 +302,7 @@
 <body>
 
 <!-- HEADER -->
-<header class="header" style="position: relative;">
-    <a href="index.html" class="home-icon">🏠</a>
+<header class="header">
     <img src="images/ksst-logo.jpeg" class="ksst-logo">
 
     <div class="header-text">
@@ -311,7 +310,10 @@
         <div class="tagline">Photo Gallery</div>
     </div>
 
-    <img src="images/om.png" class="om-image">
+    <div class="om-container">
+        <img src="images/om.png" class="om-image">
+        <a href="index.html" class="om-home-button">🏠</a>
+    </div>
 </header>
 
 <!-- GALLERY SECTION -->
@@ -351,9 +353,6 @@
 <footer class="footer">
     © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
 </footer>
-
-<!-- MOBILE HOME BUTTON -->
-<a href="index.html" class="mobile-home-button">🏠 Home</a>
 
 <script>
     // Photo Data - REPLACE WITH YOUR ACTUAL PHOTOS

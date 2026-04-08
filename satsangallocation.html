@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KSST Satsang Allocation</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=202604064">
 
 <!-- External libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -43,14 +43,16 @@ function checkAuthentication() {
 function showLoginPage() {
     document.body.innerHTML = `
         <div style="background: #fff8e6; min-height: 100vh; display: flex; flex-direction: column;">
-            <header class="header" style="position: relative;">
-                <a href="index.html" style="position: absolute; right: 90px; top: 15px; font-size: 32px; text-decoration: none; color: #333; cursor: pointer;" title="Home">🏠</a>
+            <header class="header">
                 <img src="images/ksst-logo.jpeg" class="ksst-logo">
                 <div class="header-text">
                     <h1 class="site-title">Kovai Swamināma Smarana Trust</h1>
                     <div class="tagline">Coordinator Access</div>
                 </div>
-                <img src="images/om.png" class="om-image">
+                <div class="om-container">
+                    <img src="images/om.png" class="om-image">
+                    <a href="index.html" class="om-home-button">🏠</a>
+                </div>
             </header>
             <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <div class="login-container">

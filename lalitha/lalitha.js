@@ -210,8 +210,8 @@ function allocateLalitha(params) {
         const allocations = [];
         
         // **FAIRNESS-AWARE ROUND-ROBIN ALLOCATION WITH MULTIPLE ROUNDS**
-        // Keep sequence in original order (Person 1, Person 2, ..., Person N)
-        const roundRobinSequence = [...main]; // Keep in original input order
+        // Keep round-robin sequence in original order (no shuffling)
+        const roundRobinSequence = [...main];
         
         if (roundRobinSequence.length === 0) {
             return allocations; // No allocations if no main participants
