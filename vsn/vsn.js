@@ -203,6 +203,31 @@ function analyzeHistoryFairness(historyText, currentAllocations) {
     };
 }
 
+// ---------- SEGMENT NORMALIZATION FOR HISTORY MATCH ----------
+function normalizeSegmentKey(segmentName) {
+    if (!segmentName) return "";
+    return segmentName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+}
+
+function getSegmentHistoryCount(person, segmentName, historyMap) {
+    const personHistory = historyMap[person] || {};
+    const targetSegment = normalizeSegmentKey(segmentName);
+    let count = 0;
+
+    for (const [histSegment, times] of Object.entries(personHistory)) {
+        if (normalizeSegmentKey(histSegment) === targetSegment) {
+            count += times;
+        }
+    }
+
+    return count;
+}
+
 // ---------- SHUFFLE ARRAY ----------
 function shuffleArray(array) {
     // Fisher-Yates shuffle algorithm
@@ -212,6 +237,23 @@ function shuffleArray(array) {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+}
+
+function orderParticipantsForRoundRobin(participants, historyMap) {
+    const shuffled = shuffleArray(participants);
+
+    // Decide sequence once using history, then keep strict round-robin unchanged.
+    const scored = shuffled.map((person, idx) => {
+        const mainRepeats = getSegmentHistoryCount(person, "Main Ślokam", historyMap);
+        const dhyanamRepeats = getSegmentHistoryCount(person, "Dhyānam", historyMap);
+        const nyasaRepeats = getSegmentHistoryCount(person, "Nyāsa", historyMap);
+
+        const score = (mainRepeats * 100) + (dhyanamRepeats * 20) + (nyasaRepeats * 10);
+        return { person, score, idx };
+    });
+
+    scored.sort((a, b) => a.score - b.score || a.idx - b.idx);
+    return scored.map(s => s.person);
 }
 
 // ---------- NAME CLEANUP ----------
@@ -306,14 +348,16 @@ function allocateVSN(params) {
         
         const { guruji, ksst, main: mainOriginal } = classifyParticipants(rawNames);
         
-        // SHUFFLE main list for randomized sequence, but keep it fixed for entire allocation
-        const main = shuffleArray(mainOriginal);
+        // Decide sequence once, then keep round-robin continuous and unchanged.
+        const main = historyAllocations.length > 0
+            ? orderParticipantsForRoundRobin(mainOriginal, historyMap)
+            : shuffleArray(mainOriginal);
         console.log("Classified participants:", { guruji, ksst, main });
-        console.log("Shuffled participant order for round-robin:", main);
+        console.log("Round-robin participant sequence:", main);
         
         const allocations = [];
         let globalPersonIndex = 0;  // Track across ALL segments - continuous round-robin
-    
+
         // Helper: distribute segment fairly across ALL people with flexible chunk sizes
         function distributeSegment(segmentName, totalSlokas, participantList, minChunk = 4, maxChunk = 8) {
             const segmentAllocations = [];
@@ -821,6 +865,48 @@ function handleFileUpload(event) {
 // Helper: Extract history from Excel workbook (all sheets)
 function extractHistoryFromExcel(workbook) {
     const lines = [];
+
+    function isPlaceholder(value) {
+        const v = String(value || '').trim().toLowerCase();
+        return !v || v === 't' || v === '-' || v === 'na' || v === 'n/a';
+    }
+
+    function isRangeToken(value) {
+        const v = String(value || '').trim();
+        if (!v) return false;
+        if (/^full$/i.test(v)) return true;
+        if (/^\d+$/.test(v)) return true;
+        return /^\d+\s*[–\-]\s*\d+$/.test(v);
+    }
+
+    function parseRangeToken(value) {
+        const v = String(value || '').trim();
+        if (/^full$/i.test(v)) return { from: 1, to: 1 };
+        if (/^\d+$/.test(v)) {
+            const n = parseInt(v, 10);
+            return { from: n, to: n };
+        }
+        const m = v.match(/^(\d+)\s*[–\-]\s*(\d+)$/);
+        if (m) {
+            return { from: parseInt(m[1], 10), to: parseInt(m[2], 10) };
+        }
+        return null;
+    }
+
+    function isLikelySegment(value) {
+        const key = normalizeSegmentKey(value);
+        if (!key) return false;
+        return key.includes('poorvanga') ||
+            key.includes('nyasa') ||
+            key.includes('dhyanam') ||
+            key.includes('main slokam') ||
+            key.includes('phalasruti') ||
+            key.includes('starting prayer') ||
+            key.includes('ending prayer') ||
+            key.includes('mahalkshmi astakam') ||
+            key.includes('mahalakshmi astakam') ||
+            key.includes('ksama prarthana');
+    }
     
     // Iterate through all sheets
     for (const sheetName of workbook.SheetNames) {
@@ -832,55 +918,60 @@ function extractHistoryFromExcel(workbook) {
         // Parse each row looking for allocation patterns
         for (const row of data) {
             if (!row || row.length < 2) continue;
-            
-            // Try to extract: Segment, From-To, Name
-            // Expected formats: [Segment, Range, Name] or similar variations
+
+            // Try to extract: Segment, Range, Name
             let segment = "";
             let rangeStr = "";
             let name = "";
-            
-            // Try common column orders
-            if (row.length >= 3) {
-                // Format: [Segment, Range, Name]
-                if (typeof row[0] === 'string' && typeof row[1] === 'string' && typeof row[2] === 'string') {
-                    segment = row[0].trim();
-                    rangeStr = row[1].trim();
-                    name = row[2].trim();
-                }
-                // Format: [Segment, Range, Name] with numbers
-                else if (typeof row[0] === 'string' && (typeof row[1] === 'number' || typeof row[1] === 'string')) {
-                    segment = row[0].trim();
-                    rangeStr = String(row[1]).trim();
-                    name = typeof row[2] !== 'undefined' ? String(row[2]).trim() : "";
-                }
-            } else if (row.length === 2) {
-                // Format: ["Segment 1-5", Name]
-                const firstCol = String(row[0]).trim();
-                name = String(row[1]).trim();
-                
-                // Try to extract segment and range from first column
-                const match = firstCol.match(/^(.+?)\s+(\d+)\s*[–\-]\s*(\d+)$/);
+
+            const c0 = row.length > 0 ? String(row[0] || '').trim() : '';
+            const c1 = row.length > 1 ? String(row[1] || '').trim() : '';
+            const c2 = row.length > 2 ? String(row[2] || '').trim() : '';
+
+            // Skip metadata/header rows.
+            const rowText = [c0, c1, c2].join(' ').toLowerCase();
+            if (rowText.includes('satsang#') || rowText.includes('date:') || rowText.includes('time:')) continue;
+            if (normalizeSegmentKey(c0) === 'devotees' && normalizeSegmentKey(c1) === 'segment') continue;
+
+            // Format A: [Segment, Range, Name]
+            if (isLikelySegment(c0) && isRangeToken(c1) && !isPlaceholder(c2)) {
+                segment = c0;
+                rangeStr = c1;
+                name = c2;
+            }
+            // Format B: [Name, Segment, Range]
+            else if (!isPlaceholder(c0) && isLikelySegment(c1) && isRangeToken(c2)) {
+                segment = c1;
+                rangeStr = c2;
+                name = c0;
+            }
+            // Format C: [Segment, '', Name] for single-block segments
+            else if (isLikelySegment(c0) && isPlaceholder(c1) && !isPlaceholder(c2)) {
+                segment = c0;
+                rangeStr = '1-1';
+                name = c2;
+            }
+            // Format D: ["Segment 1-5", Name]
+            else if (row.length === 2 && !isPlaceholder(c1)) {
+                const match = c0.match(/^(.+?)\s+(\d+)\s*[–\-]\s*(\d+)$/);
                 if (match) {
-                    segment = match[1];
+                    segment = match[1].trim();
                     rangeStr = `${match[2]}-${match[3]}`;
-                } else {
-                    segment = firstCol;
+                    name = c1;
                 }
             }
-            
-            // Parse range (e.g., "1-5" or "1")
-            let from = 1, to = 1;
-            if (rangeStr) {
-                const rangeParts = rangeStr.split(/[–\-]/);
-                from = parseInt(rangeParts[0]) || 1;
-                to = parseInt(rangeParts[rangeParts.length - 1]) || from;
-            }
-            
+
+            const range = parseRangeToken(rangeStr || '1-1');
+            if (!range) continue;
+
+            let from = range.from;
+            let to = range.to;
+
             // Clean name
             name = cleanName(name);
-            
+
             // Add to output if valid
-            if (segment && name && !isNaN(from) && !isNaN(to)) {
+            if (segment && name && !isPlaceholder(name) && !isNaN(from) && !isNaN(to)) {
                 lines.push(`${segment} ${from}-${to} → ${name}`);
             }
         }

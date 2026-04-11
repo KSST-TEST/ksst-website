@@ -181,6 +181,42 @@ a {
     margin-bottom: 20px;
 }
 
+.announcement-card {
+    margin: 10px auto 20px auto;
+    padding: 10px;
+    max-width: 620px;
+    background: #fff3d6;
+    border: 2px solid #e67e22;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.announcement-title {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: #1F4E78;
+}
+
+.announcement-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+.announcement-link {
+    display: block;
+    text-decoration: none;
+}
+
+.announcement-link .announcement-image {
+    transition: transform 0.2s ease;
+}
+
+.announcement-link:hover .announcement-image {
+    transform: scale(1.01);
+}
+
 .welcome-image {
     width: 25%;
     border-radius: 10px;
@@ -1338,6 +1374,16 @@ a.mobile-home-button {
         max-width: 300px;
     }
 
+    .announcement-card {
+        max-width: 100%;
+        margin: 0 auto 16px auto;
+        padding: 8px;
+    }
+
+    .announcement-title {
+        font-size: 18px;
+    }
+
     /* Buttons and inputs */
     .btn, .side-btn, .vsn-btn-primary {
         font-size: 13px;
@@ -1581,6 +1627,17 @@ a.mobile-home-button {
 
     .image-container {
         margin: 15px 0;
+    }
+
+    .announcement-card {
+        margin: 0 auto 14px auto;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .announcement-title {
+        font-size: 17px;
+        margin-bottom: 8px;
     }
 
     .welcome-image {
