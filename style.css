@@ -184,7 +184,7 @@ a {
 .announcement-card {
     margin: 10px auto 20px auto;
     padding: 10px;
-    max-width: 620px;
+    max-width: 460px;
     background: #fff3d6;
     border: 2px solid #e67e22;
     border-radius: 12px;
@@ -199,9 +199,11 @@ a {
 
 .announcement-image {
     width: 100%;
+    max-height: 360px;
     height: auto;
     display: block;
     border-radius: 8px;
+    object-fit: contain;
 }
 
 .announcement-link {
@@ -215,6 +217,79 @@ a {
 
 .announcement-link:hover .announcement-image {
     transform: scale(1.01);
+}
+
+.announcement-slider {
+    text-align: left;
+}
+
+.announcement-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.announcement-next {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #1F4E78;
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.announcement-next:hover {
+    background: #143a5a;
+}
+
+.announcement-slide {
+    display: none;
+}
+
+.announcement-slide.is-active {
+    display: block;
+}
+
+.announcement-subtitle {
+    margin: 2px 0 10px 0;
+    font-size: 18px;
+    color: #1F4E78;
+}
+
+.announcement-text-content {
+    font-family: "Calibri", sans-serif;
+    text-align: left;
+    color: #4a2c2a;
+    font-size: 15px;
+    line-height: 1.55;
+    padding: 2px 6px;
+}
+
+.announcement-text-content p {
+    margin: 0 0 10px 0;
+}
+
+.announcement-text-content a {
+    color: #1F4E78;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.announcement-counter {
+    margin-top: 8px;
+    text-align: right;
+    color: #666;
+    font-size: 13px;
+    font-family: "Calibri", sans-serif;
+}
+
+.mobile-nav-links {
+    display: none;
 }
 
 .welcome-image {
@@ -1384,6 +1459,24 @@ a.mobile-home-button {
         font-size: 18px;
     }
 
+    .announcement-image {
+        max-height: 280px;
+    }
+
+    .announcement-subtitle {
+        font-size: 17px;
+    }
+
+    .announcement-text-content {
+        font-size: 14px;
+    }
+
+    .announcement-next {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
     /* Buttons and inputs */
     .btn, .side-btn, .vsn-btn-primary {
         font-size: 13px;
@@ -1638,6 +1731,44 @@ a.mobile-home-button {
     .announcement-title {
         font-size: 17px;
         margin-bottom: 8px;
+    }
+
+    .announcement-image {
+        max-height: 220px;
+    }
+
+    .announcement-subtitle {
+        font-size: 16px;
+        margin-bottom: 7px;
+    }
+
+    .announcement-text-content {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .announcement-next {
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+    }
+
+    .mobile-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 4px 0 14px 0;
+    }
+
+    .mobile-nav-links .side-btn {
+        padding: 9px 10px;
+        font-size: 13px;
+        border-radius: 7px;
+        min-height: 38px;
+    }
+
+    .right-column {
+        display: none;
     }
 
     .welcome-image {

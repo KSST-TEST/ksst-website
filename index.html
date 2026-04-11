@@ -41,11 +41,42 @@
             </marquee>
         </div>
 
-        <div class="announcement-card">
-            <h3 class="announcement-title">Announcement</h3>
-            <a href="images/VSN Apr 12 Inagural.jpeg" class="announcement-link" target="_blank" rel="noopener noreferrer">
-                <img src="images/VSN Apr 12 Inagural.jpeg" class="announcement-image" alt="VSN Apr 12 Inagural announcement">
-            </a>
+        <div class="announcement-card announcement-slider" id="announcementSlider">
+            <div class="announcement-header">
+                <h3 class="announcement-title">Announcement</h3>
+                <button type="button" class="announcement-next" id="announcementNext" aria-label="Next announcement">&#8594;</button>
+            </div>
+
+            <div class="announcement-slide is-active" data-slide-index="0">
+                <a href="images/VSN Apr 12 Inagural.jpeg" class="announcement-link" target="_blank" rel="noopener noreferrer">
+                    <img src="images/VSN Apr 12 Inagural.jpeg" class="announcement-image" alt="VSN Apr 12 Inagural announcement">
+                </a>
+            </div>
+
+            <div class="announcement-slide" data-slide-index="1">
+                <h4 class="announcement-subtitle">Devī Māhātmyam Class Announcement</h4>
+                <div class="announcement-text-content">
+                    <p>🪷தேவி ஸ்ரீமாத்ரே நம: 🪷</p>
+                    <p>அனைவருக்கும் KSST அமைப்பாளர்களின் வணக்கம் 🙏🏻</p>
+                    <p>ஸ்ரீ தேவி மஹாத்மியம் ஸ்லோகம் கற்பித்தல் வகுப்பு ஆரம்பித்தல் எனும் ஸ்வாமி கைங்கர்யத்தை தங்களுக்கு வழங்குவதில் KSST -ன் அமைப்பாளர்கள் பாக்யமடைந்ததாக கருதுகிறார்கள்.</p>
+                    <p>இந்த வகுப்பின் துவக்க விழா ஏப்ரல் 23 - ம் தேதி வியாழனன்று நடை பெற உள்ளது. வகுப்புகள் வாரந்தோறும் வெள்ளி, சனி மற்றும் ஞாயிறுக்கிழமை பிற்பகல் 3 மணி முதல் 4.30 மணி வரை நடைபெற உள்ளது. விருப்பமுள்ள சேவார்த்திகள் இந்த தகவலுடன் இணைக்கப்பட்டுள்ள கூகுள் பதிவு படிவத்தை பூர்த்தி செய்து வகுப்பில் சேரலாம்.</p>
+                    <p>குறிப்பு: KSST - ன் மற்ற இரண்டுக்கும் மேற்பட்ட வகுப்புகளில், முக்கியமாக இதே நேரம் அல்லது நாட்களில் வகுப்பு இருப்பவர்கள் இந்த வகுப்பில் பதிவு செய்வதை தவிர்க்கவும்.</p>
+                    <p>
+                        கூகுள் லிங்க்:
+                        <a href="https://docs.google.com/forms/d/1TdybaGIs8PQuF7pYAj0DXmUClDCSxe7_BFZCYeeNQtQ/edit?chromeless=1" target="_blank" rel="noopener noreferrer">Registration Form</a>
+                    </p>
+                    <p>இங்கனம்<br>என்றென்றும் ஸ்வாமிநாம ஸ்மரணத்தில்,<br>KSST Coordinators</p>
+                </div>
+            </div>
+
+            <div class="announcement-counter" id="announcementCounter">1 / 2</div>
+        </div>
+
+        <div class="mobile-nav-links">
+            <a class="side-btn" href="events.html">Classes and Events</a>
+            <a class="side-btn" href="documents.html">Class Materials</a>
+            <a class="side-btn" href="photo-gallery.html">Photo Gallery</a>
+            <a class="side-btn" href="ksst-coordinators.html">Coordinator Only Access</a>
         </div>
 
         <div class="image-container">
@@ -71,6 +102,39 @@
 <footer class="footer">
     © Kovai Swamināma Smarana Trust – Celebrating Timeless Dharma
 </footer>
+
+<script>
+    (function () {
+        var slider = document.getElementById("announcementSlider");
+        if (!slider) {
+            return;
+        }
+
+        var slides = slider.querySelectorAll(".announcement-slide");
+        var nextButton = document.getElementById("announcementNext");
+        var counter = document.getElementById("announcementCounter");
+        var currentIndex = 0;
+
+        function showSlide(index) {
+            slides.forEach(function (slide, slideIndex) {
+                slide.classList.toggle("is-active", slideIndex === index);
+            });
+
+            if (counter) {
+                counter.textContent = (index + 1) + " / " + slides.length;
+            }
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener("click", function () {
+                currentIndex = (currentIndex + 1) % slides.length;
+                showSlide(currentIndex);
+            });
+        }
+
+        showSlide(currentIndex);
+    })();
+</script>
 
 </body>
 </html>
