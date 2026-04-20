@@ -6,11 +6,107 @@
     <title>KSST – Photo Gallery</title>
     <link rel="stylesheet" href="style.css?v=202604064">
     <style>
-        .gallery-section {
-            max-width: 1000px;
+        /* Left Navigation */
+        .gallery-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
+
+        .gallery-nav {
+            width: 240px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            height: fit-content;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .gallery-nav-title {
+            font-weight: bold;
+            color: #1F4E78;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .gallery-nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .gallery-nav-link {
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: white;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 15px;
+            color: #333;
+            display: block;
+            line-height: 1.4;
+            word-wrap: break-word;
+            font-weight: 500;
+        }
+
+        .gallery-nav-link:hover {
+            background: #e8e8e8;
+            border-left-color: #e67e22;
+            transform: translateX(4px);
+        }
+
+        .gallery-nav-link.active {
+            background: #e67e22;
+            color: white;
+            border-left-color: #d45a0a;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(230, 126, 34, 0.3);
+        }
+
+        .gallery-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gallery-section {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .gallery-nav {
+                width: 100%;
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+                padding: 15px;
+                height: auto;
+            }
+
+            .gallery-nav-links {
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .gallery-nav-link {
+                white-space: nowrap;
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+        }
+
 
         .gallery-title {
             text-align: center;
@@ -317,37 +413,48 @@
 </header>
 
 <!-- GALLERY SECTION -->
-<section class="gallery-section">
-    <h2 class="gallery-title">Samarpan of Śrī Viṣṇu Sahasranāma @ Ulagalantha Perumal Temple at Gandhimaa Nagar, Coimbatore on Apr 5th, 2026</h2>
+<div class="gallery-container">
+    <!-- Left Navigation -->
+    <nav class="gallery-nav">
+        <div class="gallery-nav-title">Events</div>
+        <ul class="gallery-nav-links" id="eventNav"></ul>
+    </nav>
 
-    <!-- Carousel -->
-    <div class="carousel-container">
-        <div class="carousel-wrapper" id="carouselWrapper">
-            <!-- Slides will be inserted here by JavaScript -->
+    <!-- Main Gallery -->
+    <section class="gallery-main">
+        <div class="gallery-section">
+            <h2 class="gallery-title" id="galleryTitle">VSN Samarpan</h2>
+
+            <!-- Carousel -->
+            <div class="carousel-container">
+                <div class="carousel-wrapper" id="carouselWrapper">
+                    <!-- Slides will be inserted here by JavaScript -->
+                </div>
+
+                <!-- Navigation Arrows -->
+                <button class="carousel-nav carousel-prev" onclick="previousSlide()">❮</button>
+                <button class="carousel-nav carousel-next" onclick="nextSlide()">❯</button>
+
+                <!-- Photo Counter -->
+                <div class="photo-counter">
+                    <span id="currentSlide">1</span> / <span id="totalSlides">0</span>
+                </div>
+
+                <!-- Dots/Indicators -->
+                <div class="carousel-dots" id="dotsContainer"></div>
+            </div>
+
+            <!-- Photo Info -->
+            <div class="photo-info">
+                <h3 class="photo-title" id="photoTitle">Event Title</h3>
+                <p class="photo-description" id="photoDescription">Photo description goes here</p>
+            </div>
+
+            <!-- Thumbnail Grid -->
+            <div class="gallery-grid" id="thumbnailGrid"></div>
         </div>
-
-        <!-- Navigation Arrows -->
-        <button class="carousel-nav carousel-prev" onclick="previousSlide()">❮</button>
-        <button class="carousel-nav carousel-next" onclick="nextSlide()">❯</button>
-
-        <!-- Photo Counter -->
-        <div class="photo-counter">
-            <span id="currentSlide">1</span> / <span id="totalSlides">0</span>
-        </div>
-
-        <!-- Dots/Indicators -->
-        <div class="carousel-dots" id="dotsContainer"></div>
-    </div>
-
-    <!-- Photo Info -->
-    <div class="photo-info">
-        <h3 class="photo-title" id="photoTitle">Event Title</h3>
-        <p class="photo-description" id="photoDescription">Photo description goes here</p>
-    </div>
-
-    <!-- Thumbnail Grid -->
-    <div class="gallery-grid" id="thumbnailGrid"></div>
-</section>
+    </section>
+</div>
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -355,58 +462,121 @@
 </footer>
 
 <script>
-    // Photo Data - REPLACE WITH YOUR ACTUAL PHOTOS
-    const photos = [
+    // Events Data - Multiple events with their photos
+    const events = [
         {
-            url: 'images/VSN Parayanam Image-01.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-02.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-03.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-04.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-05.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-06.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/VSN Parayanam Image-07.jpeg',
-            title: 'Gallery',
-            description: ''
-        },
-        {
-            url: 'images/WhatsApp Video 2026-04-05 at 2.19.31 AM.mp4',
-            title: 'Event Video',
-            description: '',
-            type: 'video'
+            id: 'vsn-samarpan',
+            title: 'Śrī Viṣṇu Sahasranāma Samarpan @ Ulagalantha Perumal Temple',
+            description: 'Samarpan on Apr 5th, 2026',
+            photos: [
+                {
+                    url: 'images/VSN Parayanam Image-01.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-02.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-03.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-04.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-05.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-06.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/VSN Parayanam Image-07.jpeg',
+                    title: 'Event Photo',
+                    description: ''
+                },
+                {
+                    url: 'images/WhatsApp Video 2026-04-05 at 2.19.31 AM.mp4',
+                    title: 'Event Video',
+                    description: '',
+                    type: 'video'
+                }
+            ]
         }
+        // Add more events here as needed
     ];
 
+    let currentEventId = events[0].id;
     let currentSlideIndex = 0;
 
     // Initialize Gallery
     function initGallery() {
+        initEventNav();
+        loadEvent(currentEventId);
+    }
+
+    // Initialize Event Navigation
+    function initEventNav() {
+        const eventNav = document.getElementById('eventNav');
+        eventNav.innerHTML = '';
+
+        events.forEach(event => {
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.className = 'gallery-nav-link' + (event.id === currentEventId ? ' active' : '');
+            link.textContent = event.title;
+            link.onclick = (e) => {
+                e.preventDefault();
+                loadEvent(event.id);
+            };
+            li.appendChild(link);
+            eventNav.appendChild(li);
+        });
+    }
+
+    // Load Event Photos
+    function loadEvent(eventId) {
+        const event = events.find(e => e.id === eventId);
+        if (!event) return;
+
+        currentEventId = eventId;
+        currentSlideIndex = 0;
+
+        // Update title
+        document.getElementById('galleryTitle').textContent = event.title + ' - ' + event.description;
+
+        // Update nav
+        document.querySelectorAll('.gallery-nav-link').forEach(link => {
+            link.classList.toggle('active', link.onclick.toString().includes(eventId));
+        });
+
+        // Clear and rebuild carousel
+        loadPhotos();
+    }
+
+    // Load Photos for Current Event
+    function loadPhotos() {
+        const event = events.find(e => e.id === currentEventId);
+        if (!event) return;
+
+        const photos = event.photos;
         const carouselWrapper = document.getElementById('carouselWrapper');
         const dotsContainer = document.getElementById('dotsContainer');
         const thumbnailGrid = document.getElementById('thumbnailGrid');
+
+        // Clear existing content
+        carouselWrapper.innerHTML = '';
+        dotsContainer.innerHTML = '';
+        thumbnailGrid.innerHTML = '';
 
         // Create slides
         photos.forEach((photo, index) => {
@@ -460,21 +630,24 @@
 
     // Navigate to specific slide
     function goToSlide(index) {
-        if (photos.length === 0) return;
+        const event = events.find(e => e.id === currentEventId);
+        if (!event || event.photos.length === 0) return;
         
-        currentSlideIndex = (index + photos.length) % photos.length;
+        currentSlideIndex = (index + event.photos.length) % event.photos.length;
         updateSlides();
         updatePhotoInfo();
     }
 
     // Next slide
     function nextSlide() {
-        goToSlide(currentSlideIndex + 1);
+        const event = events.find(e => e.id === currentEventId);
+        if (event) goToSlide(currentSlideIndex + 1);
     }
 
     // Previous slide
     function previousSlide() {
-        goToSlide(currentSlideIndex - 1);
+        const event = events.find(e => e.id === currentEventId);
+        if (event) goToSlide(currentSlideIndex - 1);
     }
 
     // Update slide display
@@ -503,7 +676,10 @@
 
     // Update photo info
     function updatePhotoInfo() {
-        const photo = photos[currentSlideIndex];
+        const event = events.find(e => e.id === currentEventId);
+        if (!event) return;
+        
+        const photo = event.photos[currentSlideIndex];
         document.getElementById('photoTitle').textContent = photo.title;
         document.getElementById('photoDescription').textContent = photo.description || '';
     }
