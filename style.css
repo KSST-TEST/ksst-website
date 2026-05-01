@@ -1690,14 +1690,19 @@ a.mobile-home-button {
     }
 
     .left-column {
-        display: none;
+        display: block;
+        width: 100%;
+        background: #f3e5f5;
+        padding: 16px;
+        margin: 0 0 12px 0;
+        order: 1;
     }
 
     .center-column {
         width: 100%;
         text-align: center;
         padding: 20px 16px;
-        order: 1;
+        order: 2;
         box-sizing: border-box;
         overflow-x: hidden;
     }
