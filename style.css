@@ -1695,14 +1695,14 @@ a.mobile-home-button {
         background: #f3e5f5;
         padding: 16px;
         margin: 0 0 12px 0;
-        order: 1;
+        order: 0;
     }
 
     .center-column {
         width: 100%;
         text-align: center;
         padding: 20px 16px;
-        order: 2;
+        order: 1;
         box-sizing: border-box;
         overflow-x: hidden;
     }
