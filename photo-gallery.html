@@ -87,17 +87,28 @@
             .gallery-nav {
                 width: 100%;
                 display: flex;
+                flex-direction: column;
                 gap: 10px;
-                overflow-x: auto;
                 padding: 15px;
                 height: auto;
+                background: #f5f5f5;
             }
 
             .gallery-nav-links {
-                display: flex;
-                gap: 10px;
-                overflow-x: auto;
-                padding-bottom: 10px;
+                display: none;
+            }
+
+            .gallery-nav-select {
+                display: block;
+                width: 100%;
+                padding: 12px;
+                font-size: 15px;
+                border: 2px solid #e67e22;
+                border-radius: 4px;
+                background: white;
+                color: #333;
+                cursor: pointer;
+                font-weight: 500;
             }
 
             .gallery-nav-link {
@@ -418,6 +429,7 @@
     <nav class="gallery-nav">
         <div class="gallery-nav-title">Events</div>
         <ul class="gallery-nav-links" id="eventNav"></ul>
+        <select class="gallery-nav-select" id="eventSelect"></select>
     </nav>
 
     <!-- Main Gallery -->
@@ -544,9 +556,12 @@
     // Initialize Event Navigation
     function initEventNav() {
         const eventNav = document.getElementById('eventNav');
+        const eventSelect = document.getElementById('eventSelect');
         eventNav.innerHTML = '';
+        eventSelect.innerHTML = '';
 
         events.forEach(event => {
+            // Desktop links
             const li = document.createElement('li');
             const link = document.createElement('a');
             link.className = 'gallery-nav-link' + (event.id === currentEventId ? ' active' : '');
@@ -557,6 +572,18 @@
             };
             li.appendChild(link);
             eventNav.appendChild(li);
+
+            // Mobile dropdown options
+            const option = document.createElement('option');
+            option.value = event.id;
+            option.textContent = event.title;
+            option.selected = event.id === currentEventId;
+            eventSelect.appendChild(option);
+        });
+
+        // Add change listener for select dropdown
+        eventSelect.addEventListener('change', (e) => {
+            loadEvent(e.target.value);
         });
     }
 
@@ -571,10 +598,16 @@
         // Update title
         document.getElementById('galleryTitle').textContent = event.title + ' - ' + event.description;
 
-        // Update nav
+        // Update nav links
         document.querySelectorAll('.gallery-nav-link').forEach(link => {
             link.classList.toggle('active', link.onclick.toString().includes(eventId));
         });
+
+        // Update select dropdown
+        const eventSelect = document.getElementById('eventSelect');
+        if (eventSelect) {
+            eventSelect.value = eventId;
+        }
 
         // Clear and rebuild carousel
         loadPhotos();
